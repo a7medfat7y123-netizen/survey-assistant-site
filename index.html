@@ -1,0 +1,3328 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="المهندس المساعد: أدوات مهندس المساحة في الموقع. حل الميزانية، البروفيل والمنحنيات الرأسية، الحفر والردم والكميات، ومراجعة ملفات الرفع.">
+<title>المهندس المساعد</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Kufi+Arabic:wght@600;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+/* Layout: the page is a drawing sheet. Title block on top, sheet tabs as a drawing register,
+   each tool a framed panel on drafting grid paper; dark mode is CAD model space. */
+:root {
+  --paper: #f3f5f2;
+  --grid-minor: #e3e9e6;
+  --grid-major: #d2dbd7;
+  --sheet: #fcfdfb;
+  --ink: #15212b;
+  --muted: #56646e;
+  --line: #9aa8b1;
+  --hair: #cfd8dc;
+  --accent: #1d5d8c;
+  --accent-soft: #e3edf5;
+  --cut: #b8401c;
+  --cut-soft: #f9e6de;
+  --fill: #2c7a4b;
+  --fill-soft: #e1f1e7;
+  --warn: #8a5a00;
+  --warn-soft: #fff2d6;
+  --ground: #7a4f22;
+  --design: #1d5d8c;
+  --mark: #e0b21c;
+  --mark-rib: #c99c0e;
+  --mark-brim: #d4a714;
+  --shine: #ffffff;
+  --sky-top: #d9e6ef;
+  --sky-bottom: #f7eedc;
+  --sun: #f3c66b;
+  --skyline: #c9d4dc;
+  --earth: #e6dccb;
+  --steel: #3c4a55;
+  --shadow: rgba(21, 33, 43, .08);
+  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-head: "Noto Kufi Arabic", "IBM Plex Sans Arabic", Tahoma, sans-serif;
+  --f-num: "IBM Plex Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d1216; --grid-minor: #141c22; --grid-major: #1b252d; --sheet: #111920;
+    --ink: #dbe5ec; --muted: #8fa0ac; --line: #4a5a66; --hair: #26323b;
+    --accent: #4fc0e8; --accent-soft: #12303d; --cut: #ff7d5a; --cut-soft: #3a1d15;
+    --fill: #5fd391; --fill-soft: #133222; --warn: #f2c35e; --warn-soft: #362a10;
+    --ground: #e0a96a; --design: #4fc0e8; --mark: #e8c547; --mark-rib: #c9a72f; --mark-brim: #d7b43a; --sky-top: #07111a; --sky-bottom: #17283a; --sun: #e9e4cf; --skyline: #1c2a36; --earth: #1a2228; --steel: #8a9aa6; --shadow: rgba(0, 0, 0, .45); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0d1216; --grid-minor: #141c22; --grid-major: #1b252d; --sheet: #111920;
+  --ink: #dbe5ec; --muted: #8fa0ac; --line: #4a5a66; --hair: #26323b;
+  --accent: #4fc0e8; --accent-soft: #12303d; --cut: #ff7d5a; --cut-soft: #3a1d15;
+  --fill: #5fd391; --fill-soft: #133222; --warn: #f2c35e; --warn-soft: #362a10;
+  --ground: #e0a96a; --design: #4fc0e8; --mark: #e8c547; --mark-rib: #c9a72f; --mark-brim: #d7b43a; --sky-top: #07111a; --sky-bottom: #17283a; --sun: #e9e4cf; --skyline: #1c2a36; --earth: #1a2228; --steel: #8a9aa6; --shadow: rgba(0, 0, 0, .45); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; direction: rtl;
+}
+/* Without the claude.ai viewer (public site) the assistant is hidden. */
+.no-ai [data-ai] { display: none !important; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sheet); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---- title block ---- */
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--sheet); border-bottom: 2px solid var(--ink); box-shadow: 0 6px 18px var(--shadow); }
+header::after { content: ""; position: absolute; inset: auto 0 -7px; height: 5px; background: repeating-linear-gradient(-45deg, var(--mark) 0 10px, var(--ink) 10px 20px); }
+header .wrap { padding-block: 10px 0; }
+.titleblock { display: grid; grid-template-columns: minmax(0, 2.2fr) repeat(4, minmax(0, 1fr)); border: 1.5px solid var(--ink); }
+.titleblock > div { padding: 5px 10px; border-inline-start: 1px solid var(--line); min-width: 0; }
+.titleblock > div:first-child { border-inline-start: 0; }
+.tb-label { display: block; font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+.tb-value { display: block; font-family: var(--f-num); font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+h1 { margin: 0; font-family: var(--f-head); font-size: 19px; font-weight: 700; line-height: 1.4; }
+.tb-name small { display: block; color: var(--muted); font-size: 12px; }
+#ai-status.on { color: var(--fill); }
+#ai-status.off { color: var(--cut); }
+@media (max-width: 760px) {
+  .titleblock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .titleblock > div:first-child { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
+  .titleblock > div:nth-child(2n) { border-inline-start: 0; }
+  .titleblock > div:nth-child(n+2) { border-top: 1px solid var(--line); }
+}
+nav { display: flex; gap: 0; overflow-x: auto; margin-top: 8px; }
+nav button {
+  font: inherit; font-weight: 500; cursor: pointer; white-space: nowrap; background: transparent; color: var(--muted);
+  border: 1px solid transparent; border-bottom: 0; padding: 6px 14px 7px; display: flex; align-items: baseline; gap: 8px; border-radius: 0;
+}
+nav button .code { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .05em; }
+nav button[aria-selected="true"] { color: var(--ink); background: var(--paper); border-color: var(--ink); position: relative; top: 2px; }
+nav button[aria-selected="true"] .code { color: var(--accent); }
+nav button[aria-selected="true"]::after { content: ""; position: absolute; inset: auto -1px -3px; height: 3px; background: var(--mark); }
+
+/* ---- sheet panels ---- */
+main .wrap { padding-block: 26px 40px; display: flex; flex-direction: column; gap: 18px; }
+.tab { display: flex; flex-direction: column; gap: 18px; }
+.tab[hidden] { display: none !important; }
+.panel { position: relative; background: var(--sheet); border: 1px solid var(--line); padding: 18px 18px 16px; min-width: 0; box-shadow: 0 1px 0 var(--line), 0 10px 28px -14px var(--shadow); }
+.panel::before, .panel::after { content: ""; position: absolute; width: 12px; height: 12px; border-color: var(--ink); border-style: solid; }
+.panel::before { top: -1px; inset-inline-start: -1px; border-width: 2px 0 0 0; border-inline-start-width: 2px; }
+.panel::after { bottom: -1px; inset-inline-end: -1px; border-width: 0 0 2px 0; border-inline-end-width: 2px; }
+h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-family: var(--f-head); font-size: 16px; font-weight: 600; text-wrap: balance; }
+h2 .callout { flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1.5px solid var(--ink); border-radius: 50%; font-family: var(--f-num); font-size: 11px; font-weight: 600; letter-spacing: .03em; background: var(--sheet); }
+h2::after { content: ""; flex: 1; height: 0; border-top: 1px solid var(--line); min-width: 24px; }
+h3 { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; margin: 16px 0 6px; color: var(--muted); }
+
+label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 12.5px; }
+label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--ink); }
+label.block { margin-block: 6px; }
+input, textarea, select { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 7px 9px; width: 100%; }
+input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+textarea.data, input[type="number"] { font-family: var(--f-num); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+textarea.data { direction: ltr; text-align: left; resize: vertical; line-height: 1.55; }
+:focus-visible { outline: 2px solid var(--mark); outline-offset: 1px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.two > * { min-width: 0; }
+@media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+button.primary, .file-btn {
+  font: inherit; font-weight: 600; background: var(--ink); color: var(--sheet); border: 1.5px solid var(--ink); border-radius: 2px;
+  padding: 7px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: .01em;
+}
+button.secondary, .file-btn.secondary { background: transparent; color: var(--ink); }
+button.primary:hover, .file-btn:hover { border-color: var(--accent); }
+button:disabled { opacity: .4; cursor: default; }
+button.link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; padding: 4px; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
+.notice { border: 1px solid var(--warn); background: var(--warn-soft); color: var(--warn); padding: 8px 12px; }
+.error { border: 1px solid var(--cut); background: var(--cut-soft); color: var(--cut); padding: 8px 12px; }
+.ok { color: var(--fill); }
+.bad { color: var(--cut); }
+.out { overflow-x: auto; }
+
+/* ---- schedules (tables) ---- */
+table { border-collapse: collapse; width: 100%; background: var(--sheet); margin: 8px 0 4px; font-size: 13px; border: 1.5px solid var(--ink); }
+th, td { border: 1px solid var(--hair); padding: 5px 9px; text-align: center; white-space: nowrap; }
+th { font-weight: 600; font-size: 12px; border-bottom: 1.5px solid var(--ink); background: var(--accent-soft); }
+td.num { direction: ltr; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--paper) 55%, transparent); }
+tr.sev-high td { background: var(--cut-soft) !important; }
+
+/* ---- readouts & stamps ---- */
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1.5px solid var(--ink); margin-block: 10px; }
+.readout { padding: 8px 12px; border-inline-start: 1px solid var(--hair); min-width: 0; }
+.readout:first-child { border-inline-start: 0; }
+.readout small { display: block; color: var(--muted); font-size: 11.5px; }
+.readout b { display: block; font-family: var(--f-num); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; overflow-wrap: anywhere; }
+.stamp { display: inline-flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 14px; border: 2px solid currentColor; outline: 1px solid currentColor; outline-offset: 2px; transform: rotate(-3deg); font-family: var(--f-head); font-weight: 700; font-size: 15px; line-height: 1.4; margin: 8px 6px 4px; }
+.stamp small { font-family: var(--f-num); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; }
+.stamp.ok { color: var(--fill); }
+.stamp.bad { color: var(--cut); }
+
+/* ---- RFI log (assistant) ---- */
+#chat-log { display: flex; flex-direction: column; gap: 14px; min-height: 36vh; }
+.msg { display: flex; flex-direction: column; max-width: 94%; min-width: 0; }
+.msg.user { align-self: flex-start; }
+.msg.assistant { align-self: flex-end; }
+.msg .who { font-family: var(--f-num); font-size: 11px; color: var(--muted); letter-spacing: .05em; margin-bottom: 3px; }
+.bubble { background: var(--sheet); border: 1px solid var(--line); border-inline-start: 3px solid var(--accent); padding: 10px 14px; overflow-x: auto; min-width: 0; }
+.msg.user .bubble { border-inline-start-color: var(--mark); background: var(--paper); }
+.bubble table td, .bubble table th { white-space: normal; }
+.bubble pre { background: var(--paper); border: 1px solid var(--hair); padding: 8px; direction: ltr; text-align: left; overflow-x: auto; font-family: var(--f-num); font-size: 12px; }
+.bubble code { font-family: var(--f-num); }
+details.trail { margin-top: 8px; font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--hair); padding-top: 6px; }
+details.trail summary { cursor: pointer; font-family: var(--f-num); }
+details.trail pre { max-height: 280px; overflow: auto; }
+#chat-form { display: flex; gap: 8px; align-items: stretch; margin-top: 12px; }
+#chat-form textarea { min-height: 54px; }
+.attach { font-size: 12.5px; cursor: pointer; padding: 8px 12px; border: 1px dashed var(--line); color: var(--muted); white-space: nowrap; display: flex; align-items: center; }
+#attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { border: 1px solid var(--line); background: var(--paper); padding: 2px 8px; font-size: 12px; font-family: var(--f-num); display: inline-flex; gap: 6px; align-items: center; }
+.chip button { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 0 2px; }
+.typing { color: var(--muted); font-style: italic; }
+
+/* ---- drawings (charts) ---- */
+.drawing { border: 1.5px solid var(--ink); background: var(--sheet); margin-block: 12px; overflow-x: auto; }
+.drawing svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.drawing .cap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--ink); padding: 5px 10px; font-size: 12px; }
+.drawing .cap b { font-family: var(--f-head); font-weight: 600; }
+.drawing .cap span { font-family: var(--f-num); color: var(--muted); }
+svg text { font-family: var(--f-num); font-size: 11px; fill: var(--muted); }
+svg .gl { stroke: var(--hair); stroke-width: 1; fill: none; }
+svg .frame { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+svg .ground { stroke: var(--ground); fill: none; stroke-width: 1.8; }
+svg .design { stroke: var(--design); fill: none; stroke-width: 2.2; }
+svg .hatch-cut { stroke: var(--cut); stroke-width: 1; }
+svg .hatch-fill { stroke: var(--fill); stroke-width: 1; }
+svg .band-label { fill: var(--ink); font-family: var(--f-body); font-size: 11.5px; }
+svg .band-val { fill: var(--ink); font-size: 10.5px; }
+svg .band-val.design-v { fill: var(--design); }
+svg .band-val.ground-v { fill: var(--ground); }
+svg .tick { stroke: var(--line); stroke-width: 1; }
+svg .key-ground { fill: var(--ground); }
+svg .key-design { fill: var(--design); }
+svg .key-cut { fill: var(--cut); }
+svg .key-fill { fill: var(--fill); }
+svg .vpi { fill: var(--sheet); stroke: var(--design); stroke-width: 1.5; }
+
+/* ---- welcome card ---- */
+.welcome { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 22px; align-items: center; }
+@media (max-width: 640px) { .welcome { grid-template-columns: 1fr; } .welcome .hat { max-width: 200px; margin-inline: auto; } }
+.welcome .hat { width: 100%; height: auto; display: block; }
+.hat .shell { fill: var(--mark); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.hat .rib { fill: var(--mark-rib); stroke: var(--ink); stroke-width: 1.6; }
+.hat .brim { fill: var(--mark-brim); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.hat .shine { fill: none; stroke: var(--shine); stroke-width: 3; stroke-linecap: round; opacity: .55; }
+.hat .bm { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.4; }
+.hat .bm-tri { fill: var(--ink); }
+.hat .cl { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 9 3 2 3; }
+.hat .dim { stroke: var(--muted); stroke-width: 1; fill: none; }
+.hat .dim-arrow { fill: var(--muted); }
+.hat text { font-family: var(--f-num); font-size: 10px; fill: var(--muted); }
+.hat .lift { animation: settle .9s ease-out both; transform-box: fill-box; transform-origin: 50% 100%; }
+.tab, #welcome { scroll-margin-top: 150px; }
+@keyframes settle { from { transform: translateY(-7px) rotate(-2deg); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hat .lift { animation: none; } }
+.welcome .eyebrow { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .08em; color: var(--accent); margin: 0; }
+.welcome h2.greet { margin: 2px 0 8px; font-size: 24px; font-weight: 700; }
+.welcome h2.greet::after { display: none; }
+.welcome p.lead { margin: 0 0 12px; max-width: 62ch; }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; }
+.quick button { font: inherit; font-size: 13.5px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 6px 12px; cursor: pointer; display: inline-flex; gap: 8px; align-items: baseline; }
+.quick button:hover { border-color: var(--ink); }
+.quick button .code { font-family: var(--f-num); font-size: 11px; color: var(--accent); }
+.safety { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--hair); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.safety .tape { width: 46px; height: 10px; flex: none; background: repeating-linear-gradient(-45deg, var(--mark) 0 6px, var(--ink) 6px 12px); }
+.safety .grow { flex: 1; min-width: 160px; }
+
+footer { position: relative; background: var(--ink); color: var(--paper); font-size: 12.5px; padding: 18px 18px 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px 20px; margin-top: 8px; }
+footer::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; background: repeating-linear-gradient(-45deg, var(--mark) 0 10px, var(--ink) 10px 20px); }
+footer .sign-title { grid-column: 1 / -1; font-family: var(--f-head); font-size: 15px; font-weight: 700; color: var(--mark); margin-top: 4px; }
+footer dl { margin: 0; }
+footer dt { font-size: 10.5px; opacity: .7; letter-spacing: .05em; }
+footer dd { margin: 0; font-family: var(--f-body); }
+footer dd.mono { font-family: var(--f-num); direction: ltr; text-align: right; }
+footer .note { grid-column: 1 / -1; opacity: .85; border-top: 1px solid rgba(255,255,255,.18); padding-top: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+footer .link { color: var(--mark); }
+
+/* ---- site panorama ---- */
+.panorama { display: block; width: calc(100% + 36px); height: auto; margin: -18px -18px 18px; border-bottom: 1.5px solid var(--ink); }
+.panorama .sky-a { stop-color: var(--sky-top); }
+.panorama .sky-b { stop-color: var(--sky-bottom); }
+.panorama .sun { fill: var(--sun); }
+.panorama .skyline { fill: var(--skyline); }
+.panorama .earth { fill: var(--earth); stroke: var(--ink); stroke-width: 1.4; }
+.panorama .st { stroke: var(--steel); stroke-width: 1.6; fill: none; stroke-linecap: square; }
+.panorama .st-thin { stroke: var(--steel); stroke-width: .9; fill: none; }
+.panorama .ink { stroke: var(--ink); stroke-width: 1.5; fill: none; stroke-linejoin: round; }
+.panorama .solid { fill: var(--ink); }
+.panorama .slab { fill: var(--sheet); stroke: var(--steel); stroke-width: 1.2; }
+.panorama .embank { stroke: var(--ink); stroke-width: 1.4; }
+.panorama .hatch-fill { stroke: var(--fill); stroke-width: 1; }
+.panorama .design-l { stroke: var(--design); stroke-width: 2; }
+.panorama .laser { stroke: var(--cut); stroke-width: 1.4; stroke-dasharray: 7 5; animation: beam 1.4s linear infinite; }
+@keyframes beam { to { stroke-dashoffset: -24; } }
+.panorama .prism { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.4; }
+.panorama .staff-red { fill: var(--cut); }
+.panorama .staff-white { fill: var(--sheet); stroke: var(--ink); stroke-width: .8; }
+.panorama .load { fill: var(--mark); stroke: var(--ink); stroke-width: 1; }
+.panorama .cab { fill: var(--mark); stroke: var(--ink); stroke-width: 1.2; }
+.panorama .tag { fill: var(--sheet); stroke: var(--ink); stroke-width: .8; }
+.panorama text { font-family: var(--f-num); font-size: 11px; fill: var(--ink); }
+.panorama text.dim { fill: var(--cut); font-weight: 600; }
+.panorama .win { fill: var(--mark); opacity: 0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .panorama .win { opacity: .85; } }
+:root[data-theme="dark"] .panorama .win { opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .panorama .laser { animation: none; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-name"><h1>المهندس المساعد</h1><small>مساعد مهندس المساحة في الموقع</small></div>
+      <div><span class="tb-label">الوحدات</span><span class="tb-value" dir="ltr">m · mm · m² · m³</span></div>
+      <div><span class="tb-label">دقة المناسيب</span><span class="tb-value" dir="ltr">± 0.001 m</span></div>
+      <div><span class="tb-label">التاريخ</span><span class="tb-value" id="tb-date">—</span></div>
+      <div data-ai><span class="tb-label">المساعد الذكي</span><span class="tb-value" id="ai-status">بيتصل…</span></div>
+    </div>
+    <nav id="tabs" role="tablist">
+      <button role="tab" data-tab="chat" aria-selected="true" data-ai><span class="code">AI</span>المساعد</button>
+      <button role="tab" data-tab="level" aria-selected="false"><span class="code">LV</span>الميزانية</button>
+      <button role="tab" data-tab="profile" aria-selected="false"><span class="code">PR</span>البروفيل</button>
+      <button role="tab" data-tab="qty" aria-selected="false"><span class="code">QT</span>الكميات</button>
+      <button role="tab" data-tab="review" aria-selected="false"><span class="code">QC</span>مراجعة الداتا</button>
+    </nav>
+  </div>
+</header>
+
+<main><div class="wrap">
+  <section id="welcome" class="panel" aria-labelledby="greet">
+    <svg class="panorama" viewBox="0 0 1200 250" direction="ltr" role="img" aria-label="موقع عمل: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي">
+      <defs>
+        <linearGradient id="pano-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-a"/><stop offset="1" class="sky-b"/></linearGradient>
+        <pattern id="pano-fill" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-45)"><line class="hatch-fill" x1="0" y1="0" x2="0" y2="7"/></pattern>
+      </defs>
+      <rect width="1200" height="250" fill="url(#pano-sky)"/>
+      <circle class="sun" cx="1122" cy="112" r="30"/>
+      <path class="skyline" d="M0,202 V168 H34 V146 H66 V172 H96 V132 H128 V158 H150 V120 H184 V166 H214 V150 H246 V176 H270 V202 Z M1030,202 V160 H1058 V138 H1090 V168 H1112 V126 H1146 V156 H1170 V144 H1200 V202 Z"/>
+      <!-- tower crane -->
+      <path class="st" d="M994,199 V46 M1006,199 V46 M840,46 H1102 M850,54 H1102 M840,46 L850,54 M1000,46 V24"/>
+      <path class="st-thin" d="M994,199 L1006,190 L994,176 L1006,162 L994,148 L1006,134 L994,120 L1006,106 L994,92 L1006,78 L994,64 L1006,50 M850,54 L862,46 L874,54 L886,46 L898,54 L910,46 L922,54 L934,46 L946,54 L958,46 L970,54 L982,46 L994,54 M1000,24 L846,46 M1000,24 L1098,46 M880,58 V110"/>
+      <rect class="solid" x="1080" y="54" width="22" height="14"/>
+      <rect class="cab" x="1008" y="56" width="16" height="12"/>
+      <rect class="solid" x="874" y="54" width="12" height="4"/>
+      <rect class="load" x="860" y="110" width="40" height="6"/>
+      <!-- building under construction -->
+      <rect class="win" x="780" y="172" width="24" height="16"/><rect class="win" x="820" y="172" width="24" height="16"/><rect class="win" x="860" y="172" width="24" height="16"/><rect class="win" x="780" y="142" width="24" height="16"/><rect class="win" x="820" y="142" width="24" height="16"/><rect class="win" x="860" y="142" width="24" height="16"/><rect class="win" x="780" y="112" width="24" height="16"/><rect class="win" x="820" y="112" width="24" height="16"/>
+      <path class="st" d="M774,199 V106 M814,199 V106 M854,199 V106 M894,199 V136"/>
+      <rect class="slab" x="766" y="164" width="136" height="4"/>
+      <rect class="slab" x="766" y="134" width="136" height="4"/>
+      <rect class="slab" x="766" y="104" width="96" height="4"/>
+      <path class="st-thin" d="M906,199 V126 M920,199 V126 M906,180 H920 M906,160 H920 M906,140 H920 M906,199 L920,180 L906,160 L920,140" stroke-dasharray="3 2"/>
+      <!-- ground -->
+      <path class="earth" d="M0,204 C120,199 230,197 330,200 C380,202 400,204 430,203 L640,203 C700,202 760,198 900,199 C1000,200 1100,197 1200,199 L1200,250 L0,250 Z"/>
+      <!-- road embankment (fill hatched as on the drawings) -->
+      <polygon class="embank" points="390,203 440,182 610,182 660,203" fill="url(#pano-fill)"/>
+      <line class="design-l" x1="440" y1="182" x2="610" y2="182"/>
+      <path class="ink" d="M460,182 V168 M590,182 V168"/>
+      <rect class="tag" x="444" y="156" width="32" height="12"/><text x="460" y="165" text-anchor="middle" style="font-size:8.5px">0+120</text>
+      <rect class="tag" x="574" y="156" width="32" height="12"/><text x="590" y="165" text-anchor="middle" style="font-size:8.5px">0+160</text>
+      <!-- benchmark -->
+      <path class="solid" d="M94,200 L106,200 L100,190 Z"/>
+      <text x="100" y="184" text-anchor="middle">BM 100.000</text>
+      <!-- total station on tripod -->
+      <path class="ink" d="M190,150 L168,201 M190,150 L212,201 M190,150 L193,203 M184,124 V118 H196 V124"/>
+      <rect class="solid" x="180" y="146" width="20" height="5"/>
+      <rect class="cab" x="182" y="124" width="16" height="22"/>
+      <rect class="solid" x="198" y="128" width="12" height="7"/>
+      <text x="190" y="112" text-anchor="middle">TS-01</text>
+      <!-- line of sight to the prism -->
+      <line class="laser" x1="210" y1="131" x2="518" y2="128"/>
+      <text class="dim" x="364" y="121" text-anchor="middle">HD 315.420 m</text>
+      <path class="ink" d="M525,182 V136"/>
+      <circle class="prism" cx="525" cy="128" r="7"/>
+      <path class="ink" d="M520,128 H530 M525,123 V133" style="stroke-width:1"/>
+      <!-- level staff -->
+      <rect class="staff-red" x="726" y="150" width="7" height="8"/><rect class="staff-white" x="726" y="158" width="7" height="8"/><rect class="staff-red" x="726" y="166" width="7" height="8"/><rect class="staff-white" x="726" y="174" width="7" height="8"/><rect class="staff-red" x="726" y="182" width="7" height="8"/><rect class="staff-white" x="726" y="190" width="7" height="8"/>
+    </svg>
+    <div class="welcome">
+      <svg class="hat" viewBox="0 0 240 190" role="img" aria-label="خوذة هندسية">
+        <line class="cl" x1="120" y1="8" x2="120" y2="150"/>
+        <text x="125" y="16">CL</text>
+        <g class="lift">
+          <path class="shell" d="M44,122 C42,66 78,34 120,34 C162,34 198,66 196,122 Z"/>
+          <path class="rib" d="M107,36 C103,62 103,96 105,122 L135,122 C137,96 137,62 133,36 C125,33 115,33 107,36 Z"/>
+          <path class="shine" d="M70,96 C70,72 82,56 96,48"/>
+          <path class="brim" d="M14,122 C60,114 180,114 226,122 C228,128 224,134 218,134 C170,128 70,128 22,134 C16,134 12,128 14,122 Z"/>
+          <g transform="translate(120,84)">
+            <circle class="bm" r="15"/>
+            <line x1="-15" y1="0" x2="15" y2="0" stroke="currentColor" style="stroke:var(--ink);stroke-width:1.2"/>
+            <path class="bm-tri" d="M0,-15 L6,-4 L-6,-4 Z"/>
+            <text x="0" y="11" text-anchor="middle" style="font-size:7.5px;fill:var(--ink)">BM</text>
+          </g>
+        </g>
+        <path class="dim" d="M14,160 L226,160 M14,152 L14,168 M226,152 L226,168"/>
+        <path class="dim-arrow" d="M14,160 L22,157 L22,163 Z M226,160 L218,157 L218,163 Z"/>
+        <text x="120" y="178" text-anchor="middle">±0.001 m</text>
+      </svg>
+      <div>
+        <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
+        <h2 class="greet" id="greet">أهلاً يا هندسة</h2>
+        <p class="lead">المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
+        <div class="quick">
+          <button type="button" data-go="chat" data-ai><span class="code">AI</span>اسأل المساعد</button>
+          <button type="button" data-go="level"><span class="code">LV</span>احسب ميزانية</button>
+          <button type="button" data-go="profile"><span class="code">PR</span>ارسم بروفيل</button>
+          <button type="button" data-go="qty"><span class="code">QT</span>احسب كميات</button>
+          <button type="button" data-go="review"><span class="code">QC</span>راجع ملف رفع</button>
+        </div>
+        <div class="safety">
+          <span class="tape" aria-hidden="true"></span>
+          <span class="grow">السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.</span>
+          <button id="welcome-close" class="link" type="button">ابدأ الشغل وإخفي الترحيب</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-chat" class="tab" data-ai>
+    <div class="panel">
+      <h2><span class="callout">RFI</span>سجل الاستفسارات</h2>
+      <div id="ai-off" class="notice" hidden>المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.</div>
+      <div id="chat-log">
+        <div class="msg assistant"><span class="who">المهندس المساعد</span><div class="bubble">أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك.
+        كل الأرقام بتتحسب بأدوات حساب ثابتة ومتختبرة، وتقدر تفتح «خطوات الحساب» تحت كل رد وتراجعها.</div></div>
+      </div>
+      <div id="attachments"></div>
+      <form id="chat-form">
+        <label class="attach" for="chat-file">إرفاق ملف</label>
+        <input type="file" id="chat-file" multiple hidden>
+        <textarea id="chat-input" rows="2" placeholder="مثال: راجع اللوحة دي واتأكد من المناسيب التصميمية والميول"></textarea>
+        <button type="submit" id="chat-send" class="primary">إرسال</button>
+      </form>
+      <div class="actions"><button id="chat-reset" class="link" type="button">محادثة جديدة</button></div>
+    </div>
+  </section>
+
+  <section id="tab-level" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">LV</span>دفتر الميزانية (Level Book)</h2>
+      <div class="grid">
+        <label for="lv-start">منسوب الروبير الابتدائي (م)<input id="lv-start" type="number" step="0.001" value="100.000"></label>
+        <label for="lv-close">منسوب روبير القفل (م)<input id="lv-close" type="number" step="0.001" value="101.190"></label>
+        <label for="lv-km">طول الخط (كم)<input id="lv-km" type="number" step="0.001" value="1"></label>
+        <label for="lv-c">ثابت الخطأ المسموح C (مم/√كم)<input id="lv-c" type="number" value="12"></label>
+        <label class="check" for="lv-loop"><input id="lv-loop" type="checkbox"> ميزانية مقفولة على نفس الروبير</label>
+      </div>
+      <label class="block" for="lv-rows">القراءات بالترتيب: المحطة، BS، IS، FS (الصق من Excel أو افصل بفاصلة، وسيب الخانة الفاضية فاضية)
+        <textarea id="lv-rows" class="data" rows="8">BM1,1.500,,
+A,,2.000,
+CP1,1.800,,1.200
+BM2,,,0.900</textarea>
+      </label>
+      <div class="actions">
+        <button id="lv-run" class="primary" type="button">احسب</button>
+        <label class="file-btn secondary" for="lv-file">تحميل من ملف</label><input type="file" id="lv-file" hidden>
+        <button id="lv-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <span class="hint">مثال محلول جاهز؛ امسحه وحط قراءاتك.</span>
+      </div>
+    </div>
+    <div id="lv-out" class="out"></div>
+  </section>
+
+  <section id="tab-profile" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">PR</span>القطاع الطولي والمناسيب التصميمية</h2>
+      <div class="two">
+        <label class="block" for="pf-vpi">نقاط تقاطع الميول VPI: المحطة، المنسوب، طول المنحنى الرأسي (اختياري)
+          <textarea id="pf-vpi" class="data" rows="7">0+000,100.000
+0+100,102.000,50
+0+200,101.000</textarea>
+        </label>
+        <label class="block" for="pf-st">المحطات ومنسوب الأرض الطبيعية (اختياري)
+          <textarea id="pf-st" class="data" rows="7">0+000,99.000
+0+025,100.200
+0+050,101.100
+0+075,102.000
+0+100,101.500
+0+125,101.750
+0+150,101.300
+0+175,100.900
+0+200,100.400</textarea>
+        </label>
+      </div>
+      <div class="grid"><label for="pf-int">لو مفيش محطات: كل (م)<input id="pf-int" type="number" value="25"></label></div>
+      <div class="actions">
+        <button id="pf-run" class="primary" type="button">احسب</button>
+        <label class="file-btn secondary" for="pf-file">تحميل المحطات من ملف</label><input type="file" id="pf-file" hidden>
+        <button id="pf-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+      </div>
+    </div>
+    <div id="pf-chart"></div>
+    <div id="pf-out" class="out"></div>
+  </section>
+
+  <section id="tab-qty" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">X-S</span>القطاع العرضي: مساحة الحفر والردم</h2>
+      <div class="two">
+        <label class="block" for="xs-ground">نقاط الأرض الطبيعية: الإزاحة (الشمال سالب)، المنسوب
+          <textarea id="xs-ground" class="data" rows="7">-20,100.40
+-10,100.20
+0,100.00
+10,99.70
+20,99.50</textarea>
+        </label>
+        <div class="grid">
+          <label for="xs-fl">منسوب التأسيس عند المحور<input id="xs-fl" type="number" step="0.001" value="101.000"></label>
+          <label for="xs-wl">العرض يسار (م)<input id="xs-wl" type="number" step="0.01" value="5"></label>
+          <label for="xs-wr">العرض يمين (م)<input id="xs-wr" type="number" step="0.01" value="5"></label>
+          <label for="xs-cf">الميل العرضي %<input id="xs-cf" type="number" step="0.1" value="2"></label>
+          <label for="xs-cs">ميل الحفر (أفقي:1)<input id="xs-cs" type="number" step="0.1" value="1"></label>
+          <label for="xs-fs">ميل الردم (أفقي:1)<input id="xs-fs" type="number" step="0.1" value="2"></label>
+        </div>
+      </div>
+      <div class="actions"><button id="xs-run" class="primary" type="button">احسب القطاع</button></div>
+      <div id="xs-chart"></div>
+      <div id="xs-out" class="out"></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="callout">QT</span>الكميات بين القطاعات</h2>
+      <label class="block" for="vol-rows">المحطة، مساحة الحفر (م²)، مساحة الردم (م²)
+        <textarea id="vol-rows" class="data" rows="6">0+000,12.5,0
+0+025,10.2,1.4
+0+050,6.0,4.8
+0+075,2.1,9.6
+0+100,0,14.2</textarea>
+      </label>
+      <div class="grid">
+        <label for="vol-method">الطريقة
+          <select id="vol-method"><option value="average_end_area">متوسط المساحات الطرفية</option><option value="prismoidal">المنشوري (Simpson)</option></select>
+        </label>
+        <label for="vol-ff">معامل الردم (حفر لكل م³ ردم مدموك)<input id="vol-ff" type="number" step="0.01" value="1"></label>
+      </div>
+      <div class="actions">
+        <button id="vol-run" class="primary" type="button">احسب الكميات</button>
+        <label class="file-btn secondary" for="vol-file">تحميل من ملف</label><input type="file" id="vol-file" hidden>
+        <button id="vol-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+      </div>
+      <div id="vol-out" class="out"></div>
+    </div>
+  </section>
+
+  <section id="tab-review" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">QC</span>مراجعة بيانات الرفع</h2>
+      <div class="grid">
+        <label for="rv-type">نوع البيانات
+          <select id="rv-type">
+            <option value="validate_points">نقاط رفع (رقم، X، Y، Z)</option>
+            <option value="validate_profile">محطات ومناسيب (بروفيل)</option>
+            <option value="check_tolerances">مقارنة منفذ بتصميمي</option>
+          </select>
+        </label>
+        <label for="rv-p1" id="rv-p1-l"><span>حد المنسوب الشاذ (م)</span><input id="rv-p1" type="number" step="0.01" value="0.5"></label>
+        <label for="rv-p2" id="rv-p2-l" hidden>أقصى ميل %<input id="rv-p2" type="number" step="0.1" value="15"></label>
+      </div>
+      <p class="hint">ارفع ملف Excel أو CSV أو TXT أو GSI أو LandXML أو KML أو DXF أو DWG. الأعمدة بتتعرف بالعربي أو الإنجليزي (رقم النقطة، شرقي/X، شمالي/Y، منسوب/Z، محطة، تصميمي، منفذ)، حتى لو فيها أخطاء إملائية.</p>
+      <div class="actions">
+        <label class="file-btn" for="rv-file">رفع ملف ومراجعته</label><input type="file" id="rv-file" hidden>
+        <button id="rv-csv" class="secondary primary dl" type="button" disabled>تصدير الملاحظات CSV</button>
+      </div>
+    </div>
+    <div id="rv-out" class="out"></div>
+  </section>
+
+  <footer>
+    <div class="sign-title">المهندس المساعد · أدوات مهندس المساحة في الموقع</div>
+    <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
+    <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
+    <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
+    <dl><dt>الإصدار</dt><dd class="mono">SURVEY-ASSIST · REV D</dd></dl>
+    <div class="note"><span>الملفات بتتقري جوه المتصفح بتاعك. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.</span><button id="welcome-open" class="link" type="button" hidden>رسالة الترحيب</button></div>
+  </footer>
+</div></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dxf-parser@1.1.2/dist/dxf-parser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+const Engine = (() => {
+"use strict";
+// ---- src/engine/util.js
+// Shared helpers for the calculation engine.
+// All math runs in full double precision; rounding happens only on output.
+
+class InputError extends Error {}
+
+function fail(message) {
+  throw new InputError(message);
+}
+
+/** Round to a fixed number of decimals (default: millimetres for metres). */
+function round(value, decimals = 3) {
+  if (value === null || value === undefined || Number.isNaN(value)) return value;
+  const f = 10 ** decimals;
+  // Add a tiny epsilon in the direction of the sign so 1.0005 -> 1.001, not 1.000.
+  return Math.round(value * f + Math.sign(value) * 1e-9) / f;
+}
+
+/** Parse a number that may come from a spreadsheet as a string ("1,234.5", " 12.30 "). */
+function toNumber(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  let s = String(value).trim();
+  if (s === "" || s === "-") return null;
+  // Arabic-Indic digits and decimal separator.
+  s = s.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/٫/g, ".");
+  s = s.replace(/,/g, "");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Parse a chainage written as "1+250.50" (km+m) or a plain number of metres.
+ * Returns metres, or null if it cannot be parsed.
+ */
+function parseChainage(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (value === null || value === undefined) return null;
+  const s = String(value).trim().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660));
+  const m = s.match(/^(-?\d+)\s*\+\s*(\d+(?:\.\d+)?)$/);
+  if (m) {
+    const km = Number(m[1]);
+    const metres = Number(m[2]);
+    return km < 0 ? km * 1000 - metres : km * 1000 + metres;
+  }
+  return toNumber(s);
+}
+
+/** Format metres as a chainage string "km+mmm.mm". */
+function formatChainage(metres, decimals = 2) {
+  if (metres === null || metres === undefined) return "";
+  const sign = metres < 0 ? "-" : "";
+  const abs = Math.abs(metres);
+  const km = Math.floor(abs / 1000 + 1e-12);
+  const rest = abs - km * 1000;
+  const restStr = rest.toFixed(decimals).padStart(3 + (decimals ? decimals + 1 : 0), "0");
+  return `${sign}${km}+${restStr}`;
+}
+
+function requireArray(value, name, min = 1) {
+  if (!Array.isArray(value)) fail(`${name} لازم يكون قائمة (array).`);
+  if (value.length < min) fail(`${name} لازم يحتوي على ${min} عناصر على الأقل.`);
+  return value;
+}
+
+function requireNumber(value, name) {
+  const n = toNumber(value);
+  if (n === null) fail(`${name} لازم يكون رقم (القيمة الحالية: ${JSON.stringify(value)}).`);
+  return n;
+}
+
+function median(values) {
+  const v = values.filter((x) => Number.isFinite(x)).sort((a, b) => a - b);
+  if (v.length === 0) return null;
+  const mid = Math.floor(v.length / 2);
+  return v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
+}
+
+// ---- src/engine/calculator.js
+// A small, safe arithmetic evaluator so the assistant never does mental math.
+// Supports + - * / ^ ( ), unary minus, and: sqrt abs sin cos tan asin acos atan atan2
+// (degrees), pi, min, max, round(x, n), hypot.
+
+
+const DEG = Math.PI / 180;
+const FUNCS = {
+  sqrt: Math.sqrt,
+  abs: Math.abs,
+  sin: (d) => Math.sin(d * DEG),
+  cos: (d) => Math.cos(d * DEG),
+  tan: (d) => Math.tan(d * DEG),
+  asin: (x) => Math.asin(x) / DEG,
+  acos: (x) => Math.acos(x) / DEG,
+  atan: (x) => Math.atan(x) / DEG,
+  atan2: (y, x) => Math.atan2(y, x) / DEG,
+  min: Math.min,
+  max: Math.max,
+  hypot: Math.hypot,
+  round: (x, n = 0) => round(x, n),
+};
+const CONSTS = { pi: Math.PI };
+
+function tokenize(src) {
+  const tokens = [];
+  const re = /\s*(?:(\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|\.\d+)|([A-Za-z_][A-Za-z0-9_]*)|(\*\*|[-+*/^(),]))/y;
+  let m;
+  let pos = 0;
+  while (pos < src.length) {
+    re.lastIndex = pos;
+    m = re.exec(src);
+    if (!m || m[0].length === 0) {
+      if (/^\s*$/.test(src.slice(pos))) break;
+      fail(`رمز غير مفهوم عند: "${src.slice(pos, pos + 10)}"`);
+    }
+    if (m[1] !== undefined) tokens.push({ t: "num", v: Number(m[1]) });
+    else if (m[2] !== undefined) tokens.push({ t: "id", v: m[2].toLowerCase() });
+    else tokens.push({ t: "op", v: m[3] === "**" ? "^" : m[3] });
+    pos = re.lastIndex;
+  }
+  return tokens;
+}
+
+function evaluate(expression) {
+  if (typeof expression !== "string" || !expression.trim()) fail("التعبير فاضي.");
+  const tokens = tokenize(expression);
+  let i = 0;
+  const peek = () => tokens[i];
+  const take = (v) => {
+    const tk = tokens[i];
+    if (!tk || (v && tk.v !== v)) fail(`متوقع "${v ?? "قيمة"}" في التعبير.`);
+    i++;
+    return tk;
+  };
+
+  function expr() {
+    let v = term();
+    while (peek()?.t === "op" && (peek().v === "+" || peek().v === "-")) {
+      const op = take().v;
+      const r = term();
+      v = op === "+" ? v + r : v - r;
+    }
+    return v;
+  }
+  function term() {
+    let v = unary();
+    while (peek()?.t === "op" && (peek().v === "*" || peek().v === "/")) {
+      const op = take().v;
+      const r = unary();
+      if (op === "/" && r === 0) fail("قسمة على صفر.");
+      v = op === "*" ? v * r : v / r;
+    }
+    return v;
+  }
+  function unary() {
+    if (peek()?.t === "op" && (peek().v === "-" || peek().v === "+")) {
+      const op = take().v;
+      const v = unary();
+      return op === "-" ? -v : v;
+    }
+    return power();
+  }
+  function power() {
+    const base = primary();
+    if (peek()?.t === "op" && peek().v === "^") {
+      take();
+      return base ** unary(); // right-associative
+    }
+    return base;
+  }
+  function primary() {
+    const tk = peek();
+    if (!tk) fail("التعبير ناقص.");
+    if (tk.t === "num") return take().v;
+    if (tk.t === "op" && tk.v === "(") {
+      take("(");
+      const v = expr();
+      take(")");
+      return v;
+    }
+    if (tk.t === "id") {
+      take();
+      if (tk.v in CONSTS) return CONSTS[tk.v];
+      const fn = FUNCS[tk.v];
+      if (!fn) fail(`دالة غير معروفة: ${tk.v}`);
+      take("(");
+      const args = [expr()];
+      while (peek()?.v === ",") {
+        take(",");
+        args.push(expr());
+      }
+      take(")");
+      return fn(...args);
+    }
+    fail(`رمز في غير مكانه: ${tk.v}`);
+  }
+
+  const value = expr();
+  if (i !== tokens.length) fail(`في رموز زيادة في آخر التعبير: ${tokens.slice(i).map((t) => t.v).join(" ")}`);
+  if (!Number.isFinite(value)) fail("الناتج مش رقم محدد (Infinity/NaN).");
+  return value;
+}
+
+function calculate(input) {
+  const exprs = Array.isArray(input?.expressions) ? input.expressions : [input?.expression];
+  return {
+    angleUnit: "degrees",
+    results: exprs.map((e) => {
+      try {
+        return { expression: e, value: evaluate(e) };
+      } catch (err) {
+        return { expression: e, error: err.message };
+      }
+    }),
+  };
+}
+
+// ---- src/engine/leveling.js
+// Level book reduction (ميزانية): HI and Rise & Fall methods, arithmetic checks,
+// misclosure against a closing benchmark, and adjustment distributed by setup.
+
+
+/**
+ * @param {object} input
+ * @param {Array<{station:string, bs?:number, is?:number, fs?:number, remark?:string}>} input.rows
+ * @param {number} input.startRL         Known RL of the first station (benchmark).
+ * @param {number} [input.closingRL]     Known RL of the last station, if the line closes on a BM.
+ * @param {boolean} [input.closedLoop]   Last station is the starting BM (closingRL = startRL).
+ * @param {number} [input.totalDistanceKm] Line length, used for the allowable misclosure C·√K.
+ * @param {number} [input.toleranceMmPerSqrtKm=12]   C for C·√K (mm).
+ * @param {number} [input.toleranceMmPerSqrtSetup=5] Used when no distance is given: C·√n (mm).
+ */
+function reduceLevelBook(input) {
+  const rows = requireArray(input?.rows, "rows", 2).map((r, i) => normaliseRow(r, i));
+  const startRL = requireNumber(input.startRL, "startRL");
+
+  if (rows[0].bs === null) fail("أول سطر لازم يكون فيه قراءة خلفية (BS) على الروبير.");
+  if (rows[0].is !== null || rows[0].fs !== null) fail("أول سطر لازم يكون BS بس.");
+  const last = rows[rows.length - 1];
+  if (last.fs === null) fail("آخر سطر لازم يكون قراءة أمامية (FS).");
+  if (last.bs !== null) fail("آخر سطر ما ينفعش يكون فيه BS (نقطة دوران من غير قراءة أمامية بعدها).");
+  rows.forEach((r, i) => {
+    if (i === 0) return;
+    if (r.is !== null && (r.fs !== null || r.bs !== null)) {
+      fail(`سطر ${i + 1} (${r.station}): القراءة المتوسطة (IS) ما تتجمعش مع BS أو FS في نفس السطر.`);
+    }
+    if (r.is === null && r.fs === null) {
+      fail(`سطر ${i + 1} (${r.station}): لازم يكون فيه IS أو FS.`);
+    }
+  });
+
+  // --- Height of instrument method ---
+  let setup = 1;
+  let hi = startRL + rows[0].bs;
+  const out = [];
+  out.push({ ...rows[0], setup, hi, rl: startRL, rise: null, fall: null, kind: "BM" });
+  let prevReading = rows[0].bs;
+  let sumRise = 0;
+  let sumFall = 0;
+
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const reading = r.is !== null ? r.is : r.fs;
+    const rl = hi - reading;
+    const diff = prevReading - reading;
+    const rise = diff > 0 ? diff : null;
+    const fall = diff < 0 ? -diff : null;
+    if (rise) sumRise += rise;
+    if (fall) sumFall += fall;
+
+    const isCP = r.fs !== null && r.bs !== null;
+    const kind = r.is !== null ? "IS" : isCP ? "CP" : "FS";
+    out.push({ ...r, setup, hi, rl, rise, fall, kind });
+
+    if (isCP) {
+      setup += 1;
+      hi = rl + r.bs;
+      prevReading = r.bs;
+    } else {
+      prevReading = reading;
+    }
+  }
+
+  const nSetups = setup;
+  const sumBS = rows.reduce((s, r) => s + (r.bs ?? 0), 0);
+  const sumFS = rows.reduce((s, r) => s + (r.fs ?? 0), 0);
+  const lastRL = out[out.length - 1].rl;
+
+  const checks = {
+    sumBS: round(sumBS),
+    sumFS: round(sumFS),
+    sumRise: round(sumRise),
+    sumFall: round(sumFall),
+    bsMinusFs: round(sumBS - sumFS),
+    riseMinusFall: round(sumRise - sumFall),
+    lastMinusFirst: round(lastRL - startRL),
+  };
+  // These three must agree exactly (to rounding) or the reduction itself is wrong.
+  checks.arithmeticOk =
+    Math.abs(sumBS - sumFS - (lastRL - startRL)) < 1e-6 &&
+    Math.abs(sumRise - sumFall - (lastRL - startRL)) < 1e-6;
+
+  // --- Misclosure and adjustment ---
+  let closing = null;
+  const knownClosing = input.closedLoop ? startRL : toNumber(input.closingRL);
+  if (knownClosing !== null) {
+    const misclosure = lastRL - knownClosing; // + means the line came out too high
+    const km = toNumber(input.totalDistanceKm);
+    let allowableMm;
+    let basis;
+    if (km !== null && km > 0) {
+      const c = toNumber(input.toleranceMmPerSqrtKm) ?? 12;
+      allowableMm = c * Math.sqrt(km);
+      basis = `${c}·√K mm (K = ${km} km)`;
+    } else {
+      const c = toNumber(input.toleranceMmPerSqrtSetup) ?? 5;
+      allowableMm = c * Math.sqrt(nSetups);
+      basis = `${c}·√n mm (n = ${nSetups} وقفات جهاز)`;
+    }
+    const misMm = misclosure * 1000;
+    closing = {
+      knownClosingRL: round(knownClosing),
+      computedClosingRL: round(lastRL),
+      misclosureMm: round(misMm, 1),
+      allowableMm: round(allowableMm, 1),
+      allowableBasis: basis,
+      accepted: Math.abs(misMm) <= allowableMm + 1e-9,
+      correctionPerSetupMm: round(-misMm / nSetups, 2),
+    };
+    // Correction to setup k is -e·k/n; every reading taken from setup k shares it.
+    for (const row of out) {
+      if (row.kind === "BM") {
+        row.correction = 0;
+      } else {
+        row.correction = (-misclosure * row.setup) / nSetups;
+      }
+      row.adjustedRL = row.rl + row.correction;
+    }
+  }
+
+  return {
+    method: "HI + Rise/Fall (الطريقتين مع بعض للتحقق)",
+    setups: nSetups,
+    rows: out.map((r) => ({
+      station: r.station,
+      bs: r.bs,
+      is: r.is,
+      fs: r.fs,
+      kind: r.kind,
+      setup: r.setup,
+      hi: round(r.hi),
+      rise: r.rise === null ? null : round(r.rise),
+      fall: r.fall === null ? null : round(r.fall),
+      rl: round(r.rl),
+      ...(closing ? { correction: round(r.correction), adjustedRL: round(r.adjustedRL) } : {}),
+      remark: r.remark ?? "",
+    })),
+    checks,
+    closing,
+  };
+}
+
+function normaliseRow(r, i) {
+  if (!r || typeof r !== "object") fail(`سطر ${i + 1} غير صالح.`);
+  const row = {
+    station: String(r.station ?? r.point ?? r.id ?? `P${i + 1}`),
+    bs: toNumber(r.bs),
+    is: toNumber(r.is),
+    fs: toNumber(r.fs),
+    remark: r.remark ?? "",
+  };
+  for (const k of ["bs", "is", "fs"]) {
+    if (row[k] !== null && (row[k] < 0 || row[k] > 10)) {
+      fail(`سطر ${i + 1} (${row.station}): قراءة ${k.toUpperCase()} = ${row[k]} خارج المدى المعقول للقامة (0–10 م). اتأكد إن الوحدة متر.`);
+    }
+  }
+  return row;
+}
+
+// ---- src/engine/profile.js
+// Longitudinal profile (القطاع الطولي): design levels from VPIs with symmetric
+// parabolic vertical curves, and cut/fill depth against the ground line.
+
+
+/**
+ * @param {object} input
+ * @param {Array<{chainage:number|string, level:number, curveLength?:number}>} input.vpis
+ *        Points of vertical intersection, in chainage order. curveLength (m) on an
+ *        interior VPI inserts a symmetric parabolic vertical curve there.
+ * @param {Array<{chainage:number|string, groundLevel?:number}>} [input.stations]
+ *        Stations to evaluate. If omitted, every `interval` metres along the grade line.
+ * @param {number} [input.interval] Spacing for generated stations (default 25 m).
+ */
+function profileDesign(input) {
+  const vpis = requireArray(input?.vpis, "vpis", 2).map((v, i) => {
+    const ch = parseChainage(v.chainage);
+    if (ch === null) fail(`VPI رقم ${i + 1}: المحطة (chainage) غير مفهومة: ${JSON.stringify(v.chainage)}`);
+    return { chainage: ch, level: requireNumber(v.level, `VPI ${i + 1} level`), curveLength: toNumber(v.curveLength) ?? 0 };
+  });
+  for (let i = 1; i < vpis.length; i++) {
+    if (vpis[i].chainage <= vpis[i - 1].chainage) fail(`محطات الـ VPI لازم تكون تصاعدية (VPI ${i + 1}).`);
+  }
+  if (vpis[0].curveLength || vpis[vpis.length - 1].curveLength) {
+    fail("المنحنى الرأسي لازم يكون على VPI داخلي (مش أول أو آخر نقطة).");
+  }
+
+  const grades = [];
+  for (let i = 1; i < vpis.length; i++) {
+    grades.push((vpis[i].level - vpis[i - 1].level) / (vpis[i].chainage - vpis[i - 1].chainage));
+  }
+
+  const curves = [];
+  for (let i = 1; i < vpis.length - 1; i++) {
+    const L = vpis[i].curveLength;
+    if (!L) continue;
+    if (L < 0) fail(`طول المنحنى عند VPI ${i + 1} سالب.`);
+    const g1 = grades[i - 1];
+    const g2 = grades[i];
+    const bvc = vpis[i].chainage - L / 2;
+    const evc = vpis[i].chainage + L / 2;
+    if (bvc < vpis[i - 1].chainage - 1e-9 || evc > vpis[i + 1].chainage + 1e-9) {
+      fail(`المنحنى عند VPI ${i + 1} (L=${L} م) أطول من المماسات المجاورة.`);
+    }
+    const bvcLevel = vpis[i].level - g1 * (L / 2);
+    const curve = {
+      vpiIndex: i,
+      vpiChainage: vpis[i].chainage,
+      length: L,
+      g1Percent: round(g1 * 100, 4),
+      g2Percent: round(g2 * 100, 4),
+      A: round((g2 - g1) * 100, 4),
+      K: g2 === g1 ? null : round(L / Math.abs((g2 - g1) * 100), 2),
+      type: g2 > g1 ? "مقعر (sag)" : "محدب (crest)",
+      bvc, evc, bvcLevel, g1, g2,
+      middleOrdinate: ((g2 - g1) * L) / 8,
+    };
+    // Turning point (high/low) lies on the curve if the grades change sign.
+    const xt = (-g1 * L) / (g2 - g1);
+    if (g2 !== g1 && xt > 0 && xt < L) {
+      curve.turningPoint = { chainage: bvc + xt, level: bvcLevel + g1 * xt + ((g2 - g1) / (2 * L)) * xt * xt };
+    }
+    curves.push(curve);
+  }
+  for (let i = 1; i < curves.length; i++) {
+    if (curves[i].bvc < curves[i - 1].evc - 1e-9) fail("في منحنيين رأسيين متداخلين — قلل الأطوال.");
+  }
+
+  const startCh = vpis[0].chainage;
+  const endCh = vpis[vpis.length - 1].chainage;
+
+  function designLevelAt(ch) {
+    if (ch < startCh - 1e-9 || ch > endCh + 1e-9) return null;
+    for (const c of curves) {
+      if (ch >= c.bvc && ch <= c.evc) {
+        const x = ch - c.bvc;
+        return c.bvcLevel + c.g1 * x + ((c.g2 - c.g1) / (2 * c.length)) * x * x;
+      }
+    }
+    let i = 1;
+    while (i < vpis.length - 1 && ch > vpis[i].chainage) i++;
+    const a = vpis[i - 1];
+    return a.level + grades[i - 1] * (ch - a.chainage);
+  }
+
+  let stations;
+  if (Array.isArray(input.stations) && input.stations.length) {
+    stations = input.stations.map((s, i) => {
+      const ch = parseChainage(s.chainage);
+      if (ch === null) fail(`محطة رقم ${i + 1}: chainage غير مفهوم: ${JSON.stringify(s.chainage)}`);
+      return { chainage: ch, groundLevel: toNumber(s.groundLevel ?? s.level), label: s.label };
+    });
+  } else {
+    const step = toNumber(input.interval) ?? 25;
+    if (step <= 0) fail("interval لازم يكون أكبر من صفر.");
+    stations = [];
+    for (let ch = startCh; ch < endCh - 1e-9; ch += step) stations.push({ chainage: ch, groundLevel: null });
+    stations.push({ chainage: endCh, groundLevel: null });
+  }
+
+  const warnings = [];
+  const rows = stations.map((s) => {
+    const dl = designLevelAt(s.chainage);
+    if (dl === null) warnings.push(`المحطة ${formatChainage(s.chainage)} خارج مدى خط التصميم.`);
+    const depth = dl !== null && s.groundLevel !== null ? s.groundLevel - dl : null;
+    return {
+      chainage: round(s.chainage, 3),
+      chainageText: formatChainage(s.chainage),
+      groundLevel: s.groundLevel === null ? null : round(s.groundLevel),
+      designLevel: dl === null ? null : round(dl),
+      cut: depth !== null && depth > 0 ? round(depth) : null,
+      fill: depth !== null && depth < 0 ? round(-depth) : null,
+    };
+  });
+
+  return {
+    signConvention: "حفر (cut) = الأرض الطبيعية أعلى من التصميم، ردم (fill) = الأرض أوطى",
+    segments: grades.map((g, i) => ({
+      from: formatChainage(vpis[i].chainage),
+      to: formatChainage(vpis[i + 1].chainage),
+      gradePercent: round(g * 100, 4),
+      length: round(vpis[i + 1].chainage - vpis[i].chainage, 3),
+    })),
+    verticalCurves: curves.map((c) => ({
+      atVPI: formatChainage(c.vpiChainage),
+      type: c.type,
+      length: c.length,
+      g1Percent: c.g1Percent,
+      g2Percent: c.g2Percent,
+      A: c.A,
+      K: c.K,
+      BVC: formatChainage(c.bvc),
+      BVCLevel: round(c.bvcLevel),
+      EVC: formatChainage(c.evc),
+      EVCLevel: round(c.bvcLevel + c.g1 * c.length + ((c.g2 - c.g1) / 2) * c.length),
+      middleOrdinate: round(c.middleOrdinate),
+      ...(c.turningPoint
+        ? { turningPoint: { chainage: formatChainage(c.turningPoint.chainage), level: round(c.turningPoint.level) } }
+        : {}),
+    })),
+    rows,
+    warnings,
+  };
+}
+
+// ---- src/engine/quantities.js
+// Earthwork quantities (حساب الكميات): cross-section cut/fill areas, road template
+// with daylight to natural ground, volumes between sections, and grid (borrow-pit) volumes.
+
+
+function toPolyline(points, name) {
+  const poly = requireArray(points, name, 2).map((p, i) => {
+    const offset = toNumber(p.offset ?? p.x);
+    const level = toNumber(p.level ?? p.z);
+    if (offset === null || level === null) fail(`${name}[${i}]: لازم offset و level أرقام.`);
+    return { offset, level };
+  });
+  poly.sort((a, b) => a.offset - b.offset);
+  for (let i = 1; i < poly.length; i++) {
+    if (poly[i].offset === poly[i - 1].offset) fail(`${name}: في نقطتين على نفس الـ offset (${poly[i].offset}).`);
+  }
+  return poly;
+}
+
+function levelAt(poly, x) {
+  if (x < poly[0].offset - 1e-9 || x > poly[poly.length - 1].offset + 1e-9) return null;
+  for (let i = 1; i < poly.length; i++) {
+    const a = poly[i - 1];
+    const b = poly[i];
+    if (x <= b.offset + 1e-12) {
+      return a.level + ((b.level - a.level) * (x - a.offset)) / (b.offset - a.offset);
+    }
+  }
+  return poly[poly.length - 1].level;
+}
+
+/** Cut and fill areas between a ground polyline and a design polyline over their common width. */
+function sectionArea(input) {
+  const ground = toPolyline(input?.ground, "ground");
+  const design = toPolyline(input?.design, "design");
+  const lo = Math.max(ground[0].offset, design[0].offset);
+  const hi = Math.min(ground[ground.length - 1].offset, design[design.length - 1].offset);
+  if (hi <= lo) fail("مفيش تداخل في العرض بين خط الأرض وخط التصميم.");
+
+  const xs = new Set([lo, hi]);
+  for (const p of [...ground, ...design]) if (p.offset > lo && p.offset < hi) xs.add(p.offset);
+  const sorted = [...xs].sort((a, b) => a - b);
+
+  let cut = 0;
+  let fill = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    const a = sorted[i - 1];
+    const b = sorted[i];
+    const da = levelAt(ground, a) - levelAt(design, a);
+    const db = levelAt(ground, b) - levelAt(design, b);
+    if (da * db >= 0) {
+      const area = ((da + db) / 2) * (b - a);
+      if (area > 0) cut += area;
+      else fill -= area;
+    } else {
+      const xc = a + (da / (da - db)) * (b - a);
+      const a1 = (da / 2) * (xc - a);
+      const a2 = (db / 2) * (b - xc);
+      for (const area of [a1, a2]) {
+        if (area > 0) cut += area;
+        else fill -= area;
+      }
+    }
+  }
+
+  const warnings = [];
+  const dl = levelAt(design, lo) - levelAt(ground, lo);
+  const dr = levelAt(design, hi) - levelAt(ground, hi);
+  if (Math.abs(dl) > 0.005 || Math.abs(dr) > 0.005) {
+    warnings.push(
+      `خط التصميم مش قافل على الأرض عند الأطراف (فرق يسار ${round(dl)} م، يمين ${round(dr)} م) — المساحة محسوبة على العرض المشترك بس.`,
+    );
+  }
+  return { cutArea: round(cut, 3), fillArea: round(fill, 3), fromOffset: round(lo), toOffset: round(hi), warnings };
+}
+
+/**
+ * Build a road/channel template and daylight its side slopes to the ground line,
+ * then compute the cut/fill areas.
+ * Slopes are horizontal per 1 vertical (e.g. fillSlope 2 = 2H:1V).
+ */
+function templateSection(input) {
+  const ground = toPolyline(input?.ground, "ground");
+  const cl = requireNumber(input.formationLevel, "formationLevel");
+  const wl = requireNumber(input.widthLeft, "widthLeft");
+  const wr = requireNumber(input.widthRight, "widthRight");
+  const cf = (toNumber(input.crossfallPercent) ?? 0) / 100;
+  const cutSlope = toNumber(input.cutSlope) ?? 1;
+  const fillSlope = toNumber(input.fillSlope) ?? 2;
+  if (wl < 0 || wr < 0) fail("العرض لازم يكون موجب.");
+  if (cutSlope <= 0 || fillSlope <= 0) fail("الميول الجانبية لازم تكون أكبر من صفر.");
+
+  const warnings = [];
+  const right = daylight(ground, wr, cl - cf * wr, cutSlope, fillSlope, warnings, "يمين");
+  const mirrored = ground.map((p) => ({ offset: -p.offset, level: p.level })).reverse();
+  const leftM = daylight(mirrored, wl, cl - cf * wl, cutSlope, fillSlope, warnings, "يسار");
+
+  const design = [];
+  if (leftM.point) design.push({ offset: -leftM.point.offset, level: leftM.point.level });
+  design.push({ offset: -wl, level: cl - cf * wl });
+  if (wl > 0 && wr > 0) design.push({ offset: 0, level: cl });
+  if (wr > 0 || wl === 0) design.push({ offset: wr, level: cl - cf * wr });
+  if (right.point) design.push({ offset: right.point.offset, level: right.point.level });
+
+  const dedup = design.filter((p, i) => i === 0 || Math.abs(p.offset - design[i - 1].offset) > 1e-9);
+  const areas = sectionArea({ ground, design: dedup });
+  return {
+    design: dedup.map((p) => ({ offset: round(p.offset), level: round(p.level) })),
+    leftSide: leftM.mode,
+    rightSide: right.mode,
+    cutArea: areas.cutArea,
+    fillArea: areas.fillArea,
+    warnings: [...warnings, ...areas.warnings],
+  };
+}
+
+function daylight(ground, edgeOffset, edgeLevel, cutSlope, fillSlope, warnings, sideName) {
+  const gEdge = levelAt(ground, edgeOffset);
+  if (gEdge === null) {
+    warnings.push(`خط الأرض مش واصل لحافة التصميم (${sideName}).`);
+    return { point: null, mode: "غير معروف" };
+  }
+  if (Math.abs(gEdge - edgeLevel) < 1e-9) return { point: null, mode: "على الأرض" };
+  const isCut = gEdge > edgeLevel;
+  const slope = isCut ? 1 / cutSlope : -1 / fillSlope;
+  const line = (x) => edgeLevel + slope * (x - edgeOffset);
+  const xs = [edgeOffset, ...ground.map((p) => p.offset).filter((x) => x > edgeOffset)];
+  for (let i = 1; i < xs.length; i++) {
+    const fa = levelAt(ground, xs[i - 1]) - line(xs[i - 1]);
+    const fb = levelAt(ground, xs[i]) - line(xs[i]);
+    if ((isCut && fb <= 0) || (!isCut && fb >= 0)) {
+      const x = xs[i - 1] + (fa / (fa - fb)) * (xs[i] - xs[i - 1]);
+      return { point: { offset: x, level: line(x) }, mode: isCut ? "حفر" : "ردم" };
+    }
+  }
+  warnings.push(`الميل الجانبي (${sideName}) ما قابلش الأرض جوه مدى خط الأرض — مدّ الرفع لبرّه.`);
+  return { point: null, mode: isCut ? "حفر" : "ردم" };
+}
+
+/**
+ * Volumes between cross sections.
+ * method: "average_end_area" (default) or "prismoidal" (Simpson; equal spacing, even number of intervals).
+ * fillFactor: cut volume needed per 1 m³ of compacted fill, for the mass-haul ordinate (default 1).
+ */
+function earthworkVolumes(input) {
+  const sections = requireArray(input?.sections, "sections", 2).map((s, i) => {
+    const ch = parseChainage(s.chainage);
+    if (ch === null) fail(`قطاع ${i + 1}: chainage غير مفهوم.`);
+    return { chainage: ch, cut: toNumber(s.cutArea) ?? 0, fill: toNumber(s.fillArea) ?? 0 };
+  });
+  for (let i = 1; i < sections.length; i++) {
+    if (sections[i].chainage <= sections[i - 1].chainage) fail(`القطاعات لازم تكون مترتبة تصاعديًا (قطاع ${i + 1}).`);
+  }
+  if (sections.some((s) => s.cut < 0 || s.fill < 0)) fail("المساحات لازم تكون موجبة.");
+  const method = input.method === "prismoidal" ? "prismoidal" : "average_end_area";
+  const factor = toNumber(input.fillFactor) ?? 1;
+
+  const rows = [];
+  let totalCut = 0;
+  let totalFill = 0;
+
+  if (method === "average_end_area") {
+    for (let i = 1; i < sections.length; i++) {
+      const a = sections[i - 1];
+      const b = sections[i];
+      const L = b.chainage - a.chainage;
+      const vc = ((a.cut + b.cut) / 2) * L;
+      const vf = ((a.fill + b.fill) / 2) * L;
+      totalCut += vc;
+      totalFill += vf;
+      rows.push(segRow(a.chainage, b.chainage, vc, vf, totalCut, totalFill, factor));
+    }
+  } else {
+    const n = sections.length - 1;
+    const L = sections[1].chainage - sections[0].chainage;
+    if (n % 2 !== 0) fail("الطريقة المنشورية (Simpson) محتاجة عدد فترات زوجي (عدد قطاعات فردي). استخدم average_end_area أو ضيف قطاع.");
+    for (let i = 1; i < sections.length; i++) {
+      if (Math.abs(sections[i].chainage - sections[i - 1].chainage - L) > 1e-6) {
+        fail("الطريقة المنشورية محتاجة مسافات متساوية بين القطاعات.");
+      }
+    }
+    for (let i = 0; i < n; i += 2) {
+      const [a, m, b] = [sections[i], sections[i + 1], sections[i + 2]];
+      const vc = (L / 3) * (a.cut + 4 * m.cut + b.cut);
+      const vf = (L / 3) * (a.fill + 4 * m.fill + b.fill);
+      totalCut += vc;
+      totalFill += vf;
+      rows.push(segRow(a.chainage, b.chainage, vc, vf, totalCut, totalFill, factor));
+    }
+  }
+
+  return {
+    method: method === "prismoidal" ? "المنشوري (Simpson)" : "متوسط المساحات الطرفية (Average End Area)",
+    rows,
+    totalCut: round(totalCut, 2),
+    totalFill: round(totalFill, 2),
+    fillFactor: factor,
+    netBalance: round(totalCut - totalFill * factor, 2),
+    balanceNote: "الموجب = فائض حفر، السالب = عجز محتاج ردم من برّه",
+  };
+}
+
+function segRow(from, to, vc, vf, cumCut, cumFill, factor) {
+  return {
+    from: formatChainage(from),
+    to: formatChainage(to),
+    length: round(to - from, 3),
+    cutVolume: round(vc, 2),
+    fillVolume: round(vf, 2),
+    cumulativeCut: round(cumCut, 2),
+    cumulativeFill: round(cumFill, 2),
+    massOrdinate: round(cumCut - cumFill * factor, 2),
+  };
+}
+
+/**
+ * Grid (borrow-pit) method. existing: 2D array of levels (null = no point).
+ * design: a single level or a 2D array the same shape.
+ */
+function gridVolume(input) {
+  const existing = requireArray(input?.existing, "existing", 2);
+  const sx = requireNumber(input.spacingX, "spacingX");
+  const sy = requireNumber(input.spacingY ?? input.spacingX, "spacingY");
+  if (sx <= 0 || sy <= 0) fail("مسافات الشبكة لازم تكون موجبة.");
+  const flat = toNumber(input.design);
+  const designAt = (i, j) => (flat !== null ? flat : toNumber(input.design?.[i]?.[j]));
+  if (flat === null && !Array.isArray(input.design)) fail("design لازم يكون منسوب واحد أو مصفوفة بنفس شكل existing.");
+
+  const A = sx * sy;
+  let cut = 0;
+  let fill = 0;
+  let cells = 0;
+  let skipped = 0;
+  for (let i = 0; i < existing.length - 1; i++) {
+    const rowA = existing[i];
+    const rowB = existing[i + 1];
+    if (!Array.isArray(rowA) || !Array.isArray(rowB)) fail(`existing[${i}] لازم يكون صف (array).`);
+    const nCols = Math.min(rowA.length, rowB.length);
+    for (let j = 0; j < nCols - 1; j++) {
+      const corners = [[i, j], [i, j + 1], [i + 1, j], [i + 1, j + 1]].map(([r, c]) => {
+        const e = toNumber(existing[r][c]);
+        const d = designAt(r, c);
+        return e === null || d === null ? null : e - d;
+      });
+      if (corners.some((h) => h === null)) {
+        skipped++;
+        continue;
+      }
+      cells++;
+      const pos = corners.filter((h) => h > 0).reduce((s, h) => s + h, 0);
+      const neg = -corners.filter((h) => h < 0).reduce((s, h) => s + h, 0);
+      if (neg === 0) cut += (A * pos) / 4;
+      else if (pos === 0) fill += (A * neg) / 4;
+      else {
+        cut += (A / 4) * ((pos * pos) / (pos + neg));
+        fill += (A / 4) * ((neg * neg) / (pos + neg));
+      }
+    }
+  }
+  if (cells === 0) fail("مفيش ولا خلية كاملة (4 أركان) في الشبكة.");
+  return {
+    method: "شبكة المربعات (Borrow-pit) — الخلايا المختلطة بمعادلة (Σh)²/(4Σ|h|)",
+    cellArea: A,
+    cellsUsed: cells,
+    cellsSkipped: skipped,
+    cutVolume: round(cut, 2),
+    fillVolume: round(fill, 2),
+    net: round(cut - fill, 2),
+  };
+}
+
+// ---- src/engine/validation.js
+// Data review (مراجعة الداتا): survey points, profile levels, and as-built tolerances.
+
+
+/**
+ * Check a list of survey points {id, x, y, z, code?}.
+ * zThreshold: a point is flagged when it differs from the median of its nearest
+ * neighbours by more than this many metres (default 0.5).
+ */
+function validatePoints(input) {
+  const raw = requireArray(input?.points, "points", 1);
+  const zThreshold = toNumber(input.zThreshold) ?? 0.5;
+  const dupTol = toNumber(input.duplicateTolerance) ?? 0.001;
+  const issues = [];
+  const pts = [];
+
+  raw.forEach((p, i) => {
+    const id = p.id ?? p.point ?? `#${i + 1}`;
+    const x = toNumber(p.x);
+    const y = toNumber(p.y);
+    const z = toNumber(p.z ?? p.level);
+    const missing = [["x", x], ["y", y], ["z", z]].filter(([, v]) => v === null).map(([k]) => k);
+    if (missing.length) {
+      issues.push({ severity: "عالي", type: "قيمة ناقصة/غير رقمية", point: String(id), row: i + 1, detail: `ناقص: ${missing.join(", ")}` });
+      return;
+    }
+    pts.push({ id: String(id), x, y, z, row: i + 1, code: p.code ?? "" });
+  });
+
+  const byId = new Map();
+  for (const p of pts) {
+    if (byId.has(p.id)) {
+      const q = byId.get(p.id);
+      issues.push({ severity: "عالي", type: "رقم نقطة مكرر", point: p.id, row: p.row, detail: `نفس رقم النقطة في سطر ${q.row}` });
+    } else byId.set(p.id, p);
+  }
+
+  // Grid hash for neighbour searches; cell size from the data extent.
+  const xsAll = pts.map((p) => p.x);
+  const ysAll = pts.map((p) => p.y);
+  const extent = pts.length ? Math.max(Math.max(...xsAll) - Math.min(...xsAll), Math.max(...ysAll) - Math.min(...ysAll)) : 0;
+  const cell = Math.max(extent / Math.max(Math.sqrt(pts.length), 1), 0.01);
+  const grid = new Map();
+  const key = (gx, gy) => `${gx},${gy}`;
+  for (const p of pts) {
+    const k = key(Math.floor(p.x / cell), Math.floor(p.y / cell));
+    if (!grid.has(k)) grid.set(k, []);
+    grid.get(k).push(p);
+  }
+  function neighbours(p, k) {
+    const gx = Math.floor(p.x / cell);
+    const gy = Math.floor(p.y / cell);
+    for (let r = 1; r < 50; r++) {
+      const found = [];
+      for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
+        for (const q of grid.get(key(gx + dx, gy + dy)) ?? []) if (q !== p) found.push(q);
+      }
+      if (found.length >= k || r === 49) {
+        return found
+          .map((q) => ({ q, d: Math.hypot(q.x - p.x, q.y - p.y) }))
+          .sort((a, b) => a.d - b.d)
+          .slice(0, k);
+      }
+    }
+    return [];
+  }
+
+  const reportedPairs = new Set();
+  for (const p of pts) {
+    const nb = neighbours(p, 6);
+    for (const { q, d } of nb) {
+      if (d <= dupTol) {
+        const pair = [p.id, q.id].sort().join("|");
+        if (!reportedPairs.has(pair)) {
+          reportedPairs.add(pair);
+          const dz = Math.abs(p.z - q.z);
+          issues.push({
+            severity: dz > 0.01 ? "عالي" : "متوسط",
+            type: "إحداثيات مكررة",
+            point: p.id,
+            row: p.row,
+            detail: `نفس مكان النقطة ${q.id} (فرق المنسوب ${round(dz)} م)`,
+          });
+        }
+      }
+    }
+    if (nb.length >= 3) {
+      const m = median(nb.map((n) => n.q.z));
+      const dz = p.z - m;
+      // Real features (ditches, banks, kerbs) are surveyed as several points at a
+      // similar level; a blunder stands alone. Flag only when no neighbour agrees.
+      const agreeing = nb.filter((n) => Math.abs(n.q.z - p.z) <= zThreshold).length;
+      if (Math.abs(dz) > zThreshold && agreeing === 0) {
+        issues.push({
+          severity: Math.abs(dz) > 3 * zThreshold ? "عالي" : "متوسط",
+          type: "منسوب شاذ مقارنة بالجيران",
+          point: p.id,
+          row: p.row,
+          detail: `Z=${round(p.z)} والوسيط حواليه ${round(m)} (فرق ${round(dz)} م)، ومفيش نقطة قريبة منسوبها قريب منه${p.code ? ` — كود ${p.code}` : ""}`,
+        });
+      }
+    }
+  }
+
+  const zs = pts.map((p) => p.z);
+  return {
+    totalRows: raw.length,
+    validPoints: pts.length,
+    stats: pts.length
+      ? {
+          minX: round(Math.min(...xsAll)), maxX: round(Math.max(...xsAll)),
+          minY: round(Math.min(...ysAll)), maxY: round(Math.max(...ysAll)),
+          minZ: round(Math.min(...zs)), maxZ: round(Math.max(...zs)),
+        }
+      : null,
+    settings: { zThreshold, duplicateTolerance: dupTol },
+    issueCount: issues.length,
+    issues,
+  };
+}
+
+/**
+ * Check a profile/chainage list {chainage, level}.
+ * spikeThreshold (m): deviation from the line joining the neighbours (default 0.3).
+ * maxGradePercent: flag steeper consecutive grades (default 15).
+ */
+function validateProfile(input) {
+  const raw = requireArray(input?.rows, "rows", 2);
+  const spike = toNumber(input.spikeThreshold) ?? 0.3;
+  const maxGrade = toNumber(input.maxGradePercent) ?? 15;
+  const issues = [];
+  const rows = [];
+  raw.forEach((r, i) => {
+    const ch = parseChainage(r.chainage);
+    const z = toNumber(r.level ?? r.groundLevel ?? r.z);
+    if (ch === null || z === null) {
+      issues.push({ severity: "عالي", type: "قيمة ناقصة/غير رقمية", row: i + 1, chainage: String(r.chainage ?? ""), detail: "محطة أو منسوب مش رقم" });
+      return;
+    }
+    rows.push({ ch, z, row: i + 1 });
+  });
+
+  for (let i = 1; i < rows.length; i++) {
+    const a = rows[i - 1];
+    const b = rows[i];
+    if (b.ch === a.ch) issues.push({ severity: "عالي", type: "محطة مكررة", row: b.row, chainage: formatChainage(b.ch), detail: `نفس محطة سطر ${a.row}` });
+    else if (b.ch < a.ch) issues.push({ severity: "عالي", type: "ترتيب المحطات", row: b.row, chainage: formatChainage(b.ch), detail: `أصغر من المحطة اللي قبلها ${formatChainage(a.ch)}` });
+  }
+
+  const sorted = [...rows].sort((a, b) => a.ch - b.ch).filter((r, i, arr) => i === 0 || r.ch !== arr[i - 1].ch);
+  const gaps = [];
+  for (let i = 1; i < sorted.length; i++) gaps.push(sorted[i].ch - sorted[i - 1].ch);
+  const typical = median(gaps);
+  for (let i = 1; i < sorted.length; i++) {
+    const a = sorted[i - 1];
+    const b = sorted[i];
+    const L = b.ch - a.ch;
+    if (typical && L > 2 * typical + 1e-9) {
+      issues.push({ severity: "متوسط", type: "فجوة في الرفع", row: b.row, chainage: formatChainage(a.ch) + " → " + formatChainage(b.ch), detail: `مسافة ${round(L, 2)} م والمعتاد ${round(typical, 2)} م` });
+    }
+    const g = ((b.z - a.z) / L) * 100;
+    if (Math.abs(g) > maxGrade) {
+      issues.push({ severity: "متوسط", type: "ميل حاد", row: b.row, chainage: formatChainage(a.ch) + " → " + formatChainage(b.ch), detail: `ميل ${round(g, 2)}% أكبر من ${maxGrade}%` });
+    }
+  }
+  // Deviation of each point from the line joining its neighbours. One bad level also
+  // bends its neighbours' check lines, so only the local peak deviation is reported.
+  const devs = sorted.map((p, i) => {
+    if (i === 0 || i === sorted.length - 1) return 0;
+    const [a, b] = [sorted[i - 1], sorted[i + 1]];
+    return p.z - (a.z + ((b.z - a.z) * (p.ch - a.ch)) / (b.ch - a.ch));
+  });
+  for (let i = 1; i < sorted.length - 1; i++) {
+    const p = sorted[i];
+    const dev = devs[i];
+    const isPeak = Math.abs(dev) >= Math.abs(devs[i - 1]) && Math.abs(dev) >= Math.abs(devs[i + 1]);
+    if (Math.abs(dev) > spike && isPeak) {
+      issues.push({ severity: Math.abs(dev) > 3 * spike ? "عالي" : "متوسط", type: "قفزة في المنسوب (spike)", row: p.row, chainage: formatChainage(p.ch), detail: `المنسوب ${round(p.z)} بيبعد ${round(dev)} م عن الخط بين الجيران` });
+    }
+  }
+
+  return {
+    totalRows: raw.length,
+    validRows: rows.length,
+    from: sorted.length ? formatChainage(sorted[0].ch) : null,
+    to: sorted.length ? formatChainage(sorted[sorted.length - 1].ch) : null,
+    typicalInterval: typical === null ? null : round(typical, 2),
+    settings: { spikeThreshold: spike, maxGradePercent: maxGrade },
+    issueCount: issues.length,
+    issues,
+  };
+}
+
+/** Compare as-built (منفذ) levels with design levels against a tolerance in mm. */
+function checkTolerances(input) {
+  const rows = requireArray(input?.rows, "rows", 1);
+  const tol = toNumber(input.toleranceMm) ?? 20;
+  if (tol <= 0) fail("toleranceMm لازم يكون أكبر من صفر.");
+  let pass = 0;
+  const out = rows.map((r, i) => {
+    const d = toNumber(r.designLevel);
+    const a = toNumber(r.actualLevel);
+    if (d === null || a === null) return { id: r.id ?? i + 1, status: "ناقص بيانات" };
+    const diffMm = (a - d) * 1000;
+    const ok = Math.abs(diffMm) <= tol + 1e-9;
+    if (ok) pass++;
+    return { id: r.id ?? i + 1, designLevel: round(d), actualLevel: round(a), diffMm: round(diffMm, 1), status: ok ? "مقبول" : diffMm > 0 ? "أعلى من المسموح" : "أوطى من المسموح" };
+  });
+  return { toleranceMm: tol, total: rows.length, passed: pass, failed: out.filter((r) => r.status !== "مقبول").length, rows: out };
+}
+
+// ---- src/engine/registry.js
+// One registry of calculation tools, shared by the REST API (the calculator tabs)
+// and the AI assistant (as Claude tool definitions), so both use the same math.
+
+
+const num = { type: "number" };
+const numOrStr = { type: ["number", "string"] };
+const fileRef = {
+  fileId: { type: "string", description: "Uploaded file id to read rows from instead of passing them inline." },
+  sheet: { type: "string", description: "Sheet name in the file (default: first sheet)." },
+};
+const polyline = {
+  type: "array",
+  items: { type: "object", properties: { offset: num, level: num }, required: ["offset", "level"] },
+};
+
+/** Resolve rows either inline or from an uploaded table file. */
+function rowsFrom(input, key, ctx) {
+  if (Array.isArray(input[key]) && input[key].length) return input[key];
+  if (input.fileId) {
+    const file = ctx?.files?.get(input.fileId);
+    if (!file) fail(`مفيش ملف بالرقم ${input.fileId}.`);
+    if (file.parsed.kind === "cad") return file.parsed.cad.points;
+    if (file.parsed.kind !== "table") fail("الملف ده مش جدول بيانات (PDF/صورة/نص) — اقرأ الأرقام منه وابعتها للأداة مباشرة.");
+    const tables = file.parsed.tables;
+    const t = input.sheet ? tables.find((x) => x.sheet === input.sheet) : tables[0];
+    if (!t) fail(`الشيت "${input.sheet}" مش موجود. الموجود: ${tables.map((x) => x.sheet).join("، ")}`);
+    return t.rows;
+  }
+  fail(`لازم تبعت ${key} أو fileId.`);
+}
+
+const TOOLS = [
+  {
+    name: "calculate",
+    description:
+      "Evaluate arithmetic expressions exactly. Use this for EVERY number you derive that no other tool returns " +
+      "(differences, slopes, distances, unit conversions). Supports + - * / ^ ( ), sqrt, abs, sin/cos/tan/asin/acos/atan/atan2 in DEGREES, hypot, min, max, round(x,n), pi.",
+    input_schema: {
+      type: "object",
+      properties: { expressions: { type: "array", items: { type: "string" }, description: "One or more expressions, e.g. [\"(102.35-101.80)/40*100\"]" } },
+      required: ["expressions"],
+    },
+    run: (input) => calculate(input),
+  },
+  {
+    name: "reduce_level_book",
+    description:
+      "Reduce a levelling field book (ميزانية) with both HI and Rise&Fall methods, run the arithmetic check (ΣBS-ΣFS = ΣRise-ΣFall = Last-First), " +
+      "compute the misclosure against a closing benchmark and its allowable value (C·√K km, or C·√n setups), and distribute the correction by setup. " +
+      "Rows in field order: first row BS only on the BM; intermediate rows IS; change points FS+BS; last row FS.",
+    input_schema: {
+      type: "object",
+      properties: {
+        rows: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: { station: { type: "string" }, bs: num, is: num, fs: num, remark: { type: "string" } },
+            required: ["station"],
+          },
+        },
+        ...fileRef,
+        startRL: { type: "number", description: "Known RL of the starting benchmark (m)." },
+        closingRL: { type: "number", description: "Known RL of the closing benchmark (m), if any." },
+        closedLoop: { type: "boolean", description: "True if the line returns to the starting BM." },
+        totalDistanceKm: { type: "number" },
+        toleranceMmPerSqrtKm: { type: "number", description: "C in C·√K (default 12)." },
+        toleranceMmPerSqrtSetup: { type: "number", description: "C in C·√n when no distance is known (default 5)." },
+      },
+      required: ["startRL"],
+    },
+    run: (input, ctx) => reduceLevelBook({ ...input, rows: rowsFrom(input, "rows", ctx) }),
+  },
+  {
+    name: "profile_design",
+    description:
+      "Longitudinal profile: design (grade line) levels from VPIs with optional symmetric parabolic vertical curves (curveLength on interior VPIs), " +
+      "grades %, curve data (BVC/EVC, K, middle ordinate, high/low point), and cut/fill depth at each station against ground level. " +
+      "Chainages may be metres or 'km+m' strings like '1+250.5'.",
+    input_schema: {
+      type: "object",
+      properties: {
+        vpis: {
+          type: "array",
+          items: { type: "object", properties: { chainage: numOrStr, level: num, curveLength: num }, required: ["chainage", "level"] },
+        },
+        stations: {
+          type: "array",
+          items: { type: "object", properties: { chainage: numOrStr, groundLevel: num, label: { type: "string" } }, required: ["chainage"] },
+        },
+        interval: { type: "number", description: "If no stations are given, evaluate every N metres (default 25)." },
+      },
+      required: ["vpis"],
+    },
+    run: (input) => profileDesign(input),
+  },
+  {
+    name: "section_area",
+    description: "Cut and fill areas (m²) of one cross section between a ground polyline and a design polyline (offset, level). Offsets left negative, right positive.",
+    input_schema: {
+      type: "object",
+      properties: { ground: polyline, design: polyline },
+      required: ["ground", "design"],
+    },
+    run: (input) => sectionArea(input),
+  },
+  {
+    name: "template_section",
+    description:
+      "Build a road/channel formation template (widths left/right from centreline, crossfall %), daylight its side slopes (H:1V) to the ground line, and return the design polyline and cut/fill areas.",
+    input_schema: {
+      type: "object",
+      properties: {
+        ground: polyline,
+        formationLevel: { type: "number", description: "Formation level at the centreline." },
+        widthLeft: num,
+        widthRight: num,
+        crossfallPercent: { type: "number", description: "Fall from centreline to edges, % (default 0)." },
+        cutSlope: { type: "number", description: "Horizontal per 1 vertical in cut (default 1)." },
+        fillSlope: { type: "number", description: "Horizontal per 1 vertical in fill (default 2)." },
+      },
+      required: ["ground", "formationLevel", "widthLeft", "widthRight"],
+    },
+    run: (input) => templateSection(input),
+  },
+  {
+    name: "earthwork_volumes",
+    description:
+      "Earthwork volumes between consecutive cross sections from their cut/fill areas, by average end area (default) or prismoidal (Simpson; equal spacing, odd number of sections). " +
+      "Returns per-segment and cumulative volumes and the mass-haul ordinate.",
+    input_schema: {
+      type: "object",
+      properties: {
+        sections: {
+          type: "array",
+          items: { type: "object", properties: { chainage: numOrStr, cutArea: num, fillArea: num }, required: ["chainage"] },
+        },
+        ...fileRef,
+        method: { type: "string", enum: ["average_end_area", "prismoidal"] },
+        fillFactor: { type: "number", description: "Cut m³ needed per compacted fill m³ (default 1)." },
+      },
+    },
+    run: (input, ctx) => earthworkVolumes({ ...input, sections: rowsFrom(input, "sections", ctx) }),
+  },
+  {
+    name: "grid_volume",
+    description: "Cut/fill volume over a regular grid (borrow-pit / levelling grid). existing is a 2D array of levels (rows × columns, null for missing); design is one level or a 2D array of the same shape.",
+    input_schema: {
+      type: "object",
+      properties: {
+        existing: { type: "array", items: { type: "array", items: { type: ["number", "null"] } } },
+        design: { type: ["number", "array"], items: { type: "array", items: { type: ["number", "null"] } } },
+        spacingX: num,
+        spacingY: num,
+      },
+      required: ["existing", "design", "spacingX"],
+    },
+    run: (input) => gridVolume(input),
+  },
+  {
+    name: "validate_points",
+    description: "Review survey points (id, x, y, z): missing values, duplicate ids, duplicate coordinates, and Z outliers against nearest neighbours. Pass points inline or a fileId of an uploaded table/DXF.",
+    input_schema: {
+      type: "object",
+      properties: {
+        points: {
+          type: "array",
+          items: { type: "object", properties: { id: numOrStr, x: num, y: num, z: num, code: { type: "string" } } },
+        },
+        ...fileRef,
+        zThreshold: { type: "number", description: "Metres from the neighbour median to flag (default 0.5)." },
+        duplicateTolerance: { type: "number", description: "Metres for duplicate coordinates (default 0.001)." },
+      },
+    },
+    run: (input, ctx) => validatePoints({ ...input, points: rowsFrom(input, "points", ctx) }),
+  },
+  {
+    name: "validate_profile",
+    description: "Review profile/chainage levels (chainage, level): order, duplicates, gaps in survey interval, spikes, and steep grades. Pass rows inline or a fileId.",
+    input_schema: {
+      type: "object",
+      properties: {
+        rows: { type: "array", items: { type: "object", properties: { chainage: numOrStr, level: num } } },
+        ...fileRef,
+        spikeThreshold: { type: "number", description: "Metres off the line between neighbours to flag (default 0.3)." },
+        maxGradePercent: { type: "number", description: "Default 15." },
+      },
+    },
+    run: (input, ctx) => validateProfile({ ...input, rows: rowsFrom(input, "rows", ctx) }),
+  },
+  {
+    name: "check_tolerances",
+    description: "Compare as-built levels with design levels against a tolerance in mm and report pass/fail per point.",
+    input_schema: {
+      type: "object",
+      properties: {
+        rows: { type: "array", items: { type: "object", properties: { id: numOrStr, designLevel: num, actualLevel: num } } },
+        ...fileRef,
+        toleranceMm: { type: "number", description: "± tolerance in mm (default 20)." },
+      },
+    },
+    run: (input, ctx) => checkTolerances({ ...input, rows: rowsFrom(input, "rows", ctx) }),
+  },
+  {
+    name: "read_file",
+    description:
+      "Read data from an uploaded file by fileId: table rows (spreadsheets, CSV/TXT, GSI, LandXML, KML, Shapefile, GeoJSON); " +
+      "for CAD files (DWG/DXF) the exact points, texts, numericTexts (level/chainage labels with their x,y position) or polylines (with vertex elevations); " +
+      "for text files the text itself (offset/limit in characters). Use offset/limit to page through large files.",
+    input_schema: {
+      type: "object",
+      properties: {
+        fileId: { type: "string" },
+        sheet: { type: "string" },
+        part: { type: "string", enum: ["rows", "points", "texts", "numericTexts", "polylines"], description: "For CAD files (default points)." },
+        offset: { type: "integer" },
+        limit: { type: "integer", description: "Default 200, max 1000." },
+      },
+      required: ["fileId"],
+    },
+    run: (input, ctx) => {
+      const file = ctx?.files?.get(input.fileId);
+      if (!file) fail(`مفيش ملف بالرقم ${input.fileId}.`);
+      const offset = Math.max(0, input.offset ?? 0);
+      const limit = Math.min(1000, Math.max(1, input.limit ?? 200));
+      let all;
+      if (file.parsed.kind === "text") {
+        const lim = Math.min(200_000, Math.max(1000, input.limit ?? 50_000));
+        return { name: file.name, totalChars: file.parsed.text.length, offset, text: file.parsed.text.slice(offset, offset + lim) };
+      }
+      if (file.parsed.kind === "cad") {
+        all = file.parsed.cad[input.part && input.part !== "rows" ? input.part : "points"] ?? [];
+      } else if (file.parsed.kind === "table") {
+        const t = input.sheet ? file.parsed.tables.find((x) => x.sheet === input.sheet) : file.parsed.tables[0];
+        if (!t) fail("الشيت مش موجود.");
+        all = t.rows;
+      } else fail("الملف ده بيتقري مباشرة كـ PDF/صورة، مش جدول.");
+      return { name: file.name, total: all.length, offset, returned: Math.min(limit, Math.max(0, all.length - offset)), items: all.slice(offset, offset + limit) };
+    },
+  },
+];
+
+const BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
+
+function runTool(name, input, ctx) {
+  const tool = BY_NAME.get(name);
+  if (!tool) fail(`أداة غير معروفة: ${name}`);
+  return tool.run(input ?? {}, ctx);
+}
+
+/** Tool definitions in the shape the Claude API expects. */
+function claudeToolDefinitions() {
+  return TOOLS.map(({ name, description, input_schema }) => ({ name, description, input_schema }));
+}
+
+// ---- src/files/geo.js
+// Geographic helpers: WGS84 -> UTM, and GeoJSON features -> point table rows.
+
+const A = 6378137;
+const F = 1 / 298.257223563;
+const K0 = 0.9996;
+const E2 = F * (2 - F);
+const EP2 = E2 / (1 - E2);
+const RAD = Math.PI / 180;
+
+function utmZone(lon) {
+  return Math.min(60, Math.floor((lon + 180) / 6) + 1);
+}
+
+/** WGS84 lat/lon (degrees) -> UTM easting/northing (m) in the given zone. */
+function toUtm(lat, lon, zone = utmZone(lon)) {
+  const phi = lat * RAD;
+  const lam0 = ((zone - 1) * 6 - 180 + 3) * RAD;
+  const sin = Math.sin(phi);
+  const cos = Math.cos(phi);
+  const tan = Math.tan(phi);
+  const N = A / Math.sqrt(1 - E2 * sin * sin);
+  const T = tan * tan;
+  const C = EP2 * cos * cos;
+  const Aa = cos * (lon * RAD - lam0);
+  const e4 = E2 * E2;
+  const e6 = e4 * E2;
+  const M =
+    A *
+    ((1 - E2 / 4 - (3 * e4) / 64 - (5 * e6) / 256) * phi -
+      ((3 * E2) / 8 + (3 * e4) / 32 + (45 * e6) / 1024) * Math.sin(2 * phi) +
+      ((15 * e4) / 256 + (45 * e6) / 1024) * Math.sin(4 * phi) -
+      ((35 * e6) / 3072) * Math.sin(6 * phi));
+  const easting =
+    K0 * N * (Aa + ((1 - T + C) * Aa ** 3) / 6 + ((5 - 18 * T + T * T + 72 * C - 58 * EP2) * Aa ** 5) / 120) + 500000;
+  let northing =
+    K0 *
+    (M +
+      N * tan * ((Aa * Aa) / 2 + ((5 - T + 9 * C + 4 * C * C) * Aa ** 4) / 24 + ((61 - 58 * T + T * T + 600 * C - 330 * EP2) * Aa ** 6) / 720));
+  if (lat < 0) northing += 10000000;
+  return { easting, northing, zone, hemisphere: lat < 0 ? "S" : "N" };
+}
+
+/** True if the coordinates look like geographic lon/lat rather than projected metres. */
+function looksGeographic(coords) {
+  return coords.length > 0 && coords.every(([x, y]) => Math.abs(x) <= 180 && Math.abs(y) <= 90);
+}
+
+/**
+ * Flatten GeoJSON features into vertex rows {id, x, y, z, code, feature}.
+ * Lon/lat input also gets UTM easting/northing in one zone (the median longitude's).
+ */
+function geojsonToTable(geojson, sheetName) {
+  const features = geojson.type === "FeatureCollection" ? geojson.features : geojson.type === "Feature" ? [geojson] : [{ type: "Feature", properties: {}, geometry: geojson }];
+  const rows = [];
+  features.forEach((f, fi) => {
+    const props = f.properties ?? {};
+    const name = props.name ?? props.Name ?? props.NAME ?? props.id ?? props.ID ?? `F${fi + 1}`;
+    const code = props.code ?? props.CODE ?? props.description ?? props.type ?? "";
+    const geom = f.geometry;
+    if (!geom) return;
+    const lists = flattenCoords(geom);
+    lists.forEach((coords, li) => {
+      coords.forEach((c, ci) => {
+        const single = lists.length === 1 && coords.length === 1;
+        rows.push({
+          id: single ? String(name) : `${name}-${li + 1}.${ci + 1}`,
+          x: c[0],
+          y: c[1],
+          z: c[2] ?? null,
+          code: String(code),
+          feature: geom.type,
+        });
+      });
+    });
+  });
+
+  const notes = [];
+  if (looksGeographic(rows.map((r) => [r.x, r.y]))) {
+    const lons = rows.map((r) => r.x).sort((a, b) => a - b);
+    const zone = utmZone(lons[Math.floor(lons.length / 2)] ?? 0);
+    for (const r of rows) {
+      r.lon = r.x;
+      r.lat = r.y;
+      const u = toUtm(r.lat, r.lon, zone);
+      r.x = Math.round(u.easting * 1000) / 1000;
+      r.y = Math.round(u.northing * 1000) / 1000;
+    }
+    notes.push(`الإحداثيات كانت جغرافية (WGS84) واتحولت UTM zone ${zone}${rows[0]?.lat < 0 ? "S" : "N"} — x/y بالمتر، وlat/lon الأصلية موجودة.`);
+    if (rows.some((r) => r.z === null || r.z === 0)) notes.push("الارتفاعات (z) في ملفات Google Earth غالبًا مش دقيقة أو صفر — ما تعتمدش عليها كمناسيب.");
+  }
+  const columns = ["id", "x", "y", "z", "code", "feature", ...(notes.length ? ["lat", "lon"] : [])];
+  return { sheet: sheetName, columns, mapping: {}, hasHeader: true, rows, notes };
+}
+
+function flattenCoords(geom) {
+  switch (geom.type) {
+    case "Point": return [[geom.coordinates]];
+    case "MultiPoint": return [geom.coordinates];
+    case "LineString": return [geom.coordinates];
+    case "MultiLineString": return geom.coordinates;
+    case "Polygon": return geom.coordinates;
+    case "MultiPolygon": return geom.coordinates.flat();
+    case "GeometryCollection": return geom.geometries.flatMap(flattenCoords);
+    default: return [];
+  }
+}
+
+// ---- src/files/text-formats.js
+// Plain-text survey formats, shared by the server and the browser page:
+// delimited tables (with Arabic/English header detection), Leica GSI, LandXML, KML.
+// No Node-specific imports here.
+
+
+// Header aliases (English / Arabic) -> canonical field names.
+const ALIASES = {
+  id: ["id", "point", "pt", "pointno", "pointid", "pointname", "name", "no", "رقم", "رقمالنقطه", "النقطه", "نقطه", "م", "اسمالنقطه"],
+  x: ["x", "e", "east", "easting", "شرقي", "شرق", "الشرقي", "اكس", "الاحداثيالشرقي"],
+  y: ["y", "n", "north", "northing", "شمالي", "شمال", "الشمالي", "واي", "الاحداثيالشمالي"],
+  z: ["z", "h", "elev", "elevation", "level", "rl", "height", "منسوب", "المنسوب", "منسوبالارض", "ارتفاع", "المنسوبالطبيعي"],
+  chainage: ["chainage", "ch", "station", "sta", "km", "chain", "محطه", "المحطه", "الكيلو", "كيلومتر", "مسافه"],
+  code: ["code", "desc", "description", "feature", "كود", "وصف", "الوصف"],
+  bs: ["bs", "backsight", "خلفيه", "قراءهخلفيه"],
+  is: ["is", "intermediate", "intermediatesight", "متوسطه", "قراءهمتوسطه"],
+  fs: ["fs", "foresight", "اماميه", "قراءهاماميه"],
+  designLevel: ["design", "designlevel", "dl", "تصميمي", "منسوبتصميمي", "المنسوبالتصميمي"],
+  actualLevel: ["actual", "asbuilt", "actuallevel", "منفذ", "منسوبمنفذ", "فعلي"],
+  offset: ["offset", "os", "بعد", "الازاحه", "ازاحه"],
+  cutArea: ["cut", "cutarea", "حفر", "مساحهحفر"],
+  fillArea: ["fill", "fillarea", "ردم", "مساحهردم"],
+  curveLength: ["curvelength", "vcl", "طولالمنحني"],
+};
+const norm = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()\[\]/:]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const ALIAS_LOOKUP = new Map(Object.entries(ALIASES).flatMap(([field, names]) => names.map((n) => [norm(n), field])));
+// Looser matches for real-world headers ("elevtion", "Elev (m)", "Point Number", "Northing m").
+const ALIAS_PATTERNS = [
+  [/^(elev|elv|levl|level|rl|منسوب|المنسوب)/, "z"],
+  [/^(point|pt|pnt)?(no|num|number|nr|id|name)$|^number$|^رقم/, "id"],
+  [/^(east|easting|شرق|الشرق)/, "x"],
+  [/^(north|northing|شمال|الشمال)/, "y"],
+  [/^(chainage|station|محطه|المحطه)/, "chainage"],
+];
+function aliasFor(header) {
+  const h = norm(header);
+  return ALIAS_LOOKUP.get(h) ?? ALIAS_PATTERNS.find(([re]) => re.test(h))?.[1] ?? null;
+}
+
+/** Convert a 2D array (first non-empty row may be a header) into a table. */
+function tableFromMatrix(matrix, sheetName = "") {
+  const rows = matrix.filter((r) => Array.isArray(r) && r.some((c) => c !== null && c !== undefined && String(c).trim() !== ""));
+  if (!rows.length) return { sheet: sheetName, columns: [], rows: [], mapping: {} };
+  const first = rows[0];
+  const numericInFirst = first.filter((c) => toNumber(c) !== null || parseChainage(c) !== null).length;
+  const hasHeader = numericInFirst < first.filter((c) => c !== null && String(c).trim() !== "").length / 2;
+  const width = Math.max(...rows.map((r) => r.length));
+  const headers = Array.from({ length: width }, (_, i) => (hasHeader ? String(first[i] ?? `col${i + 1}`).trim() : `col${i + 1}`));
+  const mapping = {};
+  const used = new Set();
+  const keys = headers.map((h, i) => {
+    const c = aliasFor(h);
+    if (c && !used.has(c)) {
+      used.add(c);
+      mapping[h] = c;
+      return c;
+    }
+    return h || `col${i + 1}`;
+  });
+  const body = hasHeader ? rows.slice(1) : rows;
+  const table = {
+    sheet: sheetName,
+    columns: keys,
+    originalHeaders: headers,
+    mapping,
+    hasHeader,
+    rows: body.map((r) => Object.fromEntries(keys.map((k, i) => [k, r[i] ?? null]))),
+  };
+  if (!hasHeader) guessHeaderless(table);
+  return table;
+}
+
+/** Common headerless coordinate layouts: P,E,N,Z[,code] / P,N,E,Z / E,N,Z. */
+function guessHeaderless(t) {
+  const sample = t.rows.slice(0, 50);
+  const numericCol = (k) => sample.every((r) => r[k] === null || toNumber(r[k]) !== null);
+  const k = t.columns;
+  let names = null;
+  if (k.length >= 4 && numericCol(k[1]) && numericCol(k[2]) && numericCol(k[3])) names = ["id", "x", "y", "z", "code"];
+  else if (k.length === 3 && k.every(numericCol)) names = ["x", "y", "z"];
+  if (!names) return;
+  const rename = Object.fromEntries(k.map((c, i) => [c, names[i] ?? c]));
+  t.columns = k.map((c) => rename[c]);
+  t.rows = t.rows.map((r) => Object.fromEntries(Object.entries(r).map(([c, v]) => [rename[c], v])));
+  t.notes = [`الملف من غير عناوين أعمدة؛ اعتبرت الترتيب ${names.slice(0, k.length).join("، ")}. لو الترتيب عندك N قبل E (شمالي قبل شرقي) قولّي.`];
+}
+
+function parseDelimited(text, name = "text") {
+  const lines = text.replace(/^﻿/, "").split(/\r?\n/).filter((l) => l.trim());
+  const sample = lines.slice(0, 20).join("\n");
+  const counts = { "\t": 0, ";": 0, ",": 0 };
+  for (const ch of sample) if (ch in counts) counts[ch]++;
+  const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const delim = best[1] >= lines.slice(0, 20).length ? best[0] : "ws";
+
+  const matrix = lines.map((line) => {
+    if (delim === "ws") return line.trim().split(/\s+/);
+    const out = [];
+    let cur = "";
+    let q = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (q) {
+        if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') q = false;
+        else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === delim) { out.push(cur.trim()); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur.trim());
+    return out;
+  });
+  return tableFromMatrix(matrix, name);
+}
+
+function parseGsi(text) {
+  const unit = { 0: 1e-3, 1: 0.0003048, 6: 1e-4, 7: 0.00003048, 8: 1e-5 };
+  const rows = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const words = line.trim().replace(/^\*/, "").split(/\s+/);
+    const rec = {};
+    for (const raw of words) {
+      const w = raw.replace(/^\*/, "");
+      if (w.length < 8) continue;
+      const wi = w.slice(0, 2);
+      const unitCode = w[5];
+      const data = w.slice(7);
+      const sign = w[6] === "-" ? -1 : 1;
+      if (wi === "11") rec.id = data.replace(/^0+(?=.)/, "");
+      else if (["81", "82", "83"].includes(wi)) {
+        const n = Number(data);
+        // Round to the finest GSI unit (0.01 mm) to drop binary floating-point noise.
+        if (Number.isFinite(n)) rec[{ 81: "x", 82: "y", 83: "z" }[wi]] = Math.round(sign * n * (unit[unitCode] ?? 1e-3) * 1e5) / 1e5;
+      } else if (wi === "71" || wi === "41") rec.code = data.replace(/^0+(?=.)/, "");
+    }
+    if (rec.x !== undefined || rec.y !== undefined || rec.z !== undefined) rows.push({ id: rec.id ?? String(rows.length + 1), x: rec.x ?? null, y: rec.y ?? null, z: rec.z ?? null, code: rec.code ?? "" });
+  }
+  if (!rows.length) return null;
+  return { sheet: "GSI", columns: ["id", "x", "y", "z", "code"], mapping: {}, hasHeader: true, rows };
+}
+
+/** LandXML: CgPoints, TIN surface points, and vertical alignment (PVIs/curves). */
+function parseLandXml(text) {
+  const tables = [];
+  const nums = (s) => s.trim().split(/\s+/).map(Number);
+  const attr = (tag, name) => (tag.match(new RegExp(`\\b${name}="([^"]*)"`)) ?? [])[1];
+
+  const cg = [];
+  for (const m of text.matchAll(/<CgPoint\b([^>]*)>([^<]*)<\/CgPoint>/g)) {
+    const [n, e, z] = nums(m[2]); // LandXML order: northing easting elevation
+    cg.push({ id: attr(m[1], "name") ?? attr(m[1], "pntRef") ?? String(cg.length + 1), x: e, y: n, z: z ?? null, code: attr(m[1], "code") ?? attr(m[1], "desc") ?? "" });
+  }
+  if (cg.length) tables.push({ sheet: "CgPoints", columns: ["id", "x", "y", "z", "code"], mapping: {}, hasHeader: true, rows: cg });
+
+  const surf = [];
+  for (const m of text.matchAll(/<P\s+id="([^"]*)"[^>]*>([^<]*)<\/P>/g)) {
+    const [n, e, z] = nums(m[2]);
+    surf.push({ id: m[1], x: e, y: n, z: z ?? null, code: "surface" });
+  }
+  if (surf.length) tables.push({ sheet: "SurfacePoints", columns: ["id", "x", "y", "z", "code"], mapping: {}, hasHeader: true, rows: surf });
+
+  for (const prof of text.matchAll(/<ProfAlign\b([^>]*)>([\s\S]*?)<\/ProfAlign>/g)) {
+    const rows = [];
+    for (const m of prof[2].matchAll(/<(PVI|ParaCurve|CircCurve|UnsymParaCurve)\b([^>]*)>([^<]*)<\/\1>/g)) {
+      const [sta, elev] = nums(m[3]);
+      const len = toNumber(attr(m[2], "length"));
+      rows.push({ chainage: sta, z: elev, curveLength: m[1] === "PVI" ? null : len, type: m[1] });
+    }
+    if (rows.length) tables.push({ sheet: `Profile ${attr(prof[1], "name") ?? ""}`.trim(), columns: ["chainage", "z", "curveLength", "type"], mapping: {}, hasHeader: true, rows });
+  }
+  return tables;
+}
+
+/** KML (Google Earth) → GeoJSON-like features → table (with UTM). */
+function parseKml(text) {
+  const features = [];
+  for (const pm of text.matchAll(/<Placemark\b[^>]*>([\s\S]*?)<\/Placemark>/g)) {
+    const name = (pm[1].match(/<name>([\s\S]*?)<\/name>/) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>/g, "").trim();
+    const desc = (pm[1].match(/<description>([\s\S]*?)<\/description>/) ?? [])[1]?.replace(/<!\[CDATA\[|\]\]>|<[^>]+>/g, " ").trim().slice(0, 80);
+    for (const c of pm[1].matchAll(/<(Point|LineString|LinearRing)\b[\s\S]*?<coordinates>([\s\S]*?)<\/coordinates>/g)) {
+      const coords = c[2].trim().split(/\s+/).map((t) => t.split(",").map(Number)).filter((p) => p.length >= 2 && p.every(Number.isFinite));
+      features.push({
+        type: "Feature",
+        properties: { name, code: desc ?? "" },
+        geometry: c[1] === "Point" ? { type: "Point", coordinates: coords[0] } : { type: "LineString", coordinates: coords },
+      });
+    }
+  }
+  return features.length ? geojsonToTable({ type: "FeatureCollection", features }, "KML") : null;
+}
+
+/** True if a parsed text table is real numeric data (at least two mostly-numeric columns). */
+function looksTabular(t) {
+  const sample = t.rows.slice(0, 50);
+  const numericCols = t.columns.filter((c) => sample.length && sample.filter((r) => toNumber(r[c]) !== null).length >= sample.length * 0.8);
+  return t.rows.length >= 2 && numericCols.length >= 2;
+}
+
+// ---- src/files/cad-model.js
+// CAD model shared by the server and the browser page: normalise DXF/DWG entities
+// into survey data (points, level texts, polylines with elevation) and draw an SVG.
+// No Node-specific imports here.
+
+
+const cleanText = (t) =>
+  String(t ?? "")
+    .replace(/\\P/g, "\n")
+    .replace(/\\[A-Za-z][^;\\]*;/g, "")
+    .replace(/%%[cC]/g, "Ø")
+    .replace(/%%[dD]/g, "°")
+    .replace(/%%[pP]/g, "±")
+    .replace(/[{}]/g, "")
+    .trim();
+
+/** Common shape for both readers. */
+function emptyModel(source) {
+  return { source, entityCount: 0, layers: {}, points: [], texts: [], polylines: [], lines: [], arcs: [], blocks: [] };
+}
+
+/** rotationDeg: text rotation in degrees, counter-clockwise. */
+function addText(m, layer, text, pos, height, rotationDeg = 0) {
+  const t = cleanText(text);
+  if (!t || !pos) return;
+  m.texts.push({ layer, text: t, x: pos.x, y: pos.y, height: height || 0, rotationDeg: rotationDeg || 0, numeric: toNumber(t.replace(/^[+]/, "").replace(/\s*m$/i, "")) });
+}
+
+/** Normalise a dxf-parser result. */
+function modelFromDxf(dxf) {
+  const m = emptyModel("DXF");
+  for (const e of dxf?.entities ?? []) {
+    m.entityCount++;
+    const layer = e.layer ?? "0";
+    m.layers[layer] = (m.layers[layer] ?? 0) + 1;
+    switch (e.type) {
+      case "POINT":
+        if (e.position) m.points.push({ layer, x: e.position.x, y: e.position.y, z: e.position.z ?? 0 });
+        break;
+      case "TEXT":
+        addText(m, layer, e.text, e.startPoint, e.textHeight, e.rotation);
+        break;
+      case "MTEXT":
+        addText(m, layer, e.text, e.position, e.height, e.rotation);
+        break;
+      case "LINE":
+        if (e.vertices?.length === 2) m.lines.push({ layer, a: e.vertices[0], b: e.vertices[1] });
+        break;
+      case "LWPOLYLINE":
+      case "POLYLINE":
+        if (e.vertices?.length) {
+          m.polylines.push({
+            layer,
+            closed: !!e.shape,
+            vertices: e.vertices.map((v) => ({ x: v.x, y: v.y, z: v.z ?? e.elevation ?? 0 })),
+          });
+        }
+        break;
+      case "ARC":
+        m.arcs.push({ layer, c: e.center, r: e.radius, a0: e.startAngle, a1: e.endAngle });
+        break;
+      case "CIRCLE":
+        m.arcs.push({ layer, c: e.center, r: e.radius, a0: 0, a1: 2 * Math.PI });
+        break;
+      case "INSERT": {
+        const attrs = (e.attribs ?? []).map((a) => cleanText(a.text)).filter(Boolean);
+        if (e.position) m.blocks.push({ layer, name: e.name, x: e.position.x, y: e.position.y, z: e.position.z ?? 0, attributes: attrs });
+        break;
+      }
+      default:
+    }
+  }
+  return m;
+}
+
+/** Normalise a libredwg-web DwgDatabase. */
+function modelFromDwg(db) {
+  const m = emptyModel("DWG");
+  for (const e of db.entities ?? []) {
+    m.entityCount++;
+    const layer = e.layer ?? "0";
+    m.layers[layer] = (m.layers[layer] ?? 0) + 1;
+    switch (e.type) {
+      case "POINT":
+        if (e.position) m.points.push({ layer, x: e.position.x, y: e.position.y, z: e.position.z ?? 0 });
+        break;
+      case "TEXT":
+        addText(m, layer, e.text, e.startPoint, e.textHeight, ((e.rotation ?? 0) * 180) / Math.PI);
+        break;
+      case "MTEXT":
+        addText(m, layer, e.text, e.insertionPoint, e.textHeight, ((e.rotation ?? 0) * 180) / Math.PI);
+        break;
+      case "LINE":
+        if (e.startPoint && e.endPoint) m.lines.push({ layer, a: e.startPoint, b: e.endPoint });
+        break;
+      case "LWPOLYLINE":
+      case "POLYLINE2D":
+      case "POLYLINE3D":
+        if (e.vertices?.length) {
+          m.polylines.push({
+            layer,
+            closed: (e.flag & 1) === 1,
+            vertices: e.vertices.map((v) => ({ x: v.x, y: v.y, z: v.z ?? e.elevation ?? 0 })),
+          });
+        }
+        break;
+      case "ARC":
+        m.arcs.push({ layer, c: e.center, r: e.radius, a0: e.startAngle, a1: e.endAngle });
+        break;
+      case "CIRCLE":
+        m.arcs.push({ layer, c: e.center, r: e.radius, a0: 0, a1: 2 * Math.PI });
+        break;
+      case "INSERT": {
+        const attrs = (e.attribs ?? []).map((a) => cleanText(a.text)).filter(Boolean);
+        if (e.insertionPoint) m.blocks.push({ layer, name: e.name, x: e.insertionPoint.x, y: e.insertionPoint.y, z: e.insertionPoint.z ?? 0, attributes: attrs });
+        break;
+      }
+      default:
+    }
+  }
+  return m;
+}
+
+/** Public data for tools: survey points include blocks (level/point attributes are common there). */
+function cadData(m) {
+  const numericTexts = m.texts.filter((t) => t.numeric !== null);
+  const points = [
+    ...m.points.map((p, i) => ({ id: `P${i + 1}`, ...p })),
+    ...m.blocks.map((b, i) => ({ id: b.attributes[0] ?? `B${i + 1}`, x: b.x, y: b.y, z: b.z, layer: b.layer, block: b.name, attributes: b.attributes })),
+  ];
+  return {
+    source: m.source,
+    entityCount: m.entityCount,
+    layers: m.layers,
+    points,
+    texts: m.texts,
+    numericTexts,
+    polylines: m.polylines.map((p) => ({ ...p, vertexCount: p.vertices.length })),
+  };
+}
+
+/** SVG of the drawing (white background, black linework, texts), or null if empty. */
+function cadSvg(m, maxEdge = 6000) {
+  const xs = [];
+  const ys = [];
+  const add = (p) => { if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) { xs.push(p.x); ys.push(p.y); } };
+  m.lines.forEach((l) => { add(l.a); add(l.b); });
+  m.polylines.forEach((p) => p.vertices.forEach(add));
+  m.arcs.forEach((a) => { add({ x: a.c.x - a.r, y: a.c.y - a.r }); add({ x: a.c.x + a.r, y: a.c.y + a.r }); });
+  m.points.forEach(add);
+  m.texts.forEach(add);
+  m.blocks.forEach(add);
+  if (xs.length < 2) return null;
+
+  // Full extents, but ignore stray objects lying far outside the bulk of the drawing
+  // (more than one drawing-width beyond the 1–99 percentile box).
+  const pct = (arr, q) => { const s = [...arr].sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.max(0, Math.floor(q * (s.length - 1))))]; };
+  const clampExtent = (arr) => {
+    const lo = pct(arr, 0.01);
+    const hi = pct(arr, 0.99);
+    const r = Math.max(hi - lo, 1e-9);
+    return [Math.max(Math.min(...arr), lo - r), Math.min(Math.max(...arr), hi + r)];
+  };
+  let [x0, x1] = clampExtent(xs);
+  let [y0, y1] = clampExtent(ys);
+  const span = Math.max(x1 - x0, y1 - y0) || 1;
+  x0 -= span * 0.02; x1 += span * 0.02; y0 -= span * 0.02; y1 += span * 0.02;
+  const scale = maxEdge / Math.max(x1 - x0, y1 - y0);
+  const W = Math.max(200, Math.round((x1 - x0) * scale));
+  const H = Math.max(200, Math.round((y1 - y0) * scale));
+  const X = (x) => ((x - x0) * scale).toFixed(1);
+  const Y = (y) => ((y1 - y) * scale).toFixed(1);
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  const parts = [];
+  for (const l of m.lines) parts.push(`<line x1="${X(l.a.x)}" y1="${Y(l.a.y)}" x2="${X(l.b.x)}" y2="${Y(l.b.y)}"/>`);
+  for (const p of m.polylines) {
+    const pts = p.vertices.map((v) => `${X(v.x)},${Y(v.y)}`).join(" ");
+    parts.push(p.closed ? `<polygon points="${pts}"/>` : `<polyline points="${pts}"/>`);
+  }
+  for (const a of m.arcs) {
+    if (!a.c || !(a.r > 0)) continue;
+    let sweep = a.a1 - a.a0;
+    if (sweep <= 0) sweep += 2 * Math.PI;
+    if (sweep >= 2 * Math.PI - 1e-9) {
+      parts.push(`<circle cx="${X(a.c.x)}" cy="${Y(a.c.y)}" r="${(a.r * scale).toFixed(1)}"/>`);
+    } else {
+      const p0 = { x: a.c.x + a.r * Math.cos(a.a0), y: a.c.y + a.r * Math.sin(a.a0) };
+      const p1 = { x: a.c.x + a.r * Math.cos(a.a0 + sweep), y: a.c.y + a.r * Math.sin(a.a0 + sweep) };
+      const r = (a.r * scale).toFixed(1);
+      parts.push(`<path d="M${X(p0.x)},${Y(p0.y)} A${r},${r} 0 ${sweep > Math.PI ? 1 : 0} 0 ${X(p1.x)},${Y(p1.y)}"/>`);
+    }
+  }
+  for (const p of [...m.points, ...m.blocks]) parts.push(`<circle class="pt" cx="${X(p.x)}" cy="${Y(p.y)}" r="2.5"/>`);
+  for (const t of m.texts) {
+    const size = Math.max(7, Math.min(400, (t.height || span / 300) * scale));
+    const rot = t.rotationDeg ? ` transform="rotate(${(-t.rotationDeg).toFixed(2)} ${X(t.x)} ${Y(t.y)})"` : "";
+    const lines = t.text.split("\n");
+    parts.push(
+      `<text x="${X(t.x)}" y="${Y(t.y)}" font-size="${size.toFixed(1)}"${rot}>${lines
+        .map((ln, i) => `<tspan x="${X(t.x)}" dy="${i ? (size * 1.2).toFixed(1) : 0}">${esc(ln)}</tspan>`)
+        .join("")}</text>`,
+    );
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+<rect width="100%" height="100%" fill="#fff"/>
+<style>line,polyline,polygon,path,circle{fill:none;stroke:#000;stroke-width:1.4} circle.pt{fill:#c00;stroke:none} text{fill:#0033aa;font-family:Arial,Tahoma,sans-serif}</style>
+${parts.join("\n")}
+</svg>`;
+  return svg;
+}
+
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg };
+})();
+</script>
+<script>
+// Browser app for the published page. The calculation engine (global `Engine`) is the
+// same tested code as the server, bundled by scripts/build-page.mjs. Files are read in
+// the browser; the assistant talks to Claude through the viewer's claude.ai account
+// (the `sample` capability) with the engine's functions as tools.
+"use strict";
+
+const E = Engine;
+const $ = (sel) => document.querySelector(sel);
+const files = new Map(); // fileId -> {id, name, parsed}; the tools read uploaded data from here
+const ctx = { files };
+let fileSeq = 1;
+const calc = (tool, input) => E.runTool(tool, input, ctx);
+
+// ---------- capabilities ----------
+let sample = null;
+let downloads = null;
+let maxImages = 0;
+// Outside the claude.ai viewer (the public website) there is no window.claude:
+// hide the assistant and save CSV files as ordinary browser downloads.
+const inViewer = Boolean(window.claude && typeof window.claude.use === "function");
+if (!inViewer) {
+  document.body.classList.add("no-ai");
+  downloads = {
+    save: async ({ filename, data }) => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([data], { type: "text/csv;charset=utf-8" }));
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      return { status: "saved" };
+    },
+  };
+}
+(async () => {
+  const status = $("#ai-status");
+  const setStatus = (on) => { status.textContent = on ? "متصل" : "غير متاح"; status.className = `tb-value ${on ? "on" : "off"}`; };
+  if (!inViewer) return;
+  const [s, d] = await Promise.all([window.claude.use("sample").catch(() => null), window.claude.use("downloads").catch(() => null)]);
+  sample = s;
+  downloads = d;
+  setStatus(Boolean(sample));
+  $("#ai-off").hidden = Boolean(sample);
+  document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
+  if (sample && typeof sample.limits === "function") {
+    try {
+      const lim = await sample.limits();
+      maxImages = typeof lim?.images === "number" ? lim.images : lim?.images ? lim.maxImages ?? 20 : 0;
+    } catch { maxImages = 0; }
+  }
+})();
+document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
+$("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
+
+// ---------- small helpers ----------
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const isNum = (s) => s !== undefined && s !== null && String(s).trim() !== "" && !Number.isNaN(Number(String(s).replace(/,/g, "")));
+const fmt = (v, d = 3) => (v === null || v === undefined || v === "" ? "" : typeof v === "number" ? v.toFixed(d) : esc(v));
+const blank = (c) => (c === undefined || String(c).trim() === "" ? undefined : String(c).trim());
+const numOrUndef = (c) => (blank(c) === undefined ? undefined : Number(String(c).replace(/,/g, "")));
+
+function parsePaste(text) {
+  return text.split(/\r?\n/).filter((l) => l.trim()).map((l) => {
+    if (l.includes("\t")) return l.split("\t").map((c) => c.trim());
+    if (l.includes(",") || l.includes(";")) return l.split(/[;,]/).map((c) => c.trim());
+    return l.trim().split(/\s+/);
+  });
+}
+const dropHeader = (rows, numericCols) =>
+  rows.length && numericCols.every((i) => !isNum(rows[0][i])) && rows[0].some((c) => c && !isNum(c)) ? rows.slice(1) : rows;
+
+function table(columns, rows, rowClass) {
+  const head = columns.map((c) => `<th>${esc(c.label)}</th>`).join("");
+  const body = rows.map((r) => `<tr class="${rowClass ? rowClass(r) : ""}">${columns.map((c) => `<td class="${c.num ? "num" : ""}">${c.num ? fmt(r[c.key], c.d ?? 3) : esc(r[c.key])}</td>`).join("")}</tr>`).join("");
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+const readouts = (items) =>
+  `<div class="readouts">${items.map(([label, value, cls]) => `<div class="readout"><small>${esc(label)}</small><b class="${cls ?? ""}">${esc(value)}</b></div>`).join("")}</div>`;
+const stamp = (ok, text, sub) => `<span class="stamp ${ok ? "ok" : "bad"}">${esc(text)}<small>${esc(sub)}</small></span>`;
+const panel = (code, title, html) => `<div class="panel"><h2><span class="callout">${esc(code)}</span>${esc(title)}</h2>${html}</div>`;
+const showError = (el, err) => { el.innerHTML = `<div class="error">${esc(err?.message || err)}</div>`; };
+
+function toCsv(columns, rows) {
+  const q = (v) => (v === null || v === undefined ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+  return "﻿" + [columns.map((c) => q(c.label)).join(","), ...rows.map((r) => columns.map((c) => q(r[c.key])).join(","))].join("\n");
+}
+function bindCsv(button, filename, getter) {
+  button.onclick = async () => {
+    const d = getter();
+    if (!d || !downloads) return;
+    try {
+      await downloads.save({ filename, data: toCsv(d.columns, d.rows) });
+    } catch (err) {
+      if (err?.code === "declined") return;
+      button.nextElementSibling?.classList.contains("save-err") && button.nextElementSibling.remove();
+      button.insertAdjacentHTML("afterend", `<span class="hint save-err bad">${esc(err?.message || "ما قدرتش أحفظ الملف.")}</span>`);
+    }
+  };
+}
+
+// ---------- engineering drawings (SVG) ----------
+let svgSeq = 0;
+const chText = (m) => E.formatChainage(m, 0);
+const niceStep = (span, target) => {
+  const raw = span / target;
+  const p = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].map((k) => k * p).find((s) => s >= raw) ?? 10 * p;
+};
+function hatchDefs(id) {
+  return `<defs>
+<pattern id="hc${id}" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line class="hatch-cut" x1="0" y1="0" x2="0" y2="7"/></pattern>
+<pattern id="hf${id}" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-45)"><line class="hatch-fill" x1="0" y1="0" x2="0" y2="7"/></pattern>
+</defs>`;
+}
+/** Polygons between ground (g) and design (d) on shared x positions, split where they cross. */
+function cutFillPaths(pts, sx, sy, id) {
+  const cut = [];
+  const fill = [];
+  const quad = (p, q) => `M${sx(p.x)},${sy(p.g)}L${sx(q.x)},${sy(q.g)}L${sx(q.x)},${sy(q.d)}L${sx(p.x)},${sy(p.d)}Z`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i];
+    const b = pts[i + 1];
+    const da = a.g - a.d;
+    const db = b.g - b.d;
+    if (da * db >= 0) {
+      if (da + db > 0) cut.push(quad(a, b));
+      else if (da + db < 0) fill.push(quad(a, b));
+    } else {
+      const t = da / (da - db);
+      const c = { x: a.x + t * (b.x - a.x), g: a.d + t * (b.d - a.d), d: a.d + t * (b.d - a.d) };
+      (da > 0 ? cut : fill).push(quad(a, c));
+      (db > 0 ? cut : fill).push(quad(c, b));
+    }
+  }
+  return `<path d="${cut.join("")}" fill="url(#hc${id})" stroke="none"/><path d="${fill.join("")}" fill="url(#hf${id})" stroke="none"/>`;
+}
+const pathOf = (pts, sx, sy, key) => pts.filter((p) => Number.isFinite(p[key])).map((p, i) => `${i ? "L" : "M"}${sx(p.x).toFixed(1)},${sy(p[key]).toFixed(1)}`).join("");
+function legendKey(x, y) {
+  return `<g transform="translate(${x},${y})">
+<rect class="key-ground" x="0" y="-8" width="16" height="3"/><text x="22" y="-3">GROUND</text>
+<rect class="key-design" x="90" y="-8" width="16" height="3"/><text x="112" y="-3">DESIGN</text>
+<rect class="key-cut" x="180" y="-11" width="10" height="10" opacity=".75"/><text x="196" y="-3">CUT</text>
+<rect class="key-fill" x="240" y="-11" width="10" height="10" opacity=".75"/><text x="256" y="-3">FILL</text></g>`;
+}
+
+/**
+ * Longitudinal profile with hatched cut/fill and data bands, as on a profile sheet.
+ * rows: the stations (bands); dense: design levels at close spacing so vertical curves draw as curves.
+ */
+function profileDrawing(rows, vpis, dense = []) {
+  const pts = rows.map((r) => ({ x: r.chainage, g: r.groundLevel ?? NaN, d: r.designLevel ?? NaN }));
+  const groundPts = pts.filter((p) => Number.isFinite(p.g));
+  const groundAt = (x) => {
+    for (let i = 1; i < groundPts.length; i++) {
+      const a = groundPts[i - 1], b = groundPts[i];
+      if (x >= a.x - 1e-9 && x <= b.x + 1e-9) return a.g + ((b.g - a.g) * (x - a.x)) / (b.x - a.x || 1);
+    }
+    return NaN;
+  };
+  // Design line: dense samples plus the stations themselves, in chainage order.
+  const designLine = [...dense.map((r) => ({ x: r.chainage, d: r.designLevel ?? NaN })), ...pts.map((p) => ({ x: p.x, d: p.d }))]
+    .filter((p) => Number.isFinite(p.d)).sort((a, b) => a.x - b.x).filter((p, i, a) => i === 0 || p.x - a[i - 1].x > 1e-6);
+  const levels = pts.flatMap((p) => [p.g, p.d]).concat(vpis.map((v) => v.level)).filter(Number.isFinite);
+  if (pts.length < 2 || levels.length < 2) return "";
+  const id = ++svgSeq;
+  const W = 1000, L = 118, R = 18, T = 22, PH = 250, BAND = 58;
+  const bandTop = T + PH + 14;
+  const H = bandTop + BAND * 3 + 8;
+  const x0 = pts[0].x, x1 = pts[pts.length - 1].x || x0 + 1;
+  let y0 = Math.min(...levels), y1 = Math.max(...levels);
+  const ystep = niceStep(Math.max(y1 - y0, 0.5), 5);
+  y0 = Math.floor(y0 / ystep) * ystep - ystep * 0.5;
+  y1 = Math.ceil(y1 / ystep) * ystep + ystep * 0.5;
+  const INSET = 14; // keep the first/last station off the frame lines
+  const sx = (x) => +(L + INSET + ((x - x0) / (x1 - x0 || 1)) * (W - L - R - 2 * INSET)).toFixed(1);
+  const sy = (y) => +(T + PH - ((y - y0) / (y1 - y0)) * PH).toFixed(1);
+  let g = `<rect class="frame" x="${L}" y="${T}" width="${W - L - R}" height="${PH}"/>`;
+  for (let y = Math.ceil(y0 / ystep) * ystep; y <= y1; y += ystep) {
+    g += `<line class="gl" x1="${L}" x2="${W - R}" y1="${sy(y)}" y2="${sy(y)}"/><text x="${L - 6}" y="${sy(y) + 4}" text-anchor="end">${y.toFixed(2)}</text>`;
+  }
+  const xstep = niceStep(x1 - x0, 8);
+  for (let x = Math.ceil(x0 / xstep) * xstep; x <= x1 + 1e-9; x += xstep) g += `<line class="gl" x1="${sx(x)}" x2="${sx(x)}" y1="${T}" y2="${T + PH}"/>`;
+  const both = designLine.map((p) => ({ x: p.x, g: groundAt(p.x), d: p.d })).filter((p) => Number.isFinite(p.g));
+  g += cutFillPaths(both, sx, sy, id);
+  g += `<path class="ground" d="${pathOf(pts, sx, sy, "g")}"/>`;
+  if (vpis.length >= 2) {
+    g += `<path d="${vpis.map((v, i) => `${i ? "L" : "M"}${sx(v.chainage)},${sy(v.level)}`).join("")}" style="fill:none;stroke:var(--design);stroke-width:1;stroke-dasharray:5 4"/>`;
+  }
+  g += `<path class="design" d="${pathOf(designLine, sx, sy, "d")}"/>`;
+  for (const v of vpis) g += `<circle class="vpi" cx="${sx(v.chainage)}" cy="${sy(v.level)}" r="4"/><text x="${sx(v.chainage)}" y="${sy(v.level) - 9}" text-anchor="middle">VPI</text>`;
+  g += legendKey(L + 10, T + 18);
+  g += `<text x="${L - 6}" y="${T - 8}" text-anchor="end">RL (m)</text>`;
+
+  // Data bands: values written vertically under each station, every k-th when crowded.
+  const bands = [["منسوب التصميم", "d", "design-v"], ["منسوب الأرض", "g", "ground-v"], ["المحطة", "x", ""]];
+  const k = Math.max(1, Math.ceil(pts.length / 36));
+  bands.forEach(([label, key, cls], bi) => {
+    const top = bandTop + bi * BAND;
+    g += `<rect class="frame" x="0" y="${top}" width="${W - R}" height="${BAND}"/><line class="frame" x1="${L}" x2="${L}" y1="${top}" y2="${top + BAND}"/>`;
+    g += `<text class="band-label" x="${L - 8}" y="${top + BAND / 2 + 4}" text-anchor="end">${esc(label)}</text>`;
+    pts.forEach((p, i) => {
+      if (i % k && i !== pts.length - 1) return;
+      const v = key === "x" ? chText(p.x) : Number.isFinite(p[key]) ? p[key].toFixed(3) : "";
+      if (!v) return;
+      const x = sx(p.x);
+      g += `<line class="tick" x1="${x}" x2="${x}" y1="${top}" y2="${top + 6}"/><text class="band-val ${cls}" transform="translate(${x + 4},${top + BAND - 6}) rotate(-90)">${esc(v)}</text>`;
+    });
+  });
+  const ve = (PH / (y1 - y0)) / ((W - L - R - 2 * INSET) / (x1 - x0 || 1));
+  return `<figure class="drawing" style="margin:0"><svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="القطاع الطولي">${hatchDefs(id)}${g}</svg>
+<figcaption class="cap"><b>القطاع الطولي</b><span>${esc(chText(x0))} → ${esc(chText(x1))} · مبالغة رأسية ≈ ×${ve.toFixed(1)}</span></figcaption></figure>`;
+}
+
+/** Cross section with hatched areas and the centreline. */
+function sectionDrawing(ground, design, cutArea, fillArea) {
+  const lv = (poly, x) => {
+    for (let i = 1; i < poly.length; i++) {
+      const a = poly[i - 1], b = poly[i];
+      if (x >= a.offset - 1e-9 && x <= b.offset + 1e-9) return a.level + ((b.level - a.level) * (x - a.offset)) / (b.offset - a.offset || 1);
+    }
+    return NaN;
+  };
+  const gs = [...ground].sort((a, b) => a.offset - b.offset);
+  const ds = [...design].sort((a, b) => a.offset - b.offset);
+  const all = [...gs, ...ds];
+  if (gs.length < 2 || ds.length < 2) return "";
+  const id = ++svgSeq;
+  const W = 1000, L = 70, R = 18, T = 20, PH = 230, H = T + PH + 34;
+  let x0 = Math.min(...all.map((p) => p.offset)), x1 = Math.max(...all.map((p) => p.offset));
+  let y0 = Math.min(...all.map((p) => p.level)), y1 = Math.max(...all.map((p) => p.level));
+  const ystep = niceStep(Math.max(y1 - y0, 0.5), 5);
+  y0 = Math.floor(y0 / ystep) * ystep - ystep * 0.5;
+  y1 = Math.ceil(y1 / ystep) * ystep + ystep * 0.5;
+  const sx = (x) => +(L + ((x - x0) / (x1 - x0 || 1)) * (W - L - R)).toFixed(1);
+  const sy = (y) => +(T + PH - ((y - y0) / (y1 - y0)) * PH).toFixed(1);
+  let g = `<rect class="frame" x="${L}" y="${T}" width="${W - L - R}" height="${PH}"/>`;
+  for (let y = Math.ceil(y0 / ystep) * ystep; y <= y1; y += ystep) g += `<line class="gl" x1="${L}" x2="${W - R}" y1="${sy(y)}" y2="${sy(y)}"/><text x="${L - 6}" y="${sy(y) + 4}" text-anchor="end">${y.toFixed(2)}</text>`;
+  const xstep = niceStep(x1 - x0, 10);
+  for (let x = Math.ceil(x0 / xstep) * xstep; x <= x1 + 1e-9; x += xstep) {
+    g += `<line class="gl" x1="${sx(x)}" x2="${sx(x)}" y1="${T}" y2="${T + PH}"/><text x="${sx(x)}" y="${T + PH + 16}" text-anchor="middle">${+x.toFixed(2)}</text>`;
+  }
+  const lo = Math.max(gs[0].offset, ds[0].offset), hi = Math.min(gs[gs.length - 1].offset, ds[ds.length - 1].offset);
+  const xs = [...new Set([lo, hi, ...all.map((p) => p.offset).filter((x) => x > lo && x < hi)])].sort((a, b) => a - b);
+  g += cutFillPaths(xs.map((x) => ({ x, g: lv(gs, x), d: lv(ds, x) })), sx, sy, id);
+  g += `<path class="ground" d="${pathOf(gs.map((p) => ({ x: p.offset, g: p.level })), sx, sy, "g")}"/>`;
+  g += `<path class="design" d="${pathOf(ds.map((p) => ({ x: p.offset, d: p.level })), sx, sy, "d")}"/>`;
+  if (x0 < 0 && x1 > 0) g += `<line x1="${sx(0)}" x2="${sx(0)}" y1="${T}" y2="${T + PH}" style="stroke:var(--ink);stroke-width:1;stroke-dasharray:10 3 2 3"/><text x="${sx(0) + 4}" y="${T + 12}">CL</text>`;
+  g += legendKey(L + 10, T + 18);
+  return `<figure class="drawing" style="margin:0"><svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="القطاع العرضي">${hatchDefs(id)}${g}</svg>
+<figcaption class="cap"><b>القطاع العرضي</b><span>CUT ${cutArea.toFixed(2)} m² · FILL ${fillArea.toFixed(2)} m² · الإزاحة بالمتر، الشمال سالب</span></figcaption></figure>`;
+}
+
+function markdown(src) {
+  const blocks = [];
+  const text = esc(src).replace(/```[a-z]*\n([\s\S]*?)```/g, (_, code) => { blocks.push(`<pre>${code}</pre>`); return `\u0000${blocks.length - 1}\u0000`; });
+  const inline = (s) => s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>");
+  const lines = text.split("\n");
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^\s*\|.*\|\s*$/.test(l) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] ?? "")) {
+      const cells = (row) => row.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+      let html = `<div class="out"><table><thead><tr>${cells(l).map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>`;
+      i += 2;
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) { html += `<tr>${cells(lines[i]).map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`; i++; }
+      i--;
+      out.push(html + "</tbody></table></div>");
+    } else if (/^#{1,4}\s/.test(l)) {
+      out.push(`<h3>${inline(l.replace(/^#+\s/, ""))}</h3>`);
+    } else if (/^\s*([-*]|\d+\.)\s+/.test(l)) {
+      const ordered = /^\s*\d+\./.test(l);
+      let html = ordered ? "<ol>" : "<ul>";
+      while (i < lines.length && /^\s*([-*]|\d+\.)\s+/.test(lines[i])) { html += `<li>${inline(lines[i].replace(/^\s*([-*]|\d+\.)\s+/, ""))}</li>`; i++; }
+      i--;
+      out.push(html + (ordered ? "</ol>" : "</ul>"));
+    } else out.push(l.trim() ? `${inline(l)}<br>` : "<br>");
+  }
+  return out.join("").replace(/\u0000(\d+)\u0000/g, (_, n) => blocks[n]);
+}
+
+// ---------- tabs ----------
+function showTab(name) {
+  document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  document.querySelectorAll(".tab").forEach((t) => (t.hidden = t.id !== `tab-${name}`));
+  try { localStorage.setItem("tab", name); } catch { /* storage blocked */ }
+}
+document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+
+// ---------- welcome card ----------
+{
+  const h = new Date().getHours();
+  $("#greet").textContent = h >= 5 && h < 12 ? "صباح الخير يا هندسة" : h < 17 && h >= 12 ? "نهارك سعيد يا هندسة" : "مساء الخير يا هندسة";
+  const setWelcome = (show) => {
+    $("#welcome").hidden = !show;
+    $("#welcome-open").hidden = show;
+    try { localStorage.setItem("welcome-hidden", show ? "0" : "1"); } catch { /* storage blocked */ }
+  };
+  let hidden = false;
+  try { hidden = localStorage.getItem("welcome-hidden") === "1"; } catch { /* ignore */ }
+  $("#welcome").hidden = hidden;
+  $("#welcome-open").hidden = !hidden;
+  $("#welcome-close").onclick = () => setWelcome(false);
+  $("#welcome-open").onclick = () => { setWelcome(true); $("#welcome").scrollIntoView({ block: "start" }); };
+  document.querySelectorAll("#welcome [data-go]").forEach((b) => {
+    b.onclick = () => {
+      showTab(b.dataset.go);
+      if (b.dataset.go === "chat") $("#chat-input").focus();
+      $(`#tab-${b.dataset.go}`).scrollIntoView({ block: "start" });
+    };
+  });
+}
+{
+  let t = null;
+  try { t = localStorage.getItem("tab"); } catch { /* ignore */ }
+  if (!inViewer && (!t || t === "chat")) t = "level";
+  if (t && $(`#tab-${t}`)) showTab(t);
+}
+
+// ---------- reading files in the browser ----------
+const TILE = 1600;
+const SMALL = 2000;
+const MAX_GRID = 4;
+const MAX_PDF_PAGES = 10;
+const MAX_TEXT = 600000;
+const SHEET_EXT = new Set([".xlsx", ".xlsm", ".xlsb", ".xls", ".xlt", ".xltx", ".ods", ".fods", ".numbers", ".dbf", ".wk1", ".wks", ".slk", ".dif", ".et"]);
+const IMAGE_EXT = new Set([".png", ".jpg", ".jpeg", ".jpe", ".jfif", ".webp", ".gif", ".bmp", ".avif", ".svg"]);
+const OFFICE_EXT = new Set([".docx", ".docm", ".pptx", ".odt", ".odp"]);
+const UNSUPPORTED = {
+  ".tif": "المتصفح مش بيقرا TIFF. حوّل اللوحة PDF أو JPG أو PNG، أو استخدم نسخة السيرفر.",
+  ".tiff": "المتصفح مش بيقرا TIFF. حوّل اللوحة PDF أو JPG أو PNG، أو استخدم نسخة السيرفر.",
+  ".heic": "صور HEIC (آيفون) مش بتتقري في المتصفح. ابعتها JPG.",
+  ".heif": "صور HEIF مش بتتقري في المتصفح. ابعتها JPG.",
+  ".dgn": "ملفات MicroStation (DGN) صدّرها DWG أو DXF.",
+  ".doc": "صيغة Word القديمة (.doc) احفظها docx أو PDF.",
+  ".ppt": "صيغة PowerPoint القديمة (.ppt) احفظها pptx أو PDF.",
+  ".rvt": "ملفات Revit صدّرها DWG أو PDF.",
+  ".skp": "ملفات SketchUp صدّرها DWG أو PDF.",
+};
+const extOf = (name) => (name.match(/\.[^.\\/]+$/)?.[0] ?? "").toLowerCase();
+const latin1 = (u8) => String.fromCharCode(...u8);
+
+function decodeText(bytes) {
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes);
+  const sample8 = bytes.subarray(0, 65536);
+  if (sample8.includes(0)) return null;
+  const s = new TextDecoder("utf-8").decode(sample8);
+  const control = (s.match(/[\u0001-\u0008\u000E-\u001F]/g) ?? []).length;
+  if (control / Math.max(1, s.length) > 0.01) return null;
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes).replace(/^﻿/, "");
+  } catch {
+    return new TextDecoder("windows-1256").decode(bytes); // CSV saved by Arabic-Windows Excel
+  }
+}
+
+function textResult(text) {
+  const notes = [];
+  if (text.length > MAX_TEXT) {
+    notes.push(`الملف طويل (${text.length} حرف)؛ اتبعت أول ${MAX_TEXT} حرف بس.`);
+    text = text.slice(0, MAX_TEXT);
+  }
+  return { kind: "text", text, notes };
+}
+
+async function canvasToBlob(c) {
+  return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error("ما قدرتش أحوّل الصورة."))), "image/jpeg", 0.92));
+}
+function crop(src, sx, sy, sw, sh, maxEdge) {
+  const s = Math.min(1, maxEdge / Math.max(sw, sh));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(sw * s));
+  c.height = Math.max(1, Math.round(sh * s));
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff";
+  g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c;
+}
+/** Overview + overlapping tiles so small text on big drawings stays legible. */
+async function tiles(src, w, h, label, notes) {
+  if (Math.max(w, h) <= SMALL) return [{ label, blob: await canvasToBlob(crop(src, 0, 0, w, h, SMALL)) }];
+  const out = [{ label: `${label} — نظرة عامة على اللوحة كلها`, blob: await canvasToBlob(crop(src, 0, 0, w, h, TILE)) }];
+  const cols = Math.min(MAX_GRID, Math.ceil(w / TILE));
+  const rows = Math.min(MAX_GRID, Math.ceil(h / TILE));
+  if (Math.ceil(w / TILE) > MAX_GRID || Math.ceil(h / TILE) > MAX_GRID) notes.push(`"${label}" كبيرة جدًا؛ لو في أرقام صغيرة مش مقروءة، قص الجزء المهم وارفعه لوحده.`);
+  const tw = Math.ceil(w / cols);
+  const th = Math.ceil(h / rows);
+  const ov = Math.round(Math.min(tw, th) * 0.08);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const left = Math.max(0, c * tw - ov);
+      const top = Math.max(0, r * th - ov);
+      const sw = Math.min(w - left, tw + 2 * ov);
+      const sh = Math.min(h - top, th + 2 * ov);
+      out.push({ label: `${label} — جزء (صف ${r + 1} من ${rows}، عمود ${c + 1} من ${cols}، العد من اليسار لليمين ومن فوق لتحت)`, blob: await canvasToBlob(crop(src, left, top, sw, sh, SMALL)) });
+    }
+  }
+  return out;
+}
+
+async function readPdf(bytes, name) {
+  const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
+  const notes = [];
+  const n = Math.min(pdf.numPages, MAX_PDF_PAGES);
+  if (pdf.numPages > n) notes.push(`الملف فيه ${pdf.numPages} صفحة؛ اتقرا أول ${n} بس. ابعت الباقي في رسالة تانية.`);
+  const images = [];
+  const texts = [];
+  for (let i = 1; i <= n; i++) {
+    const page = await pdf.getPage(i);
+    const tc = await page.getTextContent();
+    // Group text items into lines by their y position so numbers keep their context.
+    const linesByY = new Map();
+    for (const it of tc.items) {
+      if (!it.str?.trim()) continue;
+      const y = Math.round(it.transform[5]);
+      if (!linesByY.has(y)) linesByY.set(y, []);
+      linesByY.get(y).push({ x: it.transform[4], s: it.str });
+    }
+    const pageText = [...linesByY.entries()].sort((a, b) => b[0] - a[0]).map(([, items]) => items.sort((a, b) => a.x - b.x).map((t) => t.s).join("  ")).join("\n");
+    if (pageText.trim()) texts.push(`--- صفحة ${i} ---\n${pageText}`);
+    const base = page.getViewport({ scale: 1 });
+    const scale = Math.min(6, Math.max(1, 3200 / Math.max(base.width, base.height)));
+    const vp = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(vp.width);
+    canvas.height = Math.round(vp.height);
+    const g = canvas.getContext("2d");
+    g.fillStyle = "#fff";
+    g.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: g, viewport: vp }).promise;
+    images.push(...(await tiles(canvas, canvas.width, canvas.height, n > 1 ? `${name} — صفحة ${i}` : name, notes)));
+  }
+  const text = texts.join("\n\n");
+  if (!text.trim()) notes.push("الـ PDF ده ممسوح ضوئيًا (مفيهوش نص)؛ الأرقام هتتقري من الصورة، فراجع أي رقم مهم.");
+  return { kind: "pdf", images, text: text.slice(0, MAX_TEXT), pageCount: pdf.numPages, notes };
+}
+
+async function readImage(bytes, name, ext) {
+  const type = { ".svg": "image/svg+xml", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp", ".bmp": "image/bmp", ".avif": "image/avif" }[ext] ?? "image/jpeg";
+  const blob = new Blob([bytes], { type });
+  const notes = [];
+  let src;
+  let w;
+  let h;
+  try {
+    src = await createImageBitmap(blob);
+    w = src.width; h = src.height;
+  } catch {
+    const img = new Image();
+    img.src = URL.createObjectURL(blob);
+    await img.decode().catch(() => { throw new Error(`المتصفح ما قدرش يفتح الصورة "${name}". احفظها JPG أو PNG.`); });
+    src = img; w = img.naturalWidth; h = img.naturalHeight;
+  }
+  return { kind: "image", images: await tiles(src, w, h, name, notes), notes };
+}
+
+let dwgLib = null;
+async function readDwg(bytes) {
+  if (!dwgLib) {
+    try {
+      const mod = await import(new URL("dwg/dist/libredwg-web.js", document.baseURI).href);
+      dwgLib = { lib: await mod.LibreDwg.create(new URL("dwg/wasm", document.baseURI).href), type: mod.Dwg_File_Type.DWG };
+    } catch (err) {
+      throw new Error(`قارئ DWG ما اشتغلش في المتصفح ده (${err.message}). احفظ اللوحة DXF من الأوتوكاد وارفعها.`);
+    }
+  }
+  const dwg = dwgLib.lib.dwg_read_data(bytes, dwgLib.type);
+  if (!dwg) throw new Error("ملف الـ DWG ده ما اتقريش. احفظه DXF من الأوتوكاد وارفعه.");
+  let db;
+  try { db = dwgLib.lib.convert(dwg); } finally { dwgLib.lib.dwg_free(dwg); }
+  return E.modelFromDwg(db);
+}
+
+async function cadResult(model, name) {
+  const cad = E.cadData(model);
+  const notes = [];
+  let images = [];
+  try {
+    const svg = E.cadSvg(model, 5000);
+    if (svg) {
+      const img = new Image();
+      img.src = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+      await img.decode();
+      images = await tiles(img, img.naturalWidth, img.naturalHeight, `${name} (رسم مولّد من ملف الكاد)`, notes);
+    }
+  } catch (err) {
+    notes.push(`ما قدرتش أرسم معاينة للوحة (${err.message})؛ البيانات نفسها اتقرت.`);
+  }
+  return { kind: "cad", cad, images, notes };
+}
+
+function officeText(bytes, ext) {
+  const z = fflate.unzipSync(bytes);
+  const read = (n) => (z[n] ? fflate.strFromU8(z[n]) : "");
+  const xmlToText = (xml) => xml
+    .replace(/<w:tab\/>|<text:tab\/>/g, "\t")
+    .replace(/<\/w:p>|<\/a:p>|<\/text:p>|<\/text:h>|<w:br\/>|<text:line-break\/>/g, "\n")
+    .replace(/<\/w:tc>|<\/table:table-cell>/g, " | ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, "&");
+  if (ext === ".docx" || ext === ".docm") return xmlToText(read("word/document.xml"));
+  if (ext === ".pptx") {
+    const slides = Object.keys(z).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+    return slides.map((n, i) => `--- شريحة ${i + 1} ---\n${xmlToText(read(n))}`).join("\n");
+  }
+  return xmlToText(read("content.xml"));
+}
+
+async function shapefileResult(shp, dbf, name) {
+  const gj = await shapefile.read(shp.slice().buffer, dbf ? dbf.slice().buffer : undefined);
+  const t = E.geojsonToTable(gj, name);
+  return { kind: "table", tables: [t], notes: t.notes };
+}
+
+async function parseOne(name, ext, head, bytes) {
+  if (ext === ".pdf" || head.startsWith("%PDF")) return readPdf(bytes, name);
+  if (ext === ".dwg" || /^AC10\d\d/.test(head)) return cadResult(await readDwg(bytes), name);
+  if (ext === ".dxf") return cadResult(E.modelFromDxf(new DxfParser().parseSync(decodeText(bytes) ?? "")), name);
+  if (UNSUPPORTED[ext]) throw new Error(UNSUPPORTED[ext]);
+  if (IMAGE_EXT.has(ext)) return readImage(bytes, name, ext);
+  if (SHEET_EXT.has(ext)) {
+    const wb = XLSX.read(bytes, { type: "array", cellDates: true });
+    const tables = wb.SheetNames.map((s) => E.tableFromMatrix(XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false }), s)).filter((t) => t.rows.length);
+    if (!tables.length) throw new Error("ملف الإكسل فاضي.");
+    return { kind: "table", tables };
+  }
+  if (OFFICE_EXT.has(ext)) return textResult(officeText(bytes, ext));
+  if (ext === ".shp") return shapefileResult(bytes, null, name);
+
+  const text = decodeText(bytes);
+  if (text === null) {
+    try { return await readImage(bytes, name, ext); } catch { /* not an image */ }
+    throw new Error(`مش قادر أقرأ "${name}": صيغة مش معروفة. صدّره PDF أو DXF أو Excel أو CSV.`);
+  }
+  if (ext === ".gsi" || /^\*?11[0-9.]{4}[+-]/.test(text.trimStart())) {
+    const t = E.parseGsi(text);
+    if (t) return { kind: "table", tables: [t] };
+  }
+  if (/<LandXML\b/i.test(text.slice(0, 5000))) {
+    const tables = E.parseLandXml(text);
+    return tables.length ? { kind: "table", tables } : textResult(text);
+  }
+  if (ext === ".kml" || /<kml\b/i.test(text.slice(0, 2000))) {
+    const t = E.parseKml(text);
+    if (t) return { kind: "table", tables: [t], notes: t.notes };
+  }
+  if (ext === ".geojson" || ext === ".json") {
+    try {
+      const j = JSON.parse(text);
+      if (j && ["FeatureCollection", "Feature", "Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon"].includes(j.type)) {
+        const t = E.geojsonToTable(j, "GeoJSON");
+        return { kind: "table", tables: [t], notes: t.notes };
+      }
+    } catch { /* plain JSON */ }
+    return textResult(text);
+  }
+  if ([".xml", ".jxl", ".html", ".htm", ".md", ".log", ".ini", ".cfg", ".rtf"].includes(ext)) return textResult(text);
+  const t = E.parseDelimited(text, ext.replace(".", "") || "text");
+  return E.looksTabular(t) ? { kind: "table", tables: [t] } : textResult(text);
+}
+
+async function ingestBytes(name, bytes, depth = 0) {
+  const ext = extOf(name);
+  const head = latin1(bytes.subarray(0, 8));
+  if (ext === ".zip" || ext === ".kmz" || (head.startsWith("PK") && !OFFICE_EXT.has(ext) && !SHEET_EXT.has(ext))) {
+    if (depth > 2) throw new Error("ملفات مضغوطة جوه بعض كتير.");
+    let total = 0;
+    let count = 0;
+    const z = fflate.unzipSync(bytes, {
+      filter: (f) => {
+        if (f.name.endsWith("/") || f.name.startsWith("__MACOSX/") || /(^|\/)\./.test(f.name)) return false;
+        total += f.originalSize;
+        if (++count > 200 || total > 500 * 1024 * 1024) throw new Error("الملف المضغوط كبير جدًا.");
+        return true;
+      },
+    });
+    const entries = Object.entries(z);
+    if (ext === ".kmz") {
+      const kml = entries.find(([n]) => n.toLowerCase().endsWith(".kml"));
+      const t = kml && E.parseKml(fflate.strFromU8(kml[1]));
+      if (!t) throw new Error("ملف KMZ مفيهوش نقاط أو خطوط.");
+      return [{ id: `f${fileSeq++}`, name, parsed: { kind: "table", tables: [t], notes: t.notes } }];
+    }
+    const out = [];
+    const errors = [];
+    const shpParts = [".shp", ".dbf", ".shx", ".prj", ".cpg", ".sbn", ".sbx", ".qix"];
+    for (const [n, b] of entries.filter(([n]) => extOf(n) === ".shp")) {
+      const dbf = entries.find(([m]) => m.toLowerCase() === n.toLowerCase().replace(/\.shp$/, ".dbf"))?.[1];
+      try { out.push({ id: `f${fileSeq++}`, name: `${name} › ${n}`, parsed: await shapefileResult(b, dbf, n) }); }
+      catch (err) { errors.push(`${n}: ${err.message}`); }
+    }
+    for (const [n, b] of entries) {
+      if (shpParts.includes(extOf(n))) continue;
+      try { out.push(...(await ingestBytes(`${name} › ${n}`, b, depth + 1))); }
+      catch (err) { errors.push(`${n}: ${err.message}`); }
+    }
+    if (!out.length) throw new Error(`مفيش ملفات اتقرت من "${name}". ${errors.join(" | ")}`);
+    if (errors.length) out[0].parsed.notes = [...(out[0].parsed.notes ?? []), `ملفات ما اتقرتش: ${errors.join(" | ")}`];
+    return out;
+  }
+  return [{ id: `f${fileSeq++}`, name, parsed: await parseOne(name, ext, head, bytes) }];
+}
+
+async function ingestFile(file) {
+  const list = await ingestBytes(file.name, new Uint8Array(await file.arrayBuffer()));
+  for (const f of list) files.set(f.id, f);
+  return list;
+}
+
+function summarise(f) {
+  const p = f.parsed;
+  const notes = (p.notes ?? []).concat(...(p.tables ?? []).map((t) => t.notes ?? []));
+  const tail = notes.length ? `\nملاحظات: ${notes.join(" — ")}` : "";
+  if (p.kind === "table") {
+    return p.tables.map((t) => {
+      const mapped = Object.entries(t.mapping ?? {}).map(([h, c]) => `${h}→${c}`).join("، ");
+      return `جدول "${t.sheet}": ${t.rows.length} صف. الأعمدة: ${t.columns.join(" | ")}${mapped ? `. اتعرفت: ${mapped}` : ""}.\nأول صفوف:\n${t.rows.slice(0, 5).map((r) => JSON.stringify(r)).join("\n")}`;
+    }).join("\n\n") + tail;
+  }
+  if (p.kind === "cad") {
+    const d = p.cad;
+    const layers = Object.entries(d.layers).sort((a, b) => b[1] - a[1]).slice(0, 30).map(([l, n]) => `${l}(${n})`).join("، ");
+    const sample = d.numericTexts.slice(0, 15).map((t) => t.text).join("، ");
+    return `${d.source}: ${d.entityCount} عنصر. الطبقات: ${layers}. نقاط/بلوكات: ${d.points.length}، بولي لاين: ${d.polylines.length}، نصوص: ${d.texts.length} (منها ${d.numericTexts.length} أرقام${sample ? ` مثل: ${sample}` : ""}).${tail}`;
+  }
+  if (p.kind === "pdf") return `PDF، ${p.pageCount} صفحة، ${p.images.length} صورة${p.text ? `، ونص مستخرج ${p.text.length} حرف` : ""}.${tail}`;
+  if (p.kind === "image") return `صورة في ${p.images.length} جزء.${tail}`;
+  if (p.kind === "text") return `ملف نصي (${p.text.length} حرف).${tail}`;
+  return tail;
+}
+
+function firstDataFile(list) {
+  const f = list.find((x) => x.parsed.kind === "table" || x.parsed.kind === "cad");
+  if (!f) throw new Error("الملف ده مفيهوش جدول بيانات (PDF/صورة/نص). ابعته للمساعد في تاب «المساعد».");
+  return f;
+}
+const rowsOf = (f) => (f.parsed.kind === "cad" ? f.parsed.cad.points : f.parsed.tables[0].rows);
+async function loadRows(input) {
+  const f = firstDataFile(await ingestFile(input.files[0]));
+  input.value = "";
+  return rowsOf(f);
+}
+
+// ---------- assistant ----------
+const SYSTEM = `أنت "المهندس المساعد": مهندس مساحة مساعد لمهندس موقع في مشاريع إنشاءات (طرق، بنية تحتية، مباني، أعمال ترابية) في مصر والمنطقة العربية. المهندس بيعتمد على إجاباتك في قرارات حقيقية في الموقع، فالدقة أهم من السرعة.
+
+اللغة: رد بلغة المستخدم؛ بالعربي استخدم عربي هندسي مصري واضح، واكتب المصطلح الإنجليزي بين قوسين أول مرة (مثل منسوب (RL)، قطاع طولي (Profile)).
+
+الأرقام:
+- أي رقم بتقوله ومش منقول حرفيًا من بيانات المستخدم أو اللوحة لازم يطلع من أداة في المحادثة دي. استخدم calculate لأي عملية حسابية مش موجودة في أداة تانية. ما تحسبش في دماغك أبدًا، حتى الطرح البسيط.
+- استخدم الأدوات المتخصصة للميزانية، والبروفيل والمنحنيات الرأسية، ومساحات القطاعات، والكميات، والشبكة، ومراجعة الداتا. نتيجتها متختبرة؛ لو شكلها غلط قول كده وراجع المدخلات بدل ما تغيرها.
+- اذكر الطريقة والمدخلات اللي استخدمتها عشان المهندس يراجع.
+- المناسيب لأقرب مم (3 أرقام عشرية)، والمساحات والكميات لرقمين عشريين.
+
+لما البيانات مش مؤكدة:
+- ما تخترعش قيم ناقصة (منسوب روبير، datum، مقياس رسم، عروض، ميول جانبية، تفاوتات). لو قيمة لازمة ومش موجودة اسأل، أو اذكر القيمة الافتراضية اللي استخدمتها صراحة كافتراض.
+- لما تقرا لوحة ممسوحة أو صورة، افصل بين اللي قريته بوضوح واللي مش متأكد منه، وما تخمنش رقم. لو فيه نص مستخرج من الـ PDF، خد الأرقام منه لأنه أدق من الصورة.
+- لو في تناقض (منسوب مكتوب مش مطابق لخط الميول مثلًا)، اكتبه كملاحظة بالقيمتين.
+
+مراجعة اللوحات: راجع على الأقل جدول البيانات والمقياس والوحدات والروبير المرجعي والشمال، واستمرارية المحطات، والميول بين نقاط VPI محسوبة من جديد، وبيانات المنحنيات الرأسية، والمناسيب التصميمية عند المحطات مقارنة بالمكتوب، وعمق الحفر والردم، وعرض التأسيس والميول في القطاعات، وتطابق المسقط والبروفيل والقطاعات.
+اعرض الملاحظات في جدول: # | الموقع (لوحة/محطة) | الملاحظة | المكتوب في اللوحة | المحسوب/المتوقع | الخطورة (عالي/متوسط/منخفض). واختم بملخص قصير والحاجات اللي محتاجة تحقق ميداني.
+
+ملفات البيانات المرفوعة ليها fileId؛ ابعت الـ fileId للأدوات بدل نسخ الصفوف، واستخدم read_file لقراءتها. ملفات الكاد (DWG/DXF) معاها صورة مرسومة للوحة: استخدمها لفهم الشكل بس، وخد كل الأرقام من البيانات الدقيقة عن طريق read_file. اللوحات الكبيرة جاية في صورة نظرة عامة + أجزاء مكبرة؛ اقرا الأرقام الصغيرة من الأجزاء.
+
+لما النتيجة تأثر على السلامة أو كميات الصرف أو التوقيع، أضف سطر بإيه اللي لازم يتراجع في الموقع قبل التنفيذ.`;
+
+const history = [];
+let pending = [];
+let lastImages = [];
+let busy = false;
+const log = $("#chat-log");
+
+function addMsg(role, html) {
+  const div = document.createElement("div");
+  div.className = `msg ${role}`;
+  div.innerHTML = `<span class="who">${role === "user" ? "استفسار" : "المهندس المساعد"}</span><div class="bubble">${html}</div>`;
+  log.appendChild(div);
+  div.scrollIntoView({ block: "end" });
+  return div;
+}
+function renderChips() {
+  $("#attachments").innerHTML = pending.map((f, i) => `<span class="chip">${esc(f.name)}<button type="button" data-i="${i}" aria-label="إزالة">×</button></span>`).join("");
+  $("#attachments").querySelectorAll("button").forEach((b) => (b.onclick = () => { pending.splice(Number(b.dataset.i), 1); renderChips(); }));
+}
+$("#chat-file").onchange = async (e) => {
+  for (const file of e.target.files) {
+    const note = addMsg("assistant", `<span class="typing">بيقرأ ${esc(file.name)}…</span>`);
+    try { pending.push(...(await ingestFile(file))); note.remove(); }
+    catch (err) { note.querySelector(".bubble").innerHTML = `<div class="error">${esc(file.name)}: ${esc(err.message)}</div>`; }
+  }
+  e.target.value = "";
+  renderChips();
+};
+
+/** Keep tool results small: long arrays are cut, with the full count kept. */
+function shrink(result) {
+  const s = JSON.stringify(result);
+  if (s.length <= 25000) return result;
+  const copy = { ...result, note: "النتيجة كبيرة؛ اتبعت جزء منها. استخدم read_file بـ offset/limit للباقي." };
+  for (const k of ["rows", "issues", "items", "results"]) {
+    if (Array.isArray(copy[k]) && copy[k].length > 120) { copy[`${k}Total`] = copy[k].length; copy[k] = copy[k].slice(0, 120); }
+  }
+  return copy;
+}
+
+function describeForAI(f) {
+  const p = f.parsed;
+  if (p.kind === "pdf") {
+    return `لوحة/ملف PDF مرفق: ${f.name} (${p.pageCount} صفحة). صورها مرفقة في الرسالة.${p.notes?.length ? `\nملاحظات: ${p.notes.join(" — ")}` : ""}${p.text ? `\nالنص المستخرج من الـ PDF (أرقامه دقيقة):\n${p.text.slice(0, 60000)}` : ""}`;
+  }
+  if (p.kind === "image") return `صورة مرفقة: ${f.name} (${p.images.length} جزء).${p.notes?.length ? ` ملاحظات: ${p.notes.join(" — ")}` : ""}`;
+  if (p.kind === "text") return `ملف نصي مرفق: ${f.name} (fileId: ${f.id})\n${p.text.slice(0, 60000)}`;
+  return `ملف مرفق: ${f.name} (fileId: ${f.id})\n${summarise(f)}`;
+}
+
+$("#chat-form").onsubmit = async (e) => {
+  e.preventDefault();
+  if (busy) return;
+  const text = $("#chat-input").value.trim();
+  if (!text && !pending.length) return;
+  if (!sample) {
+    addMsg("assistant", `<div class="error">المساعد الذكي مش متاح هنا. افتح الصفحة من claude.ai وأنت مسجل دخول، أو استخدم الحاسبات في باقي التابات.</div>`);
+    return;
+  }
+  const attached = pending;
+  pending = [];
+  renderChips();
+  $("#chat-input").value = "";
+  addMsg("user", esc(text).replace(/\n/g, "<br>") + (attached.length ? `<br><small>مرفق: ${attached.map((f) => esc(f.name)).join("، ")}</small>` : ""));
+
+  const newImages = attached.flatMap((f) => f.parsed.images ?? []);
+  if (newImages.length) lastImages = newImages;
+  const images = maxImages ? lastImages.slice(0, maxImages) : [];
+  const parts = attached.map(describeForAI);
+  if (lastImages.length && !maxImages) parts.push("ملحوظة: الصور ما اتبعتتش (العرض ده مش بيسمح بالصور)؛ اعتمد على النص المستخرج بس، وقول كده للمستخدم.");
+  if (lastImages.length > images.length && maxImages) parts.push(`ملحوظة: اتبعت أول ${images.length} صورة بس من ${lastImages.length}.`);
+  if (images.length) parts.push(`الصور المرفقة بالترتيب:\n${images.map((im, i) => `${i + 1}. ${im.label}`).join("\n")}`);
+  parts.push(text || "راجع الملفات المرفقة وقولي ملاحظاتك.");
+  history.push({ role: "user", content: parts.join("\n\n") });
+
+  const wait = addMsg("assistant", `<span class="typing">بيراجع ويحسب…</span>`);
+  const bubble = wait.querySelector(".bubble");
+  const trail = [];
+  const tools = E.TOOLS.map((t) => ({
+    name: t.name,
+    description: t.description,
+    inputSchema: t.input_schema,
+    execute: (input) => {
+      try {
+        const r = calc(t.name, input);
+        trail.push({ tool: t.name, input, result: r });
+        return shrink(r);
+      } catch (err) {
+        trail.push({ tool: t.name, input, error: err.message });
+        throw err;
+      }
+    },
+  }));
+  busy = true;
+  $("#chat-send").disabled = true;
+  try {
+    const input = history.map((m, i) => (i === 0 ? { role: "user", content: `${SYSTEM}\n\n---\n\n${m.content}` } : m));
+    const res = await sample(input, {
+      tools,
+      images: images.map((im) => im.blob),
+      modelTier: "complex",
+      cache: false,
+      onText: ({ text: t }) => { bubble.innerHTML = markdown(t); },
+    });
+    history.push({ role: "assistant", content: res.text });
+    const trailHtml = trail.length
+      ? `<details class="trail"><summary>خطوات الحساب (${trail.length})</summary>${trail.map((t) => `<div><b>${esc(t.tool)}</b>${t.error ? ` — <span class="bad">${esc(t.error)}</span>` : ""}<pre>${esc(JSON.stringify(t.input, null, 1))}</pre>${t.result ? `<pre>${esc(JSON.stringify(shrink(t.result), null, 1))}</pre>` : ""}</div>`).join("")}</details>`
+      : "";
+    bubble.innerHTML = markdown(res.text || "(مفيش رد)") + (res.truncated ? `<div class="notice">الرد اتقطع لأنه طويل. اطلب جزء أصغر.</div>` : "") + trailHtml;
+  } catch (err) {
+    history.pop();
+    const msg = err?.code === "not_granted" ? "ما اديتش الصفحة إذن تكلم Claude. افتح Permissions من قايمة الصفحة واسمح، وجرب تاني."
+      : err?.code === "rate_limited" ? "طلبات كتير ورا بعض. استنى دقيقة وجرب تاني."
+      : err?.message || "حصل خطأ.";
+    bubble.innerHTML = (err?.text ? markdown(err.text) : "") + `<div class="error">${esc(msg)}</div>`;
+  } finally {
+    busy = false;
+    $("#chat-send").disabled = false;
+  }
+};
+$("#chat-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#chat-form").requestSubmit(); }
+});
+$("#chat-reset").onclick = () => {
+  history.length = 0;
+  lastImages = [];
+  log.querySelectorAll(".msg").forEach((m, i) => i > 0 && m.remove());
+};
+
+// ---------- level book ----------
+let lvLast = null;
+const lvCols = [
+  { key: "station", label: "المحطة" }, { key: "bs", label: "BS", num: 1 }, { key: "is", label: "IS", num: 1 }, { key: "fs", label: "FS", num: 1 },
+  { key: "hi", label: "HI", num: 1 }, { key: "rise", label: "Rise", num: 1 }, { key: "fall", label: "Fall", num: 1 }, { key: "rl", label: "RL", num: 1 },
+];
+function runLevel() {
+  const out = $("#lv-out");
+  try {
+    const rows = dropHeader(parsePaste($("#lv-rows").value), [1, 2, 3]).map((c) => ({ station: c[0], bs: numOrUndef(c[1]), is: numOrUndef(c[2]), fs: numOrUndef(c[3]) }));
+    const r = calc("reduce_level_book", {
+      rows,
+      startRL: numOrUndef($("#lv-start").value),
+      closingRL: numOrUndef($("#lv-close").value),
+      closedLoop: $("#lv-loop").checked,
+      totalDistanceKm: numOrUndef($("#lv-km").value),
+      toleranceMmPerSqrtKm: numOrUndef($("#lv-c").value),
+    });
+    const cols = r.closing ? [...lvCols, { key: "correction", label: "التصحيح", num: 1 }, { key: "adjustedRL", label: "RL المصحح", num: 1 }] : lvCols;
+    lvLast = { columns: cols, rows: r.rows };
+    const c = r.checks;
+    const items = [["ΣBS − ΣFS", c.bsMinusFs.toFixed(3)], ["ΣRise − ΣFall", c.riseMinusFall.toFixed(3)], ["آخر − أول منسوب", c.lastMinusFirst.toFixed(3)]];
+    if (r.closing) items.push(["خطأ القفل (مم)", r.closing.misclosureMm.toFixed(1)], ["المسموح ± (مم)", r.closing.allowableMm.toFixed(1)]);
+    let stamps = stamp(c.arithmeticOk, c.arithmeticOk ? "التحقق الحسابي سليم" : "خطأ في الحساب", "ARITHMETIC CHECK");
+    if (r.closing) stamps += stamp(r.closing.accepted, r.closing.accepted ? "القفل مقبول" : "القفل مرفوض", r.closing.accepted ? "WITHIN TOLERANCE" : "RE-LEVEL REQUIRED");
+    out.innerHTML = panel("LV", "نتيجة الميزانية",
+      `<div>${stamps}</div>${readouts(items)}${r.closing ? `<p class="hint">المسموح = ${esc(r.closing.allowableBasis)} · التصحيح لكل وقفة ${r.closing.correctionPerSetupMm} مم</p>` : ""}${table(cols, r.rows)}`);
+    $("#lv-csv").disabled = false;
+  } catch (err) { showError(out, err); }
+}
+$("#lv-run").onclick = runLevel;
+bindCsv($("#lv-csv"), "level-book.csv", () => lvLast);
+$("#lv-file").onchange = async (e) => {
+  try {
+    const rows = await loadRows(e.target);
+    $("#lv-rows").value = rows.map((r) => [r.id ?? r.station ?? "", r.bs ?? "", r.is ?? "", r.fs ?? ""].join(",")).join("\n");
+  } catch (err) { showError($("#lv-out"), err); }
+};
+
+// ---------- profile ----------
+let pfLast = null;
+const pfCols = [
+  { key: "chainageText", label: "المحطة" }, { key: "groundLevel", label: "منسوب الأرض", num: 1 }, { key: "designLevel", label: "المنسوب التصميمي", num: 1 },
+  { key: "cut", label: "حفر", num: 1 }, { key: "fill", label: "ردم", num: 1 },
+];
+function runProfile() {
+  const out = $("#pf-out");
+  try {
+    const vpis = dropHeader(parsePaste($("#pf-vpi").value), [1]).map((c) => ({ chainage: c[0], level: numOrUndef(c[1]), curveLength: numOrUndef(c[2]) }));
+    const stations = dropHeader(parsePaste($("#pf-st").value), [1]).map((c) => ({ chainage: c[0], groundLevel: numOrUndef(c[1]) }));
+    const r = calc("profile_design", { vpis, stations, interval: numOrUndef($("#pf-int").value) });
+    pfLast = { columns: pfCols, rows: r.rows };
+    let html = r.warnings.length ? `<div class="notice">${r.warnings.map(esc).join("<br>")}</div>` : "";
+    html += "<h3>جدول الميول</h3>" + table([{ key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 }, { key: "gradePercent", label: "الميل %", num: 1, d: 4 }], r.segments);
+    if (r.verticalCurves.length) {
+      html += "<h3>المنحنيات الرأسية</h3>" + table(
+        [{ key: "atVPI", label: "VPI" }, { key: "type", label: "النوع" }, { key: "length", label: "L", num: 1, d: 2 }, { key: "A", label: "A %", num: 1, d: 3 }, { key: "K", label: "K", num: 1, d: 2 },
+          { key: "BVC", label: "BVC" }, { key: "BVCLevel", label: "منسوب BVC", num: 1 }, { key: "EVC", label: "EVC" }, { key: "EVCLevel", label: "منسوب EVC", num: 1 }, { key: "middleOrdinate", label: "الإحداثي الأوسط", num: 1 }],
+        r.verticalCurves,
+      );
+    }
+    html += "<h3>جدول المحطات</h3>" + table(pfCols, r.rows);
+    out.innerHTML = panel("PR", "جداول القطاع الطولي", html);
+    const vpiPts = vpis.map((v) => ({ chainage: E.parseChainage(v.chainage), level: v.level })).filter((v) => Number.isFinite(v.chainage) && Number.isFinite(v.level));
+    const span = vpiPts.length >= 2 ? vpiPts[vpiPts.length - 1].chainage - vpiPts[0].chainage : 0;
+    const dense = span > 0 ? calc("profile_design", { vpis, interval: span / 240 }).rows : [];
+    $("#pf-chart").innerHTML = profileDrawing(r.rows, vpiPts, dense);
+    $("#pf-csv").disabled = false;
+  } catch (err) { showError(out, err); }
+}
+$("#pf-run").onclick = runProfile;
+bindCsv($("#pf-csv"), "profile.csv", () => pfLast);
+$("#pf-file").onchange = async (e) => {
+  try {
+    const rows = await loadRows(e.target);
+    $("#pf-st").value = rows.map((r) => [r.chainage ?? "", r.z ?? ""].join(",")).join("\n");
+  } catch (err) { showError($("#pf-out"), err); }
+};
+
+// ---------- cross section ----------
+function runSection() {
+  const out = $("#xs-out");
+  try {
+    const ground = dropHeader(parsePaste($("#xs-ground").value), [0, 1]).map((c) => ({ offset: numOrUndef(c[0]), level: numOrUndef(c[1]) }));
+    const r = calc("template_section", {
+      ground,
+      formationLevel: numOrUndef($("#xs-fl").value),
+      widthLeft: numOrUndef($("#xs-wl").value),
+      widthRight: numOrUndef($("#xs-wr").value),
+      crossfallPercent: numOrUndef($("#xs-cf").value),
+      cutSlope: numOrUndef($("#xs-cs").value),
+      fillSlope: numOrUndef($("#xs-fs").value),
+    });
+    out.innerHTML = (r.warnings.length ? `<div class="notice">${r.warnings.map(esc).join("<br>")}</div>` : "") +
+      readouts([["مساحة الحفر م²", r.cutArea.toFixed(2), "bad"], ["مساحة الردم م²", r.fillArea.toFixed(2), "ok"], ["الجنب الشمال", r.leftSide], ["الجنب اليمين", r.rightSide]]) +
+      "<h3>نقاط خط التصميم</h3>" + table([{ key: "offset", label: "الإزاحة", num: 1 }, { key: "level", label: "المنسوب", num: 1 }], r.design);
+    $("#xs-chart").innerHTML = sectionDrawing(ground, r.design, r.cutArea, r.fillArea);
+  } catch (err) { showError(out, err); }
+}
+$("#xs-run").onclick = runSection;
+
+// ---------- volumes ----------
+let volLast = null;
+const volCols = [
+  { key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 },
+  { key: "cutVolume", label: "حفر م³", num: 1, d: 2 }, { key: "fillVolume", label: "ردم م³", num: 1, d: 2 },
+  { key: "cumulativeCut", label: "حفر تراكمي", num: 1, d: 2 }, { key: "cumulativeFill", label: "ردم تراكمي", num: 1, d: 2 }, { key: "massOrdinate", label: "Mass ordinate", num: 1, d: 2 },
+];
+function runVolumes() {
+  const out = $("#vol-out");
+  try {
+    const sections = dropHeader(parsePaste($("#vol-rows").value), [1, 2]).map((c) => ({ chainage: c[0], cutArea: numOrUndef(c[1]) ?? 0, fillArea: numOrUndef(c[2]) ?? 0 }));
+    const r = calc("earthwork_volumes", { sections, method: $("#vol-method").value, fillFactor: numOrUndef($("#vol-ff").value) });
+    volLast = { columns: volCols, rows: r.rows };
+    out.innerHTML = readouts([["إجمالي الحفر م³", r.totalCut.toFixed(2), "bad"], ["إجمالي الردم م³", r.totalFill.toFixed(2), "ok"], ["الفرق (حفر − ردم×معامل) م³", r.netBalance.toFixed(2)]]) +
+      `<p class="hint">${esc(r.method)}. ${esc(r.balanceNote)}</p>` + table(volCols, r.rows);
+    $("#vol-csv").disabled = false;
+  } catch (err) { showError(out, err); }
+}
+$("#vol-run").onclick = runVolumes;
+bindCsv($("#vol-csv"), "volumes.csv", () => volLast);
+$("#vol-file").onchange = async (e) => {
+  try {
+    const rows = await loadRows(e.target);
+    $("#vol-rows").value = rows.map((r) => [r.chainage ?? "", r.cutArea ?? 0, r.fillArea ?? 0].join(",")).join("\n");
+  } catch (err) { showError($("#vol-out"), err); }
+};
+
+// ---------- data review ----------
+let rvLast = null;
+$("#rv-type").onchange = () => {
+  const t = $("#rv-type").value;
+  $("#rv-p1-l span").textContent = t === "validate_points" ? "حد المنسوب الشاذ (م)" : t === "validate_profile" ? "حد القفزة في المنسوب (م)" : "التفاوت المسموح ± (مم)";
+  $("#rv-p1").value = t === "validate_points" ? 0.5 : t === "validate_profile" ? 0.3 : 20;
+  $("#rv-p2-l").hidden = t !== "validate_profile";
+};
+$("#rv-file").onchange = async (e) => {
+  const out = $("#rv-out");
+  out.innerHTML = '<span class="typing">بيقرأ ويراجع…</span>';
+  try {
+    const f = firstDataFile(await ingestFile(e.target.files[0]));
+    e.target.value = "";
+    const tool = $("#rv-type").value;
+    const p1 = numOrUndef($("#rv-p1").value);
+    const input = { fileId: f.id };
+    if (tool === "validate_points") input.zThreshold = p1;
+    if (tool === "validate_profile") Object.assign(input, { spikeThreshold: p1, maxGradePercent: numOrUndef($("#rv-p2").value) });
+    if (tool === "check_tolerances") input.toleranceMm = p1;
+    const r = calc(tool, input);
+    let html = `<p class="hint">${esc(f.name)}: ${esc(summarise(f).split("\n")[0])}</p>`;
+    if (tool === "check_tolerances") {
+      const cols = [{ key: "id", label: "النقطة" }, { key: "designLevel", label: "تصميمي", num: 1 }, { key: "actualLevel", label: "منفذ", num: 1 }, { key: "diffMm", label: "الفرق مم", num: 1, d: 1 }, { key: "status", label: "الحالة" }];
+      rvLast = { columns: cols, rows: r.rows };
+      html += `<div>${stamp(!r.failed, r.failed ? `${r.failed} نقطة خارج التفاوت` : "كل النقاط مقبولة", `TOLERANCE ±${r.toleranceMm} mm`)}</div>`;
+      html += readouts([["إجمالي", r.total], ["مقبول", r.passed, "ok"], ["مرفوض", r.failed, r.failed ? "bad" : "ok"]]) + table(cols, r.rows, (x) => (x.status !== "مقبول" ? "sev-high" : ""));
+    } else {
+      const key = tool === "validate_points" ? "point" : "chainage";
+      const cols = [{ key: "severity", label: "الخطورة" }, { key: "type", label: "النوع" }, { key, label: tool === "validate_points" ? "النقطة" : "المحطة" }, { key: "row", label: "السطر" }, { key: "detail", label: "التفاصيل" }];
+      rvLast = { columns: cols, rows: r.issues };
+      const high = r.issues.filter((x) => x.severity === "عالي").length;
+      html += `<div>${stamp(!r.issueCount, r.issueCount ? `${r.issueCount} ملاحظة` : "الداتا سليمة", high ? `${high} HIGH SEVERITY` : "QC CHECK")}</div>`;
+      const items = [["الصفوف", r.totalRows], ["السليمة", r.validPoints ?? r.validRows], ["الملاحظات", r.issueCount, r.issueCount ? "bad" : "ok"]];
+      if (r.stats) items.push(["أقل منسوب", r.stats.minZ.toFixed(3)], ["أعلى منسوب", r.stats.maxZ.toFixed(3)]);
+      html += readouts(items);
+      if (r.issueCount) html += table(cols, r.issues, (x) => (x.severity === "عالي" ? "sev-high" : ""));
+    }
+    out.innerHTML = panel("QC", "تقرير المراجعة", html);
+    $("#rv-csv").disabled = false;
+  } catch (err) { showError(out, err); }
+};
+bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
+
+// Open in a working state: the example rows are already in the forms.
+runLevel();
+runProfile();
+runSection();
+runVolumes();
+
+</script>
+
+</body>
+</html>
