@@ -8,199 +8,223 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Kufi+Arabic:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
+<script>
+  // Before first paint: saved theme, and the sign-in gate on the public site.
+  try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+  if (!(window.claude && typeof window.claude.use === "function")) document.documentElement.classList.add("gate");
+</script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
 <style>
-/* Layout: the page is a drawing sheet. Title block on top, sheet tabs as a drawing register,
-   each tool a framed panel on drafting grid paper; dark mode is CAD model space. */
+/* Layout: a dark engineering workstation. Glass header with the tool tabs, each tool a card,
+   every drawing a 3D model you can turn, with the exact 2D sheet one click away. */
 :root {
-  --paper: #f3f5f2;
-  --grid-minor: #e3e9e6;
-  --grid-major: #d2dbd7;
-  --sheet: #fcfdfb;
-  --ink: #15212b;
-  --muted: #56646e;
-  --line: #9aa8b1;
-  --hair: #cfd8dc;
-  --accent: #1d5d8c;
-  --accent-soft: #e3edf5;
-  --cut: #b8401c;
-  --cut-soft: #f9e6de;
-  --fill: #2c7a4b;
-  --fill-soft: #e1f1e7;
-  --warn: #8a5a00;
-  --warn-soft: #fff2d6;
-  --ground: #7a4f22;
-  --design: #1d5d8c;
-  --mark: #e0b21c;
-  --mark-rib: #c99c0e;
-  --mark-brim: #d4a714;
-  --shine: #ffffff;
-  --sky-top: #d9e6ef;
-  --sky-bottom: #f7eedc;
-  --sun: #f3c66b;
-  --skyline: #c9d4dc;
-  --earth: #e6dccb;
-  --steel: #3c4a55;
-  --shadow: rgba(21, 33, 43, .08);
+  --paper: #090e13;
+  --sheet: #10171f;
+  --sheet-2: #16202a;
+  --ink: #e6edf4;
+  --muted: #8b9aaa;
+  --line: #273544;
+  --hair: #1c2733;
+  --accent: #3cc8f0;
+  --accent-2: #7c8cff;
+  --accent-soft: rgba(60, 200, 240, .12);
+  --cut: #ff7b5c;
+  --cut-soft: rgba(255, 123, 92, .13);
+  --fill: #4fd98b;
+  --fill-soft: rgba(79, 217, 139, .12);
+  --warn: #f7c04a;
+  --warn-soft: rgba(247, 192, 74, .12);
+  --ground: #d9a35f;
+  --design: #3cc8f0;
+  --mark: #f5c518;
+  --asphalt: #2b333d;
+  --earth: #6e5137;
+  --earth-2: #8a6a45;
+  --steel: #9aa9b7;
+  --hemi-ground: #1b1510;
+  --shadow: rgba(0, 0, 0, .55);
+  --glow: rgba(60, 200, 240, .28);
+  --radius: 16px;
   --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
   --f-head: "Noto Kufi Arabic", "IBM Plex Sans Arabic", Tahoma, sans-serif;
   --f-num: "IBM Plex Mono", Consolas, "Courier New", monospace;
+  color-scheme: dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0d1216; --grid-minor: #141c22; --grid-major: #1b252d; --sheet: #111920;
-    --ink: #dbe5ec; --muted: #8fa0ac; --line: #4a5a66; --hair: #26323b;
-    --accent: #4fc0e8; --accent-soft: #12303d; --cut: #ff7d5a; --cut-soft: #3a1d15;
-    --fill: #5fd391; --fill-soft: #133222; --warn: #f2c35e; --warn-soft: #362a10;
-    --ground: #e0a96a; --design: #4fc0e8; --mark: #e8c547; --mark-rib: #c9a72f; --mark-brim: #d7b43a; --sky-top: #07111a; --sky-bottom: #17283a; --sun: #e9e4cf; --skyline: #1c2a36; --earth: #1a2228; --steel: #8a9aa6; --shadow: rgba(0, 0, 0, .45); color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #0d1216; --grid-minor: #141c22; --grid-major: #1b252d; --sheet: #111920;
-  --ink: #dbe5ec; --muted: #8fa0ac; --line: #4a5a66; --hair: #26323b;
-  --accent: #4fc0e8; --accent-soft: #12303d; --cut: #ff7d5a; --cut-soft: #3a1d15;
-  --fill: #5fd391; --fill-soft: #133222; --warn: #f2c35e; --warn-soft: #362a10;
-  --ground: #e0a96a; --design: #4fc0e8; --mark: #e8c547; --mark-rib: #c9a72f; --mark-brim: #d7b43a; --sky-top: #07111a; --sky-bottom: #17283a; --sun: #e9e4cf; --skyline: #1c2a36; --earth: #1a2228; --steel: #8a9aa6; --shadow: rgba(0, 0, 0, .45); color-scheme: dark;
+:root[data-theme="light"] {
+  --paper: #eef2f6; --sheet: #ffffff; --sheet-2: #f4f7fa; --ink: #13202b; --muted: #5a6876; --line: #cfd8e1; --hair: #e3e9ef;
+  --accent: #0b7fb5; --accent-2: #4f5bd5; --accent-soft: rgba(11, 127, 181, .1); --cut: #c2461f; --cut-soft: rgba(194, 70, 31, .1);
+  --fill: #1f8a4c; --fill-soft: rgba(31, 138, 76, .1); --warn: #8f600a; --warn-soft: rgba(247, 192, 74, .18);
+  --ground: #8a5a26; --design: #0b7fb5; --mark: #e0b21c; --asphalt: #5b6570; --earth: #c9ae8b; --earth-2: #b39469; --steel: #4a5866;
+  --hemi-ground: #8a7a66; --shadow: rgba(20, 35, 50, .14); --glow: rgba(11, 127, 181, .18); color-scheme: light;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--paper); }
 body {
+  margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; direction: rtl;
   background-color: var(--paper);
   background-image:
-    linear-gradient(var(--grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-    linear-gradient(var(--grid-minor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
-  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-  color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.65; direction: rtl;
+    radial-gradient(900px 500px at 85% -10%, var(--glow), transparent 60%),
+    radial-gradient(700px 420px at 0% 10%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 60%),
+    linear-gradient(color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px);
+  background-size: auto, auto, 48px 48px, 48px 48px;
+  background-attachment: fixed;
 }
-/* Without the claude.ai viewer (public site) the assistant is hidden. */
 .no-ai [data-ai] { display: none !important; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sheet); }
-.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ---- title block ---- */
-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--sheet); border-bottom: 2px solid var(--ink); box-shadow: 0 6px 18px var(--shadow); }
-header::after { content: ""; position: absolute; inset: auto 0 -7px; height: 5px; background: repeating-linear-gradient(-45deg, var(--mark) 0 10px, var(--ink) 10px 20px); }
-header .wrap { padding-block: 10px 0; }
-.titleblock { display: grid; grid-template-columns: minmax(0, 2.2fr) repeat(4, minmax(0, 1fr)); border: 1.5px solid var(--ink); }
-.titleblock > div { padding: 5px 10px; border-inline-start: 1px solid var(--line); min-width: 0; }
-.titleblock > div:first-child { border-inline-start: 0; }
-.tb-label { display: block; font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
-.tb-value { display: block; font-family: var(--f-num); font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-h1 { margin: 0; font-family: var(--f-head); font-size: 19px; font-weight: 700; line-height: 1.4; }
-.tb-name small { display: block; color: var(--muted); font-size: 12px; }
+/* ---- header ---- */
+header {
+  position: sticky; top: 0; z-index: 20; padding-top: env(safe-area-inset-top, 0px);
+  background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid var(--line);
+}
+.bar { display: flex; align-items: center; gap: 14px; padding-block: 10px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.logo { width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 20px var(--glow); }
+.logo svg { width: 22px; height: 22px; }
+h1 { margin: 0; font-family: var(--f-head); font-size: 18px; font-weight: 800; line-height: 1.3; }
+.brand small { display: block; color: var(--muted); font-size: 12px; }
+.bar .grow { flex: 1; }
+.meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.pill { font-family: var(--f-num); font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; white-space: nowrap; background: var(--sheet); }
+.pill b { color: var(--ink); font-weight: 500; }
 #ai-status.on { color: var(--fill); }
 #ai-status.off { color: var(--cut); }
-@media (max-width: 760px) {
-  .titleblock { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .titleblock > div:first-child { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
-  .titleblock > div:nth-child(2n) { border-inline-start: 0; }
-  .titleblock > div:nth-child(n+2) { border-top: 1px solid var(--line); }
-}
-nav { display: flex; gap: 0; overflow-x: auto; margin-top: 8px; }
+.user { display: flex; align-items: center; gap: 6px; }
+.user .pill { max-width: 220px; overflow: hidden; text-overflow: ellipsis; direction: ltr; }
+button.ghost { font: inherit; font-size: 12.5px; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; white-space: nowrap; }
+button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
 nav button {
-  font: inherit; font-weight: 500; cursor: pointer; white-space: nowrap; background: transparent; color: var(--muted);
-  border: 1px solid transparent; border-bottom: 0; padding: 6px 14px 7px; display: flex; align-items: baseline; gap: 8px; border-radius: 0;
+  font: inherit; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; color: var(--muted);
+  background: transparent; border: 1px solid transparent; border-radius: 12px; padding: 7px 14px; display: flex; align-items: center; gap: 8px; transition: .15s;
 }
-nav button .code { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .05em; }
-nav button[aria-selected="true"] { color: var(--ink); background: var(--paper); border-color: var(--ink); position: relative; top: 2px; }
-nav button[aria-selected="true"] .code { color: var(--accent); }
-nav button[aria-selected="true"]::after { content: ""; position: absolute; inset: auto -1px -3px; height: 3px; background: var(--mark); }
+nav button:hover { color: var(--ink); background: var(--sheet); }
+nav button .code { font-family: var(--f-num); font-size: 10.5px; letter-spacing: .06em; padding: 1px 6px; border-radius: 6px; background: var(--sheet-2); color: var(--muted); }
+nav button[aria-selected="true"] { color: var(--ink); background: var(--sheet); border-color: var(--line); box-shadow: inset 0 -2px 0 var(--accent), 0 6px 18px -10px var(--glow); }
+nav button[aria-selected="true"] .code { background: var(--accent-soft); color: var(--accent); }
 
-/* ---- sheet panels ---- */
-main .wrap { padding-block: 26px 40px; display: flex; flex-direction: column; gap: 18px; }
+/* ---- cards ---- */
+main .wrap { padding-block: 24px 40px; display: flex; flex-direction: column; gap: 18px; }
 .tab { display: flex; flex-direction: column; gap: 18px; }
-.tab[hidden] { display: none !important; }
-.panel { position: relative; background: var(--sheet); border: 1px solid var(--line); padding: 18px 18px 16px; min-width: 0; box-shadow: 0 1px 0 var(--line), 0 10px 28px -14px var(--shadow); }
-.panel::before, .panel::after { content: ""; position: absolute; width: 12px; height: 12px; border-color: var(--ink); border-style: solid; }
-.panel::before { top: -1px; inset-inline-start: -1px; border-width: 2px 0 0 0; border-inline-start-width: 2px; }
-.panel::after { bottom: -1px; inset-inline-end: -1px; border-width: 0 0 2px 0; border-inline-end-width: 2px; }
-h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-family: var(--f-head); font-size: 16px; font-weight: 600; text-wrap: balance; }
-h2 .callout { flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1.5px solid var(--ink); border-radius: 50%; font-family: var(--f-num); font-size: 11px; font-weight: 600; letter-spacing: .03em; background: var(--sheet); }
-h2::after { content: ""; flex: 1; height: 0; border-top: 1px solid var(--line); min-width: 24px; }
-h3 { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; margin: 16px 0 6px; color: var(--muted); }
+.panel {
+  position: relative; min-width: 0; padding: 20px; border-radius: var(--radius); border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sheet) 96%, var(--accent)) 0%, var(--sheet) 120px);
+  box-shadow: 0 1px 0 color-mix(in srgb, white 4%, transparent) inset, 0 24px 48px -28px var(--shadow);
+}
+h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; font-family: var(--f-head); font-size: 16.5px; font-weight: 700; text-wrap: balance; }
+h2 .callout { flex: none; display: inline-grid; place-items: center; min-width: 36px; height: 28px; padding: 0 8px; border-radius: 9px; font-family: var(--f-num); font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--accent); background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+h3 { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; margin: 18px 0 6px; color: var(--muted); }
 
-label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 12.5px; }
+label { display: flex; flex-direction: column; gap: 5px; color: var(--muted); font-size: 12.5px; }
 label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--ink); }
 label.block { margin-block: 6px; }
-input, textarea, select { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 2px; padding: 7px 9px; width: 100%; }
+input, textarea, select { font: inherit; color: var(--ink); background: var(--sheet-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 11px; width: 100%; transition: border-color .15s, box-shadow .15s; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 input[type="checkbox"] { width: auto; accent-color: var(--accent); }
 textarea.data, input[type="number"] { font-family: var(--f-num); font-size: 13.5px; font-variant-numeric: tabular-nums; }
-textarea.data { direction: ltr; text-align: left; resize: vertical; line-height: 1.55; }
-:focus-visible { outline: 2px solid var(--mark); outline-offset: 1px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+textarea.data { direction: ltr; text-align: left; resize: vertical; line-height: 1.6; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .two > * { min-width: 0; }
 @media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
 button.primary, .file-btn {
-  font: inherit; font-weight: 600; background: var(--ink); color: var(--sheet); border: 1.5px solid var(--ink); border-radius: 2px;
-  padding: 7px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: .01em;
+  font: inherit; font-weight: 600; color: #04131b; border: 0; border-radius: 11px; padding: 8px 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent-2))); box-shadow: 0 8px 22px -10px var(--glow); transition: transform .12s, filter .12s;
 }
-button.secondary, .file-btn.secondary { background: transparent; color: var(--ink); }
-button.primary:hover, .file-btn:hover { border-color: var(--accent); }
-button:disabled { opacity: .4; cursor: default; }
+:root[data-theme="light"] button.primary, :root[data-theme="light"] .file-btn { color: #fff; }
+button.primary:hover, .file-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+button.secondary, .file-btn.secondary { background: var(--sheet-2); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+button:disabled { opacity: .4; cursor: default; transform: none; }
 button.link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; padding: 4px; }
 .hint { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
-.notice { border: 1px solid var(--warn); background: var(--warn-soft); color: var(--warn); padding: 8px 12px; }
-.error { border: 1px solid var(--cut); background: var(--cut-soft); color: var(--cut); padding: 8px 12px; }
+.notice { border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); background: var(--warn-soft); color: var(--warn); padding: 9px 13px; border-radius: 11px; }
+.error { border: 1px solid color-mix(in srgb, var(--cut) 45%, transparent); background: var(--cut-soft); color: var(--cut); padding: 9px 13px; border-radius: 11px; }
 .ok { color: var(--fill); }
 .bad { color: var(--cut); }
 .out { overflow-x: auto; }
 
-/* ---- schedules (tables) ---- */
-table { border-collapse: collapse; width: 100%; background: var(--sheet); margin: 8px 0 4px; font-size: 13px; border: 1.5px solid var(--ink); }
-th, td { border: 1px solid var(--hair); padding: 5px 9px; text-align: center; white-space: nowrap; }
-th { font-weight: 600; font-size: 12px; border-bottom: 1.5px solid var(--ink); background: var(--accent-soft); }
+/* ---- tables ---- */
+table { border-collapse: separate; border-spacing: 0; width: 100%; margin: 8px 0 4px; font-size: 13px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+th, td { border-bottom: 1px solid var(--hair); padding: 7px 10px; text-align: center; white-space: nowrap; }
+th { font-weight: 600; font-size: 12px; color: var(--muted); background: var(--sheet-2); border-bottom: 1px solid var(--line); }
 td.num { direction: ltr; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
-tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--paper) 55%, transparent); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--accent-soft); }
 tr.sev-high td { background: var(--cut-soft) !important; }
 
 /* ---- readouts & stamps ---- */
-.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1.5px solid var(--ink); margin-block: 10px; }
-.readout { padding: 8px 12px; border-inline-start: 1px solid var(--hair); min-width: 0; }
-.readout:first-child { border-inline-start: 0; }
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-block: 12px; }
+.readout { padding: 10px 14px; min-width: 0; border-radius: 12px; border: 1px solid var(--line); background: var(--sheet-2); }
 .readout small { display: block; color: var(--muted); font-size: 11.5px; }
-.readout b { display: block; font-family: var(--f-num); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; overflow-wrap: anywhere; }
-.stamp { display: inline-flex; flex-direction: column; align-items: center; gap: 0; padding: 4px 14px; border: 2px solid currentColor; outline: 1px solid currentColor; outline-offset: 2px; transform: rotate(-3deg); font-family: var(--f-head); font-weight: 700; font-size: 15px; line-height: 1.4; margin: 8px 6px 4px; }
-.stamp small { font-family: var(--f-num); font-size: 10.5px; font-weight: 500; letter-spacing: .06em; }
+.readout b { display: block; font-family: var(--f-num); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; direction: ltr; text-align: right; overflow-wrap: anywhere; }
+.stamp { display: inline-flex; flex-direction: column; align-items: center; padding: 6px 16px; border-radius: 12px; border: 1px solid currentColor; font-family: var(--f-head); font-weight: 700; font-size: 14.5px; line-height: 1.4; margin: 4px 0 4px 8px; background: color-mix(in srgb, currentColor 10%, transparent); }
+.stamp small { font-family: var(--f-num); font-size: 10.5px; font-weight: 500; letter-spacing: .08em; opacity: .85; }
 .stamp.ok { color: var(--fill); }
 .stamp.bad { color: var(--cut); }
 
-/* ---- RFI log (assistant) ---- */
+/* ---- assistant ---- */
 #chat-log { display: flex; flex-direction: column; gap: 14px; min-height: 36vh; }
 .msg { display: flex; flex-direction: column; max-width: 94%; min-width: 0; }
 .msg.user { align-self: flex-start; }
 .msg.assistant { align-self: flex-end; }
 .msg .who { font-family: var(--f-num); font-size: 11px; color: var(--muted); letter-spacing: .05em; margin-bottom: 3px; }
-.bubble { background: var(--sheet); border: 1px solid var(--line); border-inline-start: 3px solid var(--accent); padding: 10px 14px; overflow-x: auto; min-width: 0; }
-.msg.user .bubble { border-inline-start-color: var(--mark); background: var(--paper); }
+.bubble { background: var(--sheet-2); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; overflow-x: auto; min-width: 0; }
+.msg.user .bubble { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
 .bubble table td, .bubble table th { white-space: normal; }
-.bubble pre { background: var(--paper); border: 1px solid var(--hair); padding: 8px; direction: ltr; text-align: left; overflow-x: auto; font-family: var(--f-num); font-size: 12px; }
+.bubble pre { background: var(--paper); border: 1px solid var(--hair); border-radius: 8px; padding: 8px; direction: ltr; text-align: left; overflow-x: auto; font-family: var(--f-num); font-size: 12px; }
 .bubble code { font-family: var(--f-num); }
-details.trail { margin-top: 8px; font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--hair); padding-top: 6px; }
+details.trail { margin-top: 8px; font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 6px; }
 details.trail summary { cursor: pointer; font-family: var(--f-num); }
 details.trail pre { max-height: 280px; overflow: auto; }
 #chat-form { display: flex; gap: 8px; align-items: stretch; margin-top: 12px; }
 #chat-form textarea { min-height: 54px; }
-.attach { font-size: 12.5px; cursor: pointer; padding: 8px 12px; border: 1px dashed var(--line); color: var(--muted); white-space: nowrap; display: flex; align-items: center; }
+.attach { font-size: 12.5px; cursor: pointer; padding: 8px 12px; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); white-space: nowrap; display: flex; align-items: center; }
 #attachments { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.chip { border: 1px solid var(--line); background: var(--paper); padding: 2px 8px; font-size: 12px; font-family: var(--f-num); display: inline-flex; gap: 6px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--sheet-2); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-family: var(--f-num); display: inline-flex; gap: 6px; align-items: center; }
 .chip button { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 0 2px; }
 .typing { color: var(--muted); font-style: italic; }
 
-/* ---- drawings (charts) ---- */
-.drawing { border: 1.5px solid var(--ink); background: var(--sheet); margin-block: 12px; overflow-x: auto; }
+/* ---- drawing cards (3D + 2D) ---- */
+.viz { margin: 14px 0 4px; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--sheet); }
+.viz-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--sheet-2); flex-wrap: wrap; }
+.viz-title { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; }
+.viz-bar .grow { flex: 1; }
+.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); direction: ltr; }
+.seg button { font: inherit; font-family: var(--f-num); font-size: 12px; font-weight: 600; padding: 3px 12px; border-radius: 7px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #04131b; }
+:root[data-theme="light"] .seg button[aria-pressed="true"] { color: #fff; }
+.viz-3d {
+  position: relative; height: clamp(320px, 52vw, 480px); cursor: grab; touch-action: none;
+  background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 10%, var(--sheet)) 0%, var(--paper) 75%);
+}
+.viz-3d:active { cursor: grabbing; }
+.v3-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
+.viz-legend { position: absolute; top: 10px; inset-inline-start: 10px; z-index: 1; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; max-width: calc(100% - 20px); }
+.viz-legend .k, .legend-k { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: color-mix(in srgb, var(--sheet) 82%, transparent); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+.viz-legend .k::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--c); }
+.k.ground { --c: var(--ground); } .k.design { --c: var(--design); } .k.cut { --c: var(--cut); } .k.fill { --c: var(--fill); } .k.mark { --c: var(--mark); }
+.viz-hint { position: absolute; bottom: 10px; inset-inline-end: 12px; z-index: 1; font-size: 11.5px; color: var(--muted); pointer-events: none; transition: opacity .4s; background: color-mix(in srgb, var(--sheet) 70%, transparent); padding: 2px 9px; border-radius: 999px; }
+.viz-3d.touched .viz-hint { opacity: 0; }
+.viz-note { font-size: 12px; color: var(--muted); padding: 7px 12px; border-top: 1px solid var(--line); }
+.viz-2d { overflow-x: auto; }
+
+/* 2D sheets inside cards keep their drawing-sheet look */
+.drawing { margin: 0; background: var(--sheet); overflow-x: auto; }
 .drawing svg { display: block; width: 100%; min-width: 640px; height: auto; }
-.drawing .cap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--ink); padding: 5px 10px; font-size: 12px; }
+.drawing .cap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding: 6px 12px; font-size: 12px; }
 .drawing .cap b { font-family: var(--f-head); font-weight: 600; }
 .drawing .cap span { font-family: var(--f-num); color: var(--muted); }
 svg text { font-family: var(--f-num); font-size: 11px; fill: var(--muted); }
 svg .gl { stroke: var(--hair); stroke-width: 1; fill: none; }
-svg .frame { stroke: var(--ink); stroke-width: 1.2; fill: none; }
+svg .frame { stroke: var(--line); stroke-width: 1.2; fill: none; }
 svg .ground { stroke: var(--ground); fill: none; stroke-width: 1.8; }
 svg .design { stroke: var(--design); fill: none; stroke-width: 2.2; }
 svg .hatch-cut { stroke: var(--cut); stroke-width: 1; }
@@ -216,86 +240,92 @@ svg .key-cut { fill: var(--cut); }
 svg .key-fill { fill: var(--fill); }
 svg .vpi { fill: var(--sheet); stroke: var(--design); stroke-width: 1.5; }
 
-/* ---- welcome card ---- */
-.welcome { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 22px; align-items: center; }
-@media (max-width: 640px) { .welcome { grid-template-columns: 1fr; } .welcome .hat { max-width: 200px; margin-inline: auto; } }
-.welcome .hat { width: 100%; height: auto; display: block; }
-.hat .shell { fill: var(--mark); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
-.hat .rib { fill: var(--mark-rib); stroke: var(--ink); stroke-width: 1.6; }
-.hat .brim { fill: var(--mark-brim); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
-.hat .shine { fill: none; stroke: var(--shine); stroke-width: 3; stroke-linecap: round; opacity: .55; }
-.hat .bm { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.4; }
-.hat .bm-tri { fill: var(--ink); }
-.hat .cl { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 9 3 2 3; }
-.hat .dim { stroke: var(--muted); stroke-width: 1; fill: none; }
-.hat .dim-arrow { fill: var(--muted); }
-.hat text { font-family: var(--f-num); font-size: 10px; fill: var(--muted); }
-.hat .lift { animation: settle .9s ease-out both; transform-box: fill-box; transform-origin: 50% 100%; }
-.tab, #welcome { scroll-margin-top: 150px; }
-@keyframes settle { from { transform: translateY(-7px) rotate(-2deg); } to { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .hat .lift { animation: none; } }
-.welcome .eyebrow { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .08em; color: var(--accent); margin: 0; }
-.welcome h2.greet { margin: 2px 0 8px; font-size: 24px; font-weight: 700; }
-.welcome h2.greet::after { display: none; }
-.welcome p.lead { margin: 0 0 12px; max-width: 62ch; }
+/* ---- welcome (3D site) ---- */
+.hero { padding: 0; overflow: hidden; }
+.hero-3d { position: relative; height: clamp(300px, 46vw, 470px); cursor: grab; touch-action: pan-y;
+  background: radial-gradient(120% 100% at 70% 0%, color-mix(in srgb, var(--accent) 22%, var(--paper)) 0%, var(--paper) 70%); }
+.hero-3d.flat { background: radial-gradient(120% 100% at 70% 0%, color-mix(in srgb, var(--accent) 30%, var(--paper)) 0%, var(--paper) 70%), var(--paper); }
+.hero-3d::after { content: ""; position: absolute; inset: auto 0 0; height: 45%; pointer-events: none; background: linear-gradient(transparent, var(--sheet)); }
+.hero-body { position: relative; margin-top: -120px; padding: 0 22px 22px; z-index: 1; pointer-events: none; }
+.hero-body > * { pointer-events: auto; }
+.eyebrow { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .14em; color: var(--accent); margin: 0; }
+h2.greet { margin: 2px 0 8px; font-size: clamp(24px, 4vw, 34px); font-weight: 800; line-height: 1.35; }
+.lead { margin: 0 0 14px; max-width: 64ch; color: color-mix(in srgb, var(--ink) 85%, var(--muted)); }
 .quick { display: flex; flex-wrap: wrap; gap: 8px; }
-.quick button { font: inherit; font-size: 13.5px; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 2px; padding: 6px 12px; cursor: pointer; display: inline-flex; gap: 8px; align-items: baseline; }
-.quick button:hover { border-color: var(--ink); }
-.quick button .code { font-family: var(--f-num); font-size: 11px; color: var(--accent); }
-.safety { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--hair); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-.safety .tape { width: 46px; height: 10px; flex: none; background: repeating-linear-gradient(-45deg, var(--mark) 0 6px, var(--ink) 6px 12px); }
+.quick button { font: inherit; font-size: 13.5px; background: color-mix(in srgb, var(--sheet-2) 85%, transparent); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 7px 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; backdrop-filter: blur(6px); transition: .15s; }
+.quick button:hover { border-color: var(--accent); transform: translateY(-1px); }
+.quick button .code { font-family: var(--f-num); font-size: 10.5px; color: var(--accent); padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); }
+.safety { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.safety .tape { width: 46px; height: 10px; flex: none; border-radius: 3px; background: repeating-linear-gradient(-45deg, var(--mark) 0 6px, #111 6px 12px); }
 .safety .grow { flex: 1; min-width: 160px; }
 
-footer { position: relative; background: var(--ink); color: var(--paper); font-size: 12.5px; padding: 18px 18px 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px 20px; margin-top: 8px; }
-footer::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; background: repeating-linear-gradient(-45deg, var(--mark) 0 10px, var(--ink) 10px 20px); }
-footer .sign-title { grid-column: 1 / -1; font-family: var(--f-head); font-size: 15px; font-weight: 700; color: var(--mark); margin-top: 4px; }
+footer { border-radius: var(--radius); border: 1px solid var(--line); background: var(--sheet); font-size: 12.5px; padding: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px 20px; margin-top: 8px; }
+footer .sign-title { grid-column: 1 / -1; font-family: var(--f-head); font-size: 15px; font-weight: 700; color: var(--accent); }
 footer dl { margin: 0; }
-footer dt { font-size: 10.5px; opacity: .7; letter-spacing: .05em; }
-footer dd { margin: 0; font-family: var(--f-body); }
+footer dt { font-size: 10.5px; color: var(--muted); letter-spacing: .05em; }
+footer dd { margin: 0; }
 footer dd.mono { font-family: var(--f-num); direction: ltr; text-align: right; }
-footer .note { grid-column: 1 / -1; opacity: .85; border-top: 1px solid rgba(255,255,255,.18); padding-top: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-footer .link { color: var(--mark); }
+footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
-/* ---- site panorama ---- */
-.panorama { display: block; width: calc(100% + 36px); height: auto; margin: -18px -18px 18px; border-bottom: 1.5px solid var(--ink); }
-.panorama .sky-a { stop-color: var(--sky-top); }
-.panorama .sky-b { stop-color: var(--sky-bottom); }
-.panorama .sun { fill: var(--sun); }
-.panorama .skyline { fill: var(--skyline); }
-.panorama .earth { fill: var(--earth); stroke: var(--ink); stroke-width: 1.4; }
-.panorama .st { stroke: var(--steel); stroke-width: 1.6; fill: none; stroke-linecap: square; }
-.panorama .st-thin { stroke: var(--steel); stroke-width: .9; fill: none; }
-.panorama .ink { stroke: var(--ink); stroke-width: 1.5; fill: none; stroke-linejoin: round; }
-.panorama .solid { fill: var(--ink); }
-.panorama .slab { fill: var(--sheet); stroke: var(--steel); stroke-width: 1.2; }
-.panorama .embank { stroke: var(--ink); stroke-width: 1.4; }
-.panorama .hatch-fill { stroke: var(--fill); stroke-width: 1; }
-.panorama .design-l { stroke: var(--design); stroke-width: 2; }
-.panorama .laser { stroke: var(--cut); stroke-width: 1.4; stroke-dasharray: 7 5; animation: beam 1.4s linear infinite; }
-@keyframes beam { to { stroke-dashoffset: -24; } }
-.panorama .prism { fill: var(--sheet); stroke: var(--ink); stroke-width: 1.4; }
-.panorama .staff-red { fill: var(--cut); }
-.panorama .staff-white { fill: var(--sheet); stroke: var(--ink); stroke-width: .8; }
-.panorama .load { fill: var(--mark); stroke: var(--ink); stroke-width: 1; }
-.panorama .cab { fill: var(--mark); stroke: var(--ink); stroke-width: 1.2; }
-.panorama .tag { fill: var(--sheet); stroke: var(--ink); stroke-width: .8; }
-.panorama text { font-family: var(--f-num); font-size: 11px; fill: var(--ink); }
-.panorama text.dim { fill: var(--cut); font-weight: 600; }
-.panorama .win { fill: var(--mark); opacity: 0; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .panorama .win { opacity: .85; } }
-:root[data-theme="dark"] .panorama .win { opacity: .85; }
-@media (prefers-reduced-motion: reduce) { .panorama .laser { animation: none; } }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+/* ---- sign-in gate (public site) ---- */
+.auth { display: none; }
+.gate .auth { display: grid; place-items: center; position: fixed; inset: 0; z-index: 50; padding: 16px; overflow-y: auto;
+  background: radial-gradient(800px 500px at 80% 0%, var(--glow), transparent 60%), radial-gradient(700px 500px at 0% 100%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 60%), var(--paper); }
+.gate header, .gate main { visibility: hidden; }
+.auth-card { width: min(420px, 100%); padding: 28px 24px 22px; border-radius: 22px; border: 1px solid var(--line); background: color-mix(in srgb, var(--sheet) 90%, transparent); backdrop-filter: blur(14px); box-shadow: 0 30px 80px -30px var(--shadow); }
+.auth-card .logo { width: 52px; height: 52px; border-radius: 15px; margin-bottom: 14px; }
+.auth-card .logo svg { width: 30px; height: 30px; }
+.auth-card h2 { font-size: 22px; margin: 0 0 4px; }
+.auth-card p.sub { margin: 0 0 18px; color: var(--muted); }
+.auth-card form { display: flex; flex-direction: column; gap: 12px; }
+.auth-card input { font-size: 16px; padding: 11px 13px; }
+#auth-code { font-family: var(--f-num); font-size: 22px; letter-spacing: .4em; text-align: center; }
+.auth-card button.primary { justify-content: center; padding: 11px 20px; font-size: 15px; }
+.auth-card .fine { font-size: 11.5px; color: var(--muted); margin: 14px 0 0; }
+
+@media (max-width: 640px) {
+  .meta .pill.opt { display: none; }
+  .hero-body { margin-top: -90px; padding: 0 16px 18px; }
+  .panel { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
 </style>
+
+<div id="auth" class="auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+  <div class="auth-card">
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
+    <h2 id="auth-title">أهلاً يا هندسة</h2>
+    <p class="sub">سجّل دخولك بإيميلك عشان تستخدم المهندس المساعد. هنبعتلك كود دخول، من غير باسورد.</p>
+    <form id="auth-email-form">
+      <label for="auth-email">الإيميل<input id="auth-email" type="email" required autocomplete="email" inputmode="email" dir="ltr" placeholder="name@example.com"></label>
+      <button class="primary" type="submit">ابعتلي كود الدخول</button>
+    </form>
+    <form id="auth-code-form" hidden>
+      <label for="auth-code">اكتب الكود اللي وصل على <b id="auth-sent-to" dir="ltr"></b><input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" dir="ltr" placeholder="••••••"></label>
+      <button class="primary" type="submit">دخول</button>
+      <button type="button" class="link" id="auth-back">غيّر الإيميل</button>
+    </form>
+    <p id="auth-msg" class="hint" role="status"></p>
+    <p class="fine">إيميلك بيتستخدم لتسجيل الدخول بس. الملفات اللي بترفعها بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
+  </div>
+</div>
 
 <header>
   <div class="wrap">
-    <div class="titleblock">
-      <div class="tb-name"><h1>المهندس المساعد</h1><small>مساعد مهندس المساحة في الموقع</small></div>
-      <div><span class="tb-label">الوحدات</span><span class="tb-value" dir="ltr">m · mm · m² · m³</span></div>
-      <div><span class="tb-label">دقة المناسيب</span><span class="tb-value" dir="ltr">± 0.001 m</span></div>
-      <div><span class="tb-label">التاريخ</span><span class="tb-value" id="tb-date">—</span></div>
-      <div data-ai><span class="tb-label">المساعد الذكي</span><span class="tb-value" id="ai-status">بيتصل…</span></div>
+    <div class="bar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
+        <div><h1>المهندس المساعد</h1><small>أدوات مهندس المساحة في الموقع</small></div>
+      </div>
+      <span class="grow"></span>
+      <div class="meta">
+        <span class="pill opt" dir="ltr">m · mm · m² · m³</span>
+        <span class="pill opt" dir="ltr">± 0.001 m</span>
+        <span class="pill opt" id="tb-date" dir="ltr">—</span>
+        <span class="pill" data-ai>المساعد: <b id="ai-status">بيتصل…</b></span>
+        <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
+        <span id="user-box" class="user" hidden><span class="pill" id="user-email"></span><button id="sign-out" class="ghost" type="button">خروج</button></span>
+      </div>
     </div>
     <nav id="tabs" role="tablist">
       <button role="tab" data-tab="chat" aria-selected="true" data-ai><span class="code">AI</span>المساعد</button>
@@ -308,91 +338,23 @@ footer .link { color: var(--mark); }
 </header>
 
 <main><div class="wrap">
-  <section id="welcome" class="panel" aria-labelledby="greet">
-    <svg class="panorama" viewBox="0 0 1200 250" direction="ltr" role="img" aria-label="موقع عمل: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي">
-      <defs>
-        <linearGradient id="pano-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="sky-a"/><stop offset="1" class="sky-b"/></linearGradient>
-        <pattern id="pano-fill" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-45)"><line class="hatch-fill" x1="0" y1="0" x2="0" y2="7"/></pattern>
-      </defs>
-      <rect width="1200" height="250" fill="url(#pano-sky)"/>
-      <circle class="sun" cx="1122" cy="112" r="30"/>
-      <path class="skyline" d="M0,202 V168 H34 V146 H66 V172 H96 V132 H128 V158 H150 V120 H184 V166 H214 V150 H246 V176 H270 V202 Z M1030,202 V160 H1058 V138 H1090 V168 H1112 V126 H1146 V156 H1170 V144 H1200 V202 Z"/>
-      <!-- tower crane -->
-      <path class="st" d="M994,199 V46 M1006,199 V46 M840,46 H1102 M850,54 H1102 M840,46 L850,54 M1000,46 V24"/>
-      <path class="st-thin" d="M994,199 L1006,190 L994,176 L1006,162 L994,148 L1006,134 L994,120 L1006,106 L994,92 L1006,78 L994,64 L1006,50 M850,54 L862,46 L874,54 L886,46 L898,54 L910,46 L922,54 L934,46 L946,54 L958,46 L970,54 L982,46 L994,54 M1000,24 L846,46 M1000,24 L1098,46 M880,58 V110"/>
-      <rect class="solid" x="1080" y="54" width="22" height="14"/>
-      <rect class="cab" x="1008" y="56" width="16" height="12"/>
-      <rect class="solid" x="874" y="54" width="12" height="4"/>
-      <rect class="load" x="860" y="110" width="40" height="6"/>
-      <!-- building under construction -->
-      <rect class="win" x="780" y="172" width="24" height="16"/><rect class="win" x="820" y="172" width="24" height="16"/><rect class="win" x="860" y="172" width="24" height="16"/><rect class="win" x="780" y="142" width="24" height="16"/><rect class="win" x="820" y="142" width="24" height="16"/><rect class="win" x="860" y="142" width="24" height="16"/><rect class="win" x="780" y="112" width="24" height="16"/><rect class="win" x="820" y="112" width="24" height="16"/>
-      <path class="st" d="M774,199 V106 M814,199 V106 M854,199 V106 M894,199 V136"/>
-      <rect class="slab" x="766" y="164" width="136" height="4"/>
-      <rect class="slab" x="766" y="134" width="136" height="4"/>
-      <rect class="slab" x="766" y="104" width="96" height="4"/>
-      <path class="st-thin" d="M906,199 V126 M920,199 V126 M906,180 H920 M906,160 H920 M906,140 H920 M906,199 L920,180 L906,160 L920,140" stroke-dasharray="3 2"/>
-      <!-- ground -->
-      <path class="earth" d="M0,204 C120,199 230,197 330,200 C380,202 400,204 430,203 L640,203 C700,202 760,198 900,199 C1000,200 1100,197 1200,199 L1200,250 L0,250 Z"/>
-      <!-- road embankment (fill hatched as on the drawings) -->
-      <polygon class="embank" points="390,203 440,182 610,182 660,203" fill="url(#pano-fill)"/>
-      <line class="design-l" x1="440" y1="182" x2="610" y2="182"/>
-      <path class="ink" d="M460,182 V168 M590,182 V168"/>
-      <rect class="tag" x="444" y="156" width="32" height="12"/><text x="460" y="165" text-anchor="middle" style="font-size:8.5px">0+120</text>
-      <rect class="tag" x="574" y="156" width="32" height="12"/><text x="590" y="165" text-anchor="middle" style="font-size:8.5px">0+160</text>
-      <!-- benchmark -->
-      <path class="solid" d="M94,200 L106,200 L100,190 Z"/>
-      <text x="100" y="184" text-anchor="middle">BM 100.000</text>
-      <!-- total station on tripod -->
-      <path class="ink" d="M190,150 L168,201 M190,150 L212,201 M190,150 L193,203 M184,124 V118 H196 V124"/>
-      <rect class="solid" x="180" y="146" width="20" height="5"/>
-      <rect class="cab" x="182" y="124" width="16" height="22"/>
-      <rect class="solid" x="198" y="128" width="12" height="7"/>
-      <text x="190" y="112" text-anchor="middle">TS-01</text>
-      <!-- line of sight to the prism -->
-      <line class="laser" x1="210" y1="131" x2="518" y2="128"/>
-      <text class="dim" x="364" y="121" text-anchor="middle">HD 315.420 m</text>
-      <path class="ink" d="M525,182 V136"/>
-      <circle class="prism" cx="525" cy="128" r="7"/>
-      <path class="ink" d="M520,128 H530 M525,123 V133" style="stroke-width:1"/>
-      <!-- level staff -->
-      <rect class="staff-red" x="726" y="150" width="7" height="8"/><rect class="staff-white" x="726" y="158" width="7" height="8"/><rect class="staff-red" x="726" y="166" width="7" height="8"/><rect class="staff-white" x="726" y="174" width="7" height="8"/><rect class="staff-red" x="726" y="182" width="7" height="8"/><rect class="staff-white" x="726" y="190" width="7" height="8"/>
-    </svg>
-    <div class="welcome">
-      <svg class="hat" viewBox="0 0 240 190" role="img" aria-label="خوذة هندسية">
-        <line class="cl" x1="120" y1="8" x2="120" y2="150"/>
-        <text x="125" y="16">CL</text>
-        <g class="lift">
-          <path class="shell" d="M44,122 C42,66 78,34 120,34 C162,34 198,66 196,122 Z"/>
-          <path class="rib" d="M107,36 C103,62 103,96 105,122 L135,122 C137,96 137,62 133,36 C125,33 115,33 107,36 Z"/>
-          <path class="shine" d="M70,96 C70,72 82,56 96,48"/>
-          <path class="brim" d="M14,122 C60,114 180,114 226,122 C228,128 224,134 218,134 C170,128 70,128 22,134 C16,134 12,128 14,122 Z"/>
-          <g transform="translate(120,84)">
-            <circle class="bm" r="15"/>
-            <line x1="-15" y1="0" x2="15" y2="0" stroke="currentColor" style="stroke:var(--ink);stroke-width:1.2"/>
-            <path class="bm-tri" d="M0,-15 L6,-4 L-6,-4 Z"/>
-            <text x="0" y="11" text-anchor="middle" style="font-size:7.5px;fill:var(--ink)">BM</text>
-          </g>
-        </g>
-        <path class="dim" d="M14,160 L226,160 M14,152 L14,168 M226,152 L226,168"/>
-        <path class="dim-arrow" d="M14,160 L22,157 L22,163 Z M226,160 L218,157 L218,163 Z"/>
-        <text x="120" y="178" text-anchor="middle">±0.001 m</text>
-      </svg>
-      <div>
-        <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
-        <h2 class="greet" id="greet">أهلاً يا هندسة</h2>
-        <p class="lead">المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
-        <div class="quick">
-          <button type="button" data-go="chat" data-ai><span class="code">AI</span>اسأل المساعد</button>
-          <button type="button" data-go="level"><span class="code">LV</span>احسب ميزانية</button>
-          <button type="button" data-go="profile"><span class="code">PR</span>ارسم بروفيل</button>
-          <button type="button" data-go="qty"><span class="code">QT</span>احسب كميات</button>
-          <button type="button" data-go="review"><span class="code">QC</span>راجع ملف رفع</button>
-        </div>
-        <div class="safety">
-          <span class="tape" aria-hidden="true"></span>
-          <span class="grow">السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.</span>
-          <button id="welcome-close" class="link" type="button">ابدأ الشغل وإخفي الترحيب</button>
-        </div>
+  <section id="welcome" class="panel hero" aria-labelledby="greet">
+    <div id="hero-3d" class="hero-3d" role="img" aria-label="موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي"></div>
+    <div class="hero-body">
+      <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
+      <h2 class="greet" id="greet">أهلاً يا هندسة</h2>
+      <p class="lead">المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
+      <div class="quick">
+        <button type="button" data-go="chat" data-ai><span class="code">AI</span>اسأل المساعد</button>
+        <button type="button" data-go="level"><span class="code">LV</span>احسب ميزانية</button>
+        <button type="button" data-go="profile"><span class="code">PR</span>ارسم بروفيل</button>
+        <button type="button" data-go="qty"><span class="code">QT</span>احسب كميات</button>
+        <button type="button" data-go="review"><span class="code">QC</span>راجع ملف رفع</button>
+      </div>
+      <div class="safety">
+        <span class="tape" aria-hidden="true"></span>
+        <span class="grow">السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.</span>
+        <button id="welcome-close" class="link" type="button">ابدأ الشغل وإخفي الترحيب</button>
       </div>
     </div>
   </section>
@@ -439,6 +401,7 @@ BM2,,,0.900</textarea>
         <span class="hint">مثال محلول جاهز؛ امسحه وحط قراءاتك.</span>
       </div>
     </div>
+    <div id="lv-chart"></div>
     <div id="lv-out" class="out"></div>
   </section>
 
@@ -519,6 +482,7 @@ BM2,,,0.900</textarea>
         <label class="file-btn secondary" for="vol-file">تحميل من ملف</label><input type="file" id="vol-file" hidden>
         <button id="vol-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
       </div>
+      <div id="vol-chart"></div>
       <div id="vol-out" class="out"></div>
     </div>
   </section>
@@ -537,12 +501,13 @@ BM2,,,0.900</textarea>
         <label for="rv-p1" id="rv-p1-l"><span>حد المنسوب الشاذ (م)</span><input id="rv-p1" type="number" step="0.01" value="0.5"></label>
         <label for="rv-p2" id="rv-p2-l" hidden>أقصى ميل %<input id="rv-p2" type="number" step="0.1" value="15"></label>
       </div>
-      <p class="hint">ارفع ملف Excel أو CSV أو TXT أو GSI أو LandXML أو KML أو DXF أو DWG. الأعمدة بتتعرف بالعربي أو الإنجليزي (رقم النقطة، شرقي/X، شمالي/Y، منسوب/Z، محطة، تصميمي، منفذ)، حتى لو فيها أخطاء إملائية.</p>
+      <p class="hint">ارفع ملف Excel أو CSV أو TXT أو GSI أو LandXML أو KML أو DXF أو DWG. الأعمدة بتتعرف بالعربي أو الإنجليزي (رقم النقطة، شرقي/X، شمالي/Y، منسوب/Z، محطة، تصميمي، منفذ)، حتى لو فيها أخطاء إملائية. لو الملف فيه X وY وZ، النقاط هتظهر مجسّمة 3D.</p>
       <div class="actions">
         <label class="file-btn" for="rv-file">رفع ملف ومراجعته</label><input type="file" id="rv-file" hidden>
         <button id="rv-csv" class="secondary primary dl" type="button" disabled>تصدير الملاحظات CSV</button>
       </div>
     </div>
+    <div id="rv-chart"></div>
     <div id="rv-out" class="out"></div>
   </section>
 
@@ -551,8 +516,8 @@ BM2,,,0.900</textarea>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
-    <dl><dt>الإصدار</dt><dd class="mono">SURVEY-ASSIST · REV D</dd></dl>
-    <div class="note"><span>الملفات بتتقري جوه المتصفح بتاعك. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.</span><button id="welcome-open" class="link" type="button" hidden>رسالة الترحيب</button></div>
+    <dl><dt>الإصدار</dt><dd class="mono">SURVEY-ASSIST · REV E · 3D</dd></dl>
+    <div class="note"><span>الملفات بتتقري جوه المتصفح بتاعك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.</span><button id="welcome-open" class="link" type="button" hidden>رسالة الترحيب</button></div>
   </footer>
 </div></main>
 
@@ -562,6 +527,9 @@ BM2,,,0.900</textarea>
 <script src="https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const Engine = (() => {
 "use strict";
@@ -2350,6 +2318,690 @@ return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatri
 })();
 </script>
 <script>
+// 3D views for the published page (Three.js r147, global THREE + THREE.OrbitControls).
+// Each drawing gets a 3D model you can orbit, next to the exact 2D sheet it is built from.
+// The geometry only re-draws numbers the engine already computed; nothing here calculates.
+"use strict";
+
+const V3 = (() => {
+  let webgl = null;
+  const supported = () => {
+    if (webgl === null) {
+      try {
+        const c = document.createElement("canvas");
+        webgl = Boolean(typeof THREE !== "undefined" && THREE.OrbitControls && (c.getContext("webgl2") || c.getContext("webgl")));
+      } catch { webgl = false; }
+    }
+    return webgl;
+  };
+  const reduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || "#888888";
+  // CSS colours are sRGB; the renderer works in linear light and encodes back to sRGB.
+  const col = (name) => new THREE.Color(css(name)).convertSRGBToLinear();
+  const live = new Set(); // mounted host elements, re-mounted when the theme changes
+
+  function textSprite(text, { color = css("--ink"), bg = css("--sheet"), size = 1, weight = 600 } = {}) {
+    const fontPx = 44;
+    const c = document.createElement("canvas");
+    const g = c.getContext("2d");
+    const font = `${weight} ${fontPx}px "IBM Plex Mono", "IBM Plex Sans Arabic", Consolas, monospace`;
+    g.font = font;
+    const w = Math.ceil(g.measureText(text).width) + 28;
+    c.width = w;
+    c.height = fontPx + 22;
+    g.font = font;
+    g.fillStyle = bg;
+    g.globalAlpha = 0.82;
+    const r = 12;
+    g.beginPath();
+    g.moveTo(r, 0); g.arcTo(w, 0, w, c.height, r); g.arcTo(w, c.height, 0, c.height, r); g.arcTo(0, c.height, 0, 0, r); g.arcTo(0, 0, w, 0, r);
+    g.fill();
+    g.globalAlpha = 1;
+    g.fillStyle = color;
+    g.textBaseline = "middle";
+    g.fillText(text, 14, c.height / 2 + 2);
+    const tex = new THREE.CanvasTexture(c);
+    tex.anisotropy = 4;
+    tex.encoding = THREE.sRGBEncoding;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
+    sp.scale.set((size * c.width) / c.height, size, 1);
+    sp.renderOrder = 10;
+    return sp;
+  }
+
+  /** Triangle soup -> mesh. tris: flat [x,y,z, x,y,z, x,y,z, ...]. */
+  function soup(tris, material) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(tris, 3));
+    geo.computeVertexNormals();
+    return new THREE.Mesh(geo, material);
+  }
+  const quad = (out, a, b, c, d) => out.push(...a, ...b, ...c, ...a, ...c, ...d);
+
+  function line(points, color, { dashed = false, dash = 1, gap = 0.6, width = 1 } = {}) {
+    const geo = new THREE.BufferGeometry().setFromPoints(points.map((p) => new THREE.Vector3(...p)));
+    const mat = dashed
+      ? new THREE.LineDashedMaterial({ color, dashSize: dash, gapSize: gap, linewidth: width })
+      : new THREE.LineBasicMaterial({ color, linewidth: width });
+    const l = new THREE.Line(geo, mat);
+    if (dashed) l.computeLineDistances();
+    return l;
+  }
+
+  function mat(color, opts = {}) {
+    return new THREE.MeshStandardMaterial({
+      color, roughness: 0.78, metalness: 0.05, side: THREE.DoubleSide,
+      transparent: opts.opacity !== undefined && opts.opacity < 1, opacity: opts.opacity ?? 1,
+      depthWrite: opts.depthWrite ?? !(opts.opacity < 1), flatShading: opts.flat ?? false,
+      emissive: opts.emissive ?? 0x000000, emissiveIntensity: opts.emissiveIntensity ?? 1,
+    });
+  }
+
+  function disposeTree(obj) {
+    obj.traverse((o) => {
+      o.geometry?.dispose();
+      const ms = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
+      for (const m of ms) { m.map?.dispose(); m.dispose(); }
+    });
+  }
+
+  /**
+   * Mount a scene into `host`. build(scene, api) adds objects and may return
+   * { view: [x,y,z] direction to look from, fit: 0..1 tighter/looser }.
+   */
+  function mount(host, build, { autoRotate = false, height, interactive = true } = {}) {
+    unmount(host);
+    if (!supported()) return false;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    const canvas = renderer.domElement;
+    canvas.className = "v3-canvas";
+    if (height) host.style.height = `${height}px`;
+    host.prepend(canvas);
+
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xffffff, col("--hemi-ground"), 0.75));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+    sun.position.set(0.6, 1, 0.8);
+    scene.add(sun);
+    const rim = new THREE.DirectionalLight(col("--accent"), 0.25);
+    rim.position.set(-1, 0.4, -0.6);
+    scene.add(rim);
+
+    const frames = [];
+    const api = { col, css, mat, line, soup, quad, textSprite, onFrame: (fn) => frames.push(fn) };
+    const opts = build(scene, api) || {};
+
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100000);
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.screenSpacePanning = true;
+    controls.autoRotate = autoRotate && !reduced();
+    controls.autoRotateSpeed = 0.6;
+    controls.addEventListener("start", () => { controls.autoRotate = false; host.classList.add("touched"); });
+    if (!interactive) { controls.enabled = false; canvas.style.touchAction = "pan-y"; }
+
+    const box = new THREE.Box3();
+    scene.traverse((o) => { if ((o.isMesh || o.isLine || o.isPoints) && !o.userData.noFit) box.expandByObject(o); });
+    const center = box.getCenter(new THREE.Vector3());
+    const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 1);
+    const dir = new THREE.Vector3(...(opts.view ?? [0.8, 0.6, 1])).normalize();
+    const home = () => {
+      const dist = (radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * (opts.fit ?? 0.82);
+      camera.position.copy(center).addScaledVector(dir, dist);
+      camera.near = dist / 200;
+      camera.far = dist * 20;
+      camera.updateProjectionMatrix();
+      controls.target.copy(center);
+      controls.minDistance = radius * 0.15;
+      controls.maxDistance = dist * 4;
+      controls.update();
+    };
+
+    const size = () => {
+      const w = host.clientWidth || 600;
+      const h = host.clientHeight || 360;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    size();
+    home();
+
+    let raf = 0;
+    let visible = true;
+    const t0 = performance.now();
+    const tick = () => {
+      raf = 0;
+      if (!visible || !host.isConnected) return;
+      const t = (performance.now() - t0) / 1000;
+      for (const f of frames) f(t);
+      controls.update();
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(tick);
+    };
+    const start = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    const ro = new ResizeObserver(() => { size(); start(); });
+    ro.observe(host);
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting && !document.hidden; if (visible) start(); });
+    io.observe(host);
+    start();
+
+    host._v3 = {
+      build, opts: { autoRotate, height, interactive }, home,
+      wake() { visible = true; start(); },
+      dispose() {
+        cancelAnimationFrame(raf);
+        ro.disconnect();
+        io.disconnect();
+        controls.dispose();
+        disposeTree(scene);
+        renderer.dispose();
+        canvas.remove();
+      },
+    };
+    live.add(host);
+    return true;
+  }
+
+  function unmount(host) {
+    if (host?._v3) { host._v3.dispose(); host._v3 = null; }
+    live.delete(host);
+  }
+  function remountAll() {
+    for (const host of [...live]) {
+      if (!host.isConnected) { unmount(host); continue; }
+      const { build, opts } = host._v3;
+      mount(host, build, opts);
+    }
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) for (const h of live) h._v3?.wake(); });
+
+  return { supported, mount, unmount, remountAll, home: (host) => host?._v3?.home() };
+})();
+
+// ---------- shared geometry helpers ----------
+/** Split a ground/design pair (shared x) into cut and fill quads [x0, g0, d0, x1, g1, d1]. */
+function cutFillSegments(pts) {
+  const out = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1];
+    const da = a.g - a.d, db = b.g - b.d;
+    if (da * db >= 0) {
+      if (da + db !== 0) out.push({ cut: da + db > 0, a, b });
+    } else {
+      const t = da / (da - db);
+      const c = { x: a.x + t * (b.x - a.x), g: a.d + t * (b.d - a.d), d: a.d + t * (b.d - a.d) };
+      out.push({ cut: da > 0, a, b: c }, { cut: db > 0, a: c, b });
+    }
+  }
+  return out;
+}
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+/** Ground slab: top follows (x, y) along X, constant across Z in [-hw, hw], skirt down to y=0. */
+function slabTris(line2d, hw) {
+  const t = [];
+  for (let i = 0; i < line2d.length - 1; i++) {
+    const [x0, y0] = line2d[i], [x1, y1] = line2d[i + 1];
+    V3q(t, [x0, y0, -hw], [x1, y1, -hw], [x1, y1, hw], [x0, y0, hw]); // top
+    V3q(t, [x0, 0, hw], [x1, 0, hw], [x1, y1, hw], [x0, y0, hw]); // front
+    V3q(t, [x0, 0, -hw], [x1, 0, -hw], [x1, y1, -hw], [x0, y0, -hw]); // back
+    V3q(t, [x0, 0, -hw], [x1, 0, -hw], [x1, 0, hw], [x0, 0, hw]); // bottom
+  }
+  const [fx, fy] = line2d[0], [lx, ly] = line2d[line2d.length - 1];
+  V3q(t, [fx, 0, -hw], [fx, fy, -hw], [fx, fy, hw], [fx, 0, hw]);
+  V3q(t, [lx, 0, -hw], [lx, ly, -hw], [lx, ly, hw], [lx, 0, hw]);
+  return t;
+}
+function V3q(out, a, b, c, d) { out.push(...a, ...b, ...c, ...a, ...c, ...d); }
+
+/** Polygon in the XY plane extruded along Z by depth, centred on z=0. */
+function extrudeXY(points, depth, material) {
+  const shape = new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
+  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+  geo.translate(0, 0, -depth / 2);
+  return new THREE.Mesh(geo, material);
+}
+
+// ---------- scene builders ----------
+
+/** Longitudinal profile as a 3D corridor: ground block, road deck on the design line, cut/fill walls. */
+function profileScene({ groundPts, designLine, both, vpis, pts }) {
+  return (scene, A) => {
+    const xs = [...groundPts.map((p) => p.x), ...designLine.map((p) => p.x)];
+    const x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const len = Math.max(x1 - x0, 1);
+    const lv = [...groundPts.map((p) => p.g), ...designLine.map((p) => p.d), ...vpis.map((v) => v.level)];
+    const lo = Math.min(...lv), hi = Math.max(...lv);
+    const relief = Math.max(hi - lo, 0.5);
+    const ve = clamp((len * 0.16) / relief, 1, 60);
+    const base = lo - relief * 0.45;
+    const X = (x) => x - x0;
+    const Y = (y) => (y - base) * ve;
+    const hw = Math.max(len * 0.032, 3.5);
+    const tw = hw * 3;
+
+    if (groundPts.length >= 2) {
+      const slab = A.soup(slabTris(groundPts.map((p) => [X(p.x), Y(p.g)]), tw), A.mat(A.col("--earth"), { opacity: 0.42 }));
+      scene.add(slab);
+      scene.add(A.line(groundPts.map((p) => [X(p.x), Y(p.g) + 0.02, tw]), A.col("--ground")));
+      scene.add(A.line(groundPts.map((p) => [X(p.x), Y(p.g) + 0.02, -tw]), A.col("--ground")));
+      scene.add(A.line(groundPts.map((p) => [X(p.x), Y(p.g) + 0.05, 0]), A.col("--ground"), { dashed: true, dash: len / 120, gap: len / 200 }));
+    }
+    if (designLine.length >= 2) {
+      const deck = [];
+      for (let i = 0; i < designLine.length - 1; i++) {
+        const a = designLine[i], b = designLine[i + 1];
+        A.quad(deck, [X(a.x), Y(a.d), -hw], [X(b.x), Y(b.d), -hw], [X(b.x), Y(b.d), hw], [X(a.x), Y(a.d), hw]);
+      }
+      scene.add(A.soup(deck, A.mat(A.col("--asphalt"), { emissive: A.col("--asphalt"), emissiveIntensity: 0.15 })));
+      const lift = 0.04 * ve;
+      scene.add(A.line(designLine.map((p) => [X(p.x), Y(p.d) + lift, hw]), A.col("--design")));
+      scene.add(A.line(designLine.map((p) => [X(p.x), Y(p.d) + lift, -hw]), A.col("--design")));
+      scene.add(A.line(designLine.map((p) => [X(p.x), Y(p.d) + lift, 0]), A.col("--mark"), { dashed: true, dash: len / 60, gap: len / 90 }));
+    }
+    const cut = [], fill = [];
+    for (const s of cutFillSegments(both)) {
+      const t = s.cut ? cut : fill;
+      for (const z of [-hw, hw]) A.quad(t, [X(s.a.x), Y(s.a.g), z], [X(s.b.x), Y(s.b.g), z], [X(s.b.x), Y(s.b.d), z], [X(s.a.x), Y(s.a.d), z]);
+    }
+    if (cut.length) scene.add(A.soup(cut, A.mat(A.col("--cut"), { opacity: 0.78, emissive: A.col("--cut"), emissiveIntensity: 0.25 })));
+    if (fill.length) scene.add(A.soup(fill, A.mat(A.col("--fill"), { opacity: 0.78, emissive: A.col("--fill"), emissiveIntensity: 0.25 })));
+
+    const ls = len / 26;
+    for (const v of vpis) {
+      const top = Y(v.level) + relief * ve * 0.35;
+      scene.add(A.line([[X(v.chainage), 0, 0], [X(v.chainage), top, 0]], A.col("--design"), { dashed: true, dash: ls / 3, gap: ls / 5 }));
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(ls * 0.18, 20, 14), A.mat(A.col("--design"), { emissive: A.col("--design"), emissiveIntensity: 0.6 }));
+      ball.position.set(X(v.chainage), Y(v.level), 0);
+      scene.add(ball);
+      const lab = A.textSprite(`VPI ${chText(v.chainage)}`, { color: A.css("--design"), size: ls * 0.55 });
+      lab.position.set(X(v.chainage), top + ls * 0.4, 0);
+      scene.add(lab);
+    }
+    const k = Math.max(1, Math.ceil(pts.length / 9));
+    pts.forEach((p, i) => {
+      if (i % k && i !== pts.length - 1) return;
+      const lab = A.textSprite(chText(p.x), { color: A.css("--muted"), size: ls * 0.42 });
+      lab.position.set(X(p.x), -ls * 0.5, tw + ls * 0.6);
+      scene.add(lab);
+    });
+    return { view: [0.35, 0.42, 1], fit: 0.62, ve };
+  };
+}
+
+/** Cross section extruded along the road: ground block, cut/fill solids, road template surface. */
+function sectionScene({ ground, design, xs, cutArea, fillArea }) {
+  return (scene, A) => {
+    const all = [...ground, ...design];
+    const x0 = Math.min(...all.map((p) => p.offset)), x1 = Math.max(...all.map((p) => p.offset));
+    const span = Math.max(x1 - x0, 1);
+    const lo = Math.min(...all.map((p) => p.level)), hi = Math.max(...all.map((p) => p.level));
+    const relief = Math.max(hi - lo, 0.5);
+    const ve = clamp((span * 0.22) / relief, 1, 10);
+    const base = lo - Math.max(relief * 0.6, 0.6);
+    const Y = (y) => (y - base) * ve;
+    const depth = span * 0.75;
+
+    const gpts = ground.map((p) => [p.offset, Y(p.level)]);
+    const block = [...gpts, [gpts[gpts.length - 1][0], 0], [gpts[0][0], 0]];
+    scene.add(extrudeXY(block, depth, A.mat(A.col("--earth"), { opacity: 0.4 })));
+    for (const z of [-depth / 2, depth / 2]) scene.add(A.line(gpts.map(([x, y]) => [x, y + 0.01, z]), A.col("--ground")));
+
+    for (const s of cutFillSegments(xs)) {
+      const poly = [[s.a.x, Y(s.a.g)], [s.b.x, Y(s.b.g)], [s.b.x, Y(s.b.d)], [s.a.x, Y(s.a.d)]];
+      const area = Math.abs((poly[0][0] - poly[2][0]) * (poly[1][1] - poly[3][1]) - (poly[1][0] - poly[3][0]) * (poly[0][1] - poly[2][1])) / 2;
+      if (area < 1e-6) continue;
+      const c = s.cut ? A.col("--cut") : A.col("--fill");
+      scene.add(extrudeXY(poly, depth * 0.999, A.mat(c, { opacity: 0.82, emissive: c, emissiveIntensity: 0.25 })));
+    }
+    const deck = [];
+    for (let i = 0; i < design.length - 1; i++) {
+      const a = design[i], b = design[i + 1];
+      A.quad(deck, [a.offset, Y(a.level) + 0.01, -depth / 2], [b.offset, Y(b.level) + 0.01, -depth / 2], [b.offset, Y(b.level) + 0.01, depth / 2], [a.offset, Y(a.level) + 0.01, depth / 2]);
+    }
+    scene.add(A.soup(deck, A.mat(A.col("--asphalt"))));
+    for (const z of [-depth / 2, depth / 2]) scene.add(A.line(design.map((p) => [p.offset, Y(p.level) + 0.02, z]), A.col("--design")));
+    if (x0 < 0 && x1 > 0) {
+      const top = Y(hi) + relief * ve * 0.5;
+      scene.add(A.line([[0, 0, depth / 2], [0, top, depth / 2]], A.col("--ink"), { dashed: true, dash: span / 50, gap: span / 120 }));
+      scene.add(A.line([[0, Y(hi) + 0.03, -depth / 2], [0, Y(hi) + 0.03, depth / 2]], A.col("--mark"), { dashed: true, dash: span / 40, gap: span / 60 }));
+      const cl = A.textSprite("CL", { size: span / 28 });
+      cl.position.set(0, top + span / 40, depth / 2);
+      scene.add(cl);
+    }
+    const tag = (text, color, x) => {
+      const s = A.textSprite(text, { color, size: span / 26 });
+      s.position.set(x, Y(hi) + relief * ve * 0.85, 0);
+      scene.add(s);
+    };
+    tag(`CUT ${cutArea.toFixed(2)} m²`, A.css("--cut"), x0 + span * 0.22);
+    tag(`FILL ${fillArea.toFixed(2)} m²`, A.css("--fill"), x1 - span * 0.22);
+    return { view: [0.55, 0.45, 1], fit: 0.7 };
+  };
+}
+
+/** Earthwork: cut and fill area columns at each section, mass-haul ribbon behind. */
+function volumeScene({ sections, mass }) {
+  return (scene, A) => {
+    const c0 = sections[0].chainage, c1 = sections[sections.length - 1].chainage;
+    const L = 100;
+    const X = (c) => ((c - c0) / (c1 - c0 || 1)) * L;
+    const maxA = Math.max(...sections.flatMap((s) => [s.cutArea, s.fillArea]), 1e-6);
+    const H = 28 / maxA;
+    const w = Math.min(L / (sections.length * 2.6), 6);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(L + 24, 40), A.mat(A.col("--sheet-2")));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(L / 2, -0.02, 0);
+    scene.add(floor);
+    const grid = new THREE.GridHelper(L + 24, 24, A.col("--line"), A.col("--hair"));
+    grid.position.set(L / 2, 0, 0);
+    grid.scale.z = 40 / (L + 24);
+    grid.userData.noFit = true;
+    scene.add(grid);
+    const ls = 2.4;
+    sections.forEach((s, i) => {
+      for (const [v, z, name] of [[s.cutArea, -4.5, "--cut"], [s.fillArea, 4.5, "--fill"]]) {
+        if (!(v > 0)) continue;
+        const h = v * H;
+        const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 6), A.mat(A.col(name), { emissive: A.col(name), emissiveIntensity: 0.22 }));
+        m.position.set(X(s.chainage), h / 2, z);
+        scene.add(m);
+        if (sections.length <= 14) {
+          const lab = A.textSprite(v.toFixed(1), { color: A.css(name), size: ls * 0.75 });
+          lab.position.set(X(s.chainage), h + 1.6, z);
+          scene.add(lab);
+        }
+      }
+      const k = Math.max(1, Math.ceil(sections.length / 10));
+      if (i % k === 0 || i === sections.length - 1) {
+        const lab = A.textSprite(chText(s.chainage), { color: A.css("--muted"), size: ls * 0.8 });
+        lab.position.set(X(s.chainage), 0.2, 13);
+        scene.add(lab);
+      }
+    });
+    if (mass.length >= 2) {
+      const mMax = Math.max(...mass.map((m) => Math.abs(m.value)), 1e-6);
+      const M = 16 / mMax;
+      const zb = -16, y0 = 18;
+      const wall = new THREE.Mesh(new THREE.PlaneGeometry(L + 8, 40), A.mat(A.col("--sheet-2"), { opacity: 0.55 }));
+      wall.position.set(L / 2, y0, zb - 0.1);
+      scene.add(wall);
+      scene.add(A.line([[-4, y0, zb], [L + 4, y0, zb]], A.col("--muted"), { dashed: true, dash: 1.2, gap: 0.8 }));
+      const ribbon = [];
+      for (let i = 0; i < mass.length - 1; i++) {
+        const a = mass[i], b = mass[i + 1];
+        A.quad(ribbon, [X(a.chainage), y0, zb], [X(b.chainage), y0, zb], [X(b.chainage), y0 + b.value * M, zb], [X(a.chainage), y0 + a.value * M, zb]);
+      }
+      scene.add(A.soup(ribbon, A.mat(A.col("--mark"), { opacity: 0.35 })));
+      scene.add(A.line(mass.map((m) => [X(m.chainage), y0 + m.value * M, zb + 0.05]), A.col("--mark")));
+      const lab = A.textSprite("MASS HAUL", { color: A.css("--mark"), size: ls });
+      lab.position.set(-2, y0 + 18, zb);
+      scene.add(lab);
+    }
+    const key = (text, name, z) => {
+      const s = A.textSprite(text, { color: A.css(name), size: ls });
+      s.position.set(L + 8, 3, z);
+      scene.add(s);
+    };
+    key("CUT m²", "--cut", -4.5);
+    key("FILL m²", "--fill", 4.5);
+    return { view: [0.45, 0.55, 1], fit: 0.62 };
+  };
+}
+
+/** Level run: ground through the reduced levels, a staff at each station, the instrument at each HI with its sights. */
+function levelScene(rows) {
+  return (scene, A) => {
+    const S = 7;
+    // Reduced levels before the closing adjustment, so each RL + reading meets its HI exactly.
+    const rls = rows.map((r) => r.rl).filter(Number.isFinite);
+    if (rls.length < 2) return {};
+    const lo = Math.min(...rls);
+    const base = lo - 1.2;
+    const Y = (v) => v - base;
+    const X = (i) => i * S;
+    const rl = (r) => r.rl;
+    const line2d = rows.map((r, i) => [X(i), Y(rl(r))]);
+    scene.add(A.soup(slabTris(line2d, 4.5), A.mat(A.col("--earth"), { opacity: 0.55 })));
+    scene.add(A.line(line2d.map(([x, y]) => [x, y + 0.01, 4.5]), A.col("--ground")));
+
+    // Striped staff texture (red/white every 0.1 m on a 4 m staff, like an E-staff from afar).
+    const c = document.createElement("canvas");
+    c.width = 16; c.height = 256;
+    const g = c.getContext("2d");
+    for (let i = 0; i < 40; i++) { g.fillStyle = i % 2 ? "#f4f4f0" : "#d33b2c"; g.fillRect(0, (i * 256) / 40, 16, 256 / 40 + 1); }
+    const staffTex = new THREE.CanvasTexture(c);
+    staffTex.encoding = THREE.sRGBEncoding;
+    const staffMat = new THREE.MeshStandardMaterial({ map: staffTex, roughness: 0.6 });
+    const sm = 0.9;
+    rows.forEach((r, i) => {
+      const y = Y(rl(r));
+      const st = new THREE.Mesh(new THREE.BoxGeometry(0.18, 4, 0.08), staffMat);
+      st.position.set(X(i), y + 2, 0);
+      scene.add(st);
+      const peg = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.4, 3), A.mat(A.col("--mark")));
+      peg.position.set(X(i), y - 0.2, 0);
+      peg.rotation.x = Math.PI;
+      scene.add(peg);
+      const name = A.textSprite(String(r.station ?? ""), { size: sm });
+      name.position.set(X(i), y + 4.7, 0);
+      scene.add(name);
+      if (Number.isFinite(rl(r))) {
+        const v = A.textSprite(rl(r).toFixed(3), { color: A.css("--ground"), size: sm * 0.8 });
+        v.position.set(X(i), y - 0.9, 2.2);
+        scene.add(v);
+      }
+    });
+
+    // Setups as the engine numbered them; a change point is also the backsight of the next setup.
+    const setups = new Map();
+    const setupOf = (n) => setups.get(n) ?? setups.set(n, { hi: undefined, reads: [] }).get(n);
+    rows.forEach((r, i) => {
+      const s = setupOf(r.setup);
+      if (s.hi === undefined) s.hi = r.hi;
+      s.reads.push({ i });
+      if (r.kind === "CP") setupOf(r.setup + 1).reads.push({ i });
+    });
+    for (const s of setups.values()) {
+      if (!Number.isFinite(s.hi) || s.reads.length < 1) continue;
+      const idx = s.reads.map((q) => q.i);
+      const ix = (X(Math.min(...idx)) + X(Math.max(...idx))) / 2 + (idx.length === 1 ? S / 2 : 0);
+      const iz = -2.2;
+      const head = Y(s.hi);
+      const groundAtI = Math.min(...idx.map((i) => Y(rl(rows[i])))) + 0.1;
+      for (const [dx, dz] of [[0.7, 0], [-0.4, 0.6], [-0.4, -0.6]]) {
+        scene.add(A.line([[ix, head - 0.25, iz], [ix + dx, Math.min(groundAtI, head - 1.2), iz + dz]], A.col("--steel")));
+      }
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.32, 0.32), A.mat(A.col("--mark"), { emissive: A.col("--mark"), emissiveIntensity: 0.2 }));
+      body.position.set(ix, head, iz);
+      scene.add(body);
+      for (const q of s.reads) scene.add(A.line([[ix, head, iz], [X(q.i), head, 0]], A.col("--accent"), { dashed: true, dash: 0.35, gap: 0.2 }));
+      const t = A.textSprite(`HI ${s.hi.toFixed(3)}`, { color: A.css("--accent"), size: sm * 0.85 });
+      t.position.set(ix, head + 0.9, iz);
+      scene.add(t);
+    }
+    return { view: [0.35, 0.5, 1], fit: 0.68 };
+  };
+}
+
+/** Survey points in 3D, coloured by level; flagged points marked. */
+function pointsScene(points, flagged) {
+  return (scene, A) => {
+    const xs = points.map((p) => p.x), ys = points.map((p) => p.y), zs = points.map((p) => p.z);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const zlo = Math.min(...zs), zhi = Math.max(...zs);
+    const plan = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1);
+    const ve = clamp((plan * 0.3) / Math.max(zhi - zlo, 0.1), 1, 25);
+    const P = (p) => [p.x - cx, (p.z - zlo) * ve, -(p.y - cy)];
+    const pos = [], colr = [];
+    const lowC = A.col("--fill"), midC = A.col("--mark"), highC = A.col("--cut");
+    const tmp = new THREE.Color();
+    for (const p of points) {
+      pos.push(...P(p));
+      const t = (p.z - zlo) / (zhi - zlo || 1);
+      if (t < 0.5) tmp.copy(lowC).lerp(midC, t * 2);
+      else tmp.copy(midC).lerp(highC, (t - 0.5) * 2);
+      colr.push(tmp.r, tmp.g, tmp.b);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(colr, 3));
+    const dot = Math.max(plan / 55, 0.05);
+    scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: dot, vertexColors: true, sizeAttenuation: true })));
+    // Drop lines to the datum plane help read heights in 3D (only when there are few points).
+    if (points.length <= 400) {
+      const seg = [];
+      for (const p of points) { const q = P(p); seg.push(new THREE.Vector3(...q), new THREE.Vector3(q[0], 0, q[2])); }
+      scene.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(seg), new THREE.LineBasicMaterial({ color: A.col("--line"), transparent: true, opacity: 0.5 })));
+    }
+    const grid = new THREE.GridHelper(plan * 1.15, 20, A.col("--line"), A.col("--hair"));
+    scene.add(grid);
+    const bad = points.filter((p) => flagged.has(String(p.id)));
+    for (const p of bad.slice(0, 300)) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(dot * 1.6, 14, 10), A.mat(A.col("--cut"), { emissive: A.col("--cut"), emissiveIntensity: 0.7 }));
+      m.position.set(...P(p));
+      scene.add(m);
+      if (bad.length <= 25) {
+        const s = A.textSprite(String(p.id), { color: A.css("--cut"), size: plan / 40 });
+        s.position.set(m.position.x, m.position.y + plan / 30, m.position.z);
+        scene.add(s);
+      }
+    }
+    const n = A.textSprite("N", { color: A.css("--accent"), size: plan / 22 });
+    n.position.set(0, 0, -plan * 0.62);
+    scene.add(n);
+    return { view: [0.6, 0.75, 1], fit: 0.7, ve };
+  };
+}
+
+/** Welcome scene: a small construction site you can turn around. Decorative only. */
+function siteScene() {
+  return (scene, A) => {
+    // Terrain with gentle hills.
+    const tg = new THREE.PlaneGeometry(220, 130, 110, 65);
+    tg.rotateX(-Math.PI / 2);
+    const p = tg.attributes.position;
+    const colors = [];
+    const e1 = A.col("--earth"), e2 = A.col("--earth-2"), tc = new THREE.Color();
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), z = p.getZ(i);
+      const roadBand = Math.exp(-(((z - 8) / 9) ** 2));
+      const h = (Math.sin(x * 0.045) * 2.4 + Math.cos(z * 0.07 + x * 0.02) * 1.8 + Math.sin(x * 0.11 + z * 0.05) * 0.7) * (1 - roadBand * 0.85);
+      p.setY(i, h);
+      tc.copy(e1).lerp(e2, clamp((h + 3) / 7, 0, 1));
+      colors.push(tc.r, tc.g, tc.b);
+    }
+    tg.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    tg.computeVertexNormals();
+    scene.add(new THREE.Mesh(tg, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true })));
+
+    // Road on an embankment.
+    const emb = extrudeXY([[-9, -1], [9, -1], [5.5, 2.2], [-5.5, 2.2]], 220, A.mat(A.col("--fill"), { opacity: 0.85, flat: true }));
+    emb.rotation.y = Math.PI / 2;
+    emb.position.set(0, 0, 8);
+    scene.add(emb);
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(220, 0.25, 11), A.mat(A.col("--asphalt")));
+    deck.position.set(0, 2.3, 8);
+    scene.add(deck);
+    scene.add(A.line([[-110, 2.45, 8], [110, 2.45, 8]], A.col("--mark"), { dashed: true, dash: 3, gap: 2.5 }));
+    for (const z of [2.7, 13.3]) scene.add(A.line([[-110, 2.45, z], [110, 2.45, z]], new THREE.Color(0xf0f0f0)));
+    // Chainage boards.
+    for (const [x, t] of [[-40, "0+120"], [10, "0+160"], [60, "0+200"]]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3), A.mat(A.col("--steel")));
+      post.position.set(x, 3.8, 14.4);
+      scene.add(post);
+      const s = A.textSprite(t, { size: 1.8 });
+      s.position.set(x, 6, 14.4);
+      scene.add(s);
+    }
+
+    // Total station on a tripod, sighting a prism; a pulse runs along the line of sight.
+    const ts = new THREE.Group();
+    for (const a of [0, 2.1, 4.2]) ts.add(A.line([[0, 4.6, 0], [Math.cos(a) * 1.6, 0, Math.sin(a) * 1.6]], A.col("--steel")));
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.7), A.mat(A.col("--mark"), { emissive: A.col("--mark"), emissiveIntensity: 0.15 }));
+    head.position.y = 5.3;
+    ts.add(head);
+    const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1, 14), A.mat(A.col("--steel")));
+    scope.rotation.z = Math.PI / 2;
+    scope.position.set(0.55, 5.45, 0);
+    ts.add(scope);
+    ts.position.set(-55, 1.2, -14);
+    scene.add(ts);
+    const prismPos = new THREE.Vector3(25, 2.4, 6);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2), A.mat(new THREE.Color(0xf0f0f0)));
+    pole.position.set(prismPos.x, prismPos.y + 2.1, prismPos.z);
+    scene.add(pole);
+    const prism = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 14), A.mat(A.col("--cut"), { emissive: A.col("--cut"), emissiveIntensity: 0.5 }));
+    prism.position.set(prismPos.x, prismPos.y + 4.3, prismPos.z);
+    scene.add(prism);
+    const from = new THREE.Vector3(-55 + 1.05, 1.2 + 5.45, -14);
+    const to = prism.position.clone();
+    scene.add(A.line([from.toArray(), to.toArray()], A.col("--cut"), { dashed: true, dash: 1.4, gap: 1 }));
+    const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 10), new THREE.MeshBasicMaterial({ color: A.col("--cut") }));
+    scene.add(pulse);
+    const hd = A.textSprite("HD 81.462 m", { color: A.css("--cut"), size: 1.7 });
+    hd.position.copy(from.clone().lerp(to, 0.5)).add(new THREE.Vector3(0, 2, 0));
+    scene.add(hd);
+    A.onFrame((t) => pulse.position.copy(from).lerp(to, (t * 0.45) % 1));
+
+    // Benchmark.
+    const bm = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.8, 6), A.mat(A.col("--sheet-2")));
+    bm.position.set(-75, 2.2, 22);
+    scene.add(bm);
+    const bml = A.textSprite("BM 100.000", { size: 1.7 });
+    bml.position.set(-75, 4.4, 22);
+    scene.add(bml);
+
+    // Building under construction: columns and slabs.
+    const bx = 55, bz = -35;
+    const colM = A.mat(A.col("--steel"));
+    const slabM = A.mat(A.col("--sheet-2"), { opacity: 0.92 });
+    for (let lvl = 0; lvl < 4; lvl++) {
+      const y = 2.6 + lvl * 4.2;
+      const s = new THREE.Mesh(new THREE.BoxGeometry(24, 0.45, 16), slabM);
+      s.position.set(bx, y + 4, bz);
+      if (lvl < 3) scene.add(s);
+      for (const dx of [-11, -3.7, 3.7, 11]) for (const dz of [-7, 0, 7]) {
+        if (lvl === 3 && dx > 4) continue;
+        const c = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.2, 0.6), colM);
+        c.position.set(bx + dx, y + 2, bz + dz);
+        scene.add(c);
+      }
+    }
+    // Tower crane with a slewing jib.
+    const mast = new THREE.Mesh(new THREE.BoxGeometry(1.4, 34, 1.4), A.mat(A.col("--mark"), { flat: true }));
+    mast.position.set(30, 18, -48);
+    scene.add(mast);
+    const jib = new THREE.Group();
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(46, 1, 1), A.mat(A.col("--mark"), { flat: true }));
+    arm.position.x = 12;
+    jib.add(arm);
+    const cw = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 2), A.mat(A.col("--steel")));
+    cw.position.set(-9, -1, 0);
+    jib.add(cw);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), A.mat(A.col("--sheet-2")));
+    cab.position.set(1.8, -1.5, 0);
+    jib.add(cab);
+    jib.add(A.line([[24, 0, 0], [24, -14, 0]], A.col("--steel")));
+    const load = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), A.mat(A.col("--cut")));
+    load.position.set(24, -14.6, 0);
+    jib.add(load);
+    jib.position.set(30, 35, -48);
+    scene.add(jib);
+    A.onFrame((t) => { jib.rotation.y = Math.sin(t * 0.25) * 0.9 - 0.6; });
+
+    // Level staff.
+    const staff = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 0.15), A.mat(new THREE.Color(0xf4f4f0)));
+    staff.position.set(-20, 4.6, 12);
+    scene.add(staff);
+    return { view: [0.55, 0.42, 1], fit: 0.42 };
+  };
+}
+
 // Browser app for the published page. The calculation engine (global `Engine`) is the
 // same tested code as the server, bundled by scripts/build-page.mjs. Files are read in
 // the browser; the assistant talks to Claude through the viewer's claude.ai account
@@ -2403,6 +3055,78 @@ if (!inViewer) {
 })();
 document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
 $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
+
+// ---------- sign-in (public site only) ----------
+// Visitors sign in with a one-time code sent to their email (Supabase Auth). Inside the
+// claude.ai viewer the page belongs to the viewer already, so there is no gate there.
+const SUPABASE_URL = "https://hidjlsdcwnsgmrqnlphy.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpZGpsc2Rjd25zZ21ycW5scGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMjEwMDgsImV4cCI6MjEwODU5NzAwOH0.TzVLTgvJNxQZTAOivmm7QCOm3Dubq4vKCtvKmqAy1MM";
+{
+  const root = document.documentElement;
+  const sb = !inViewer && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: "implicit" } }) : null;
+  const msg = (text, bad = false) => { $("#auth-msg").textContent = text; $("#auth-msg").className = `hint ${bad ? "bad" : ""}`; };
+  const setUser = (user) => {
+    const signedIn = Boolean(user) || inViewer;
+    root.classList.toggle("gate", !signedIn);
+    $("#user-box").hidden = !user;
+    if (user) $("#user-email").textContent = user.email ?? "";
+    if (signedIn) V3.remountAll();
+  };
+  const arabicError = (err) => {
+    const m = String(err?.message || err || "");
+    if (/rate limit|too many|security purposes/i.test(m)) return "طلبات كتير ورا بعض. استنى دقيقة وجرّب تاني.";
+    if (/expired|invalid/i.test(m)) return "الكود غلط أو انتهى. اطلب كود جديد.";
+    if (/email/i.test(m) && /invalid|valid/i.test(m)) return "الإيميل مش مكتوب صح.";
+    return `حصلت مشكلة: ${m}`;
+  };
+  if (inViewer) setUser(null);
+  else if (!sb) { root.classList.add("gate"); msg("مش قادر أوصل لخدمة تسجيل الدخول. اتأكد من النت وحدّث الصفحة.", true); }
+  else {
+    sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
+    sb.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
+    let email = "";
+    $("#auth-email-form").onsubmit = async (e) => {
+      e.preventDefault();
+      email = $("#auth-email").value.trim();
+      const btn = e.submitter || $("#auth-email-form button");
+      btn.disabled = true;
+      msg("بيبعت…");
+      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
+      btn.disabled = false;
+      if (error) return msg(arabicError(error), true);
+      $("#auth-sent-to").textContent = email;
+      $("#auth-email-form").hidden = true;
+      $("#auth-code-form").hidden = false;
+      $("#auth-code").focus();
+      msg("بعتنالك إيميل فيه كود الدخول (وفيه لينك كمان، أيهم يمشي). بص في الـ Spam لو ما لقيتوش.");
+    };
+    $("#auth-code-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const token = $("#auth-code").value.replace(/\s/g, "");
+      if (!token) return;
+      msg("بيتأكد…");
+      const { error } = await sb.auth.verifyOtp({ email, token, type: "email" });
+      if (error) return msg(arabicError(error), true);
+      msg("");
+    };
+    $("#auth-back").onclick = () => { $("#auth-code-form").hidden = true; $("#auth-email-form").hidden = false; msg(""); $("#auth-email").focus(); };
+    $("#sign-out").onclick = async () => { await sb.auth.signOut(); $("#auth-code").value = ""; $("#auth-back").click(); };
+  }
+}
+
+// ---------- theme (dark by default) ----------
+{
+  const btn = $("#theme-btn");
+  const paint = () => { btn.textContent = document.documentElement.dataset.theme === "light" ? "☾ غامق" : "☀ فاتح"; };
+  btn.onclick = () => {
+    const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("theme", next); } catch { /* storage blocked */ }
+    paint();
+    requestAnimationFrame(() => V3.remountAll());
+  };
+  paint();
+}
 
 // ---------- small helpers ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -2496,10 +3220,10 @@ function legendKey(x, y) {
 }
 
 /**
- * Longitudinal profile with hatched cut/fill and data bands, as on a profile sheet.
+ * Ground and design lines for the profile drawings (2D sheet and 3D corridor).
  * rows: the stations (bands); dense: design levels at close spacing so vertical curves draw as curves.
  */
-function profileDrawing(rows, vpis, dense = []) {
+function profileData(rows, vpis, dense = []) {
   const pts = rows.map((r) => ({ x: r.chainage, g: r.groundLevel ?? NaN, d: r.designLevel ?? NaN }));
   const groundPts = pts.filter((p) => Number.isFinite(p.g));
   const groundAt = (x) => {
@@ -2513,7 +3237,18 @@ function profileDrawing(rows, vpis, dense = []) {
   const designLine = [...dense.map((r) => ({ x: r.chainage, d: r.designLevel ?? NaN })), ...pts.map((p) => ({ x: p.x, d: p.d }))]
     .filter((p) => Number.isFinite(p.d)).sort((a, b) => a.x - b.x).filter((p, i, a) => i === 0 || p.x - a[i - 1].x > 1e-6);
   const levels = pts.flatMap((p) => [p.g, p.d]).concat(vpis.map((v) => v.level)).filter(Number.isFinite);
-  if (pts.length < 2 || levels.length < 2) return "";
+  if (pts.length < 2 || levels.length < 2) return null;
+  const both = designLine.map((p) => ({ x: p.x, g: groundAt(p.x), d: p.d })).filter((p) => Number.isFinite(p.g));
+  return { pts, groundPts, designLine, both, levels, vpis };
+}
+
+/**
+ * Longitudinal profile with hatched cut/fill and data bands, as on a profile sheet.
+ * pd: profileData(); its dense design levels make vertical curves draw as curves.
+ */
+function profileDrawing(pd) {
+  if (!pd) return "";
+  const { pts, designLine, both, levels, vpis } = pd;
   const id = ++svgSeq;
   const W = 1000, L = 118, R = 18, T = 22, PH = 250, BAND = 58;
   const bandTop = T + PH + 14;
@@ -2532,7 +3267,6 @@ function profileDrawing(rows, vpis, dense = []) {
   }
   const xstep = niceStep(x1 - x0, 8);
   for (let x = Math.ceil(x0 / xstep) * xstep; x <= x1 + 1e-9; x += xstep) g += `<line class="gl" x1="${sx(x)}" x2="${sx(x)}" y1="${T}" y2="${T + PH}"/>`;
-  const both = designLine.map((p) => ({ x: p.x, g: groundAt(p.x), d: p.d })).filter((p) => Number.isFinite(p.g));
   g += cutFillPaths(both, sx, sy, id);
   g += `<path class="ground" d="${pathOf(pts, sx, sy, "g")}"/>`;
   if (vpis.length >= 2) {
@@ -2563,8 +3297,8 @@ function profileDrawing(rows, vpis, dense = []) {
 <figcaption class="cap"><b>القطاع الطولي</b><span>${esc(chText(x0))} → ${esc(chText(x1))} · مبالغة رأسية ≈ ×${ve.toFixed(1)}</span></figcaption></figure>`;
 }
 
-/** Cross section with hatched areas and the centreline. */
-function sectionDrawing(ground, design, cutArea, fillArea) {
+/** Sorted ground/design lines of a cross section and both levels at every break point between them. */
+function sectionData(ground, design) {
   const lv = (poly, x) => {
     for (let i = 1; i < poly.length; i++) {
       const a = poly[i - 1], b = poly[i];
@@ -2572,10 +3306,21 @@ function sectionDrawing(ground, design, cutArea, fillArea) {
     }
     return NaN;
   };
-  const gs = [...ground].sort((a, b) => a.offset - b.offset);
+  const gs = [...ground].filter((p) => Number.isFinite(p.offset) && Number.isFinite(p.level)).sort((a, b) => a.offset - b.offset);
   const ds = [...design].sort((a, b) => a.offset - b.offset);
+  if (gs.length < 2 || ds.length < 2) return null;
   const all = [...gs, ...ds];
-  if (gs.length < 2 || ds.length < 2) return "";
+  const lo = Math.max(gs[0].offset, ds[0].offset), hi = Math.min(gs[gs.length - 1].offset, ds[ds.length - 1].offset);
+  const xs = [...new Set([lo, hi, ...all.map((p) => p.offset).filter((x) => x > lo && x < hi)])].sort((a, b) => a - b)
+    .map((x) => ({ x, g: lv(gs, x), d: lv(ds, x) }));
+  return { ground: gs, design: ds, xs };
+}
+
+/** Cross section with hatched areas and the centreline. */
+function sectionDrawing(sd, cutArea, fillArea) {
+  if (!sd) return "";
+  const { ground: gs, design: ds } = sd;
+  const all = [...gs, ...ds];
   const id = ++svgSeq;
   const W = 1000, L = 70, R = 18, T = 20, PH = 230, H = T + PH + 34;
   let x0 = Math.min(...all.map((p) => p.offset)), x1 = Math.max(...all.map((p) => p.offset));
@@ -2591,15 +3336,52 @@ function sectionDrawing(ground, design, cutArea, fillArea) {
   for (let x = Math.ceil(x0 / xstep) * xstep; x <= x1 + 1e-9; x += xstep) {
     g += `<line class="gl" x1="${sx(x)}" x2="${sx(x)}" y1="${T}" y2="${T + PH}"/><text x="${sx(x)}" y="${T + PH + 16}" text-anchor="middle">${+x.toFixed(2)}</text>`;
   }
-  const lo = Math.max(gs[0].offset, ds[0].offset), hi = Math.min(gs[gs.length - 1].offset, ds[ds.length - 1].offset);
-  const xs = [...new Set([lo, hi, ...all.map((p) => p.offset).filter((x) => x > lo && x < hi)])].sort((a, b) => a - b);
-  g += cutFillPaths(xs.map((x) => ({ x, g: lv(gs, x), d: lv(ds, x) })), sx, sy, id);
+  g += cutFillPaths(sd.xs, sx, sy, id);
   g += `<path class="ground" d="${pathOf(gs.map((p) => ({ x: p.offset, g: p.level })), sx, sy, "g")}"/>`;
   g += `<path class="design" d="${pathOf(ds.map((p) => ({ x: p.offset, d: p.level })), sx, sy, "d")}"/>`;
   if (x0 < 0 && x1 > 0) g += `<line x1="${sx(0)}" x2="${sx(0)}" y1="${T}" y2="${T + PH}" style="stroke:var(--ink);stroke-width:1;stroke-dasharray:10 3 2 3"/><text x="${sx(0) + 4}" y="${T + 12}">CL</text>`;
   g += legendKey(L + 10, T + 18);
   return `<figure class="drawing" style="margin:0"><svg viewBox="0 0 ${W} ${H}" direction="ltr" role="img" aria-label="القطاع العرضي">${hatchDefs(id)}${g}</svg>
 <figcaption class="cap"><b>القطاع العرضي</b><span>CUT ${cutArea.toFixed(2)} m² · FILL ${fillArea.toFixed(2)} m² · الإزاحة بالمتر، الشمال سالب</span></figcaption></figure>`;
+}
+
+// ---------- drawing cards: 3D model + the exact 2D sheet ----------
+const LEGEND = '<span class="k ground">الأرض</span><span class="k design">التصميم</span><span class="k cut">حفر</span><span class="k fill">ردم</span>';
+let vizMode = "3d";
+try { vizMode = localStorage.getItem("viz-mode") === "2d" ? "2d" : "3d"; } catch { /* storage blocked */ }
+/** Fill `host` with a drawing card. sheet: the 2D SVG figure; build: a page-3d.js scene builder. */
+function viz(host, { title, sheet = "", build = null, legend = LEGEND, note = "" }) {
+  V3.unmount(host.querySelector(".viz-3d"));
+  const can3d = Boolean(build) && V3.supported();
+  if (!can3d && !sheet) { host.innerHTML = ""; return; }
+  host.innerHTML = `<figure class="viz">
+<div class="viz-bar"><b class="viz-title">${esc(title)}</b><span class="grow"></span>
+${can3d && sheet ? '<div class="seg" role="group" aria-label="طريقة العرض"><button type="button" data-mode="3d">3D</button><button type="button" data-mode="2d">2D</button></div>' : ""}
+${can3d ? '<button type="button" class="ghost viz-home" title="رجّع الزاوية الأصلية">↺ الزاوية</button>' : ""}</div>
+${can3d ? `<div class="viz-3d"><div class="viz-legend">${legend}</div><div class="viz-hint">اسحب للّف · العجلة أو صباعين للتقريب · كليك يمين للتحريك</div></div>` : ""}
+${sheet ? `<div class="viz-2d">${sheet}</div>` : ""}
+${note && can3d ? `<figcaption class="viz-note">${note}</figcaption>` : ""}
+</figure>`;
+  const v3 = host.querySelector(".viz-3d");
+  const v2 = host.querySelector(".viz-2d");
+  const apply = (mode) => {
+    if (!can3d) mode = "2d";
+    if (!sheet) mode = "3d";
+    if (v3) v3.hidden = mode !== "3d";
+    if (v2) v2.hidden = mode !== "2d";
+    host.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+    const home = host.querySelector(".viz-home");
+    if (home) home.hidden = mode !== "3d";
+    if (mode === "3d" && !v3._v3) V3.mount(v3, build);
+  };
+  host.querySelectorAll(".seg button").forEach((b) => (b.onclick = () => {
+    vizMode = b.dataset.mode;
+    try { localStorage.setItem("viz-mode", vizMode); } catch { /* storage blocked */ }
+    apply(vizMode);
+  }));
+  const home = host.querySelector(".viz-home");
+  if (home) home.onclick = () => V3.home(v3);
+  apply(vizMode);
 }
 
 function markdown(src) {
@@ -2651,6 +3433,9 @@ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show
   try { hidden = localStorage.getItem("welcome-hidden") === "1"; } catch { /* ignore */ }
   $("#welcome").hidden = hidden;
   $("#welcome-open").hidden = !hidden;
+  // On touch screens the welcome scene only turns by itself, so swiping still scrolls the page.
+  const coarse = window.matchMedia?.("(pointer: coarse)").matches;
+  if (!V3.mount($("#hero-3d"), siteScene(), { autoRotate: true, interactive: !coarse })) $("#hero-3d").classList.add("flat");
   $("#welcome-close").onclick = () => setWelcome(false);
   $("#welcome-open").onclick = () => { setWelcome(true); $("#welcome").scrollIntoView({ block: "start" }); };
   document.querySelectorAll("#welcome [data-go]").forEach((b) => {
@@ -3171,6 +3956,12 @@ function runLevel() {
     if (r.closing) stamps += stamp(r.closing.accepted, r.closing.accepted ? "القفل مقبول" : "القفل مرفوض", r.closing.accepted ? "WITHIN TOLERANCE" : "RE-LEVEL REQUIRED");
     out.innerHTML = panel("LV", "نتيجة الميزانية",
       `<div>${stamps}</div>${readouts(items)}${r.closing ? `<p class="hint">المسموح = ${esc(r.closing.allowableBasis)} · التصحيح لكل وقفة ${r.closing.correctionPerSetupMm} مم</p>` : ""}${table(cols, r.rows)}`);
+    viz($("#lv-chart"), {
+      title: "مسار الميزانية",
+      build: levelScene(r.rows),
+      legend: '<span class="k ground">منسوب النقطة RL</span><span class="k design">خط النظر عند HI</span><span class="k mark">الجهاز</span>',
+      note: "المحطات متساوية المسافات في الرسم لأن الدفتر مفيهوش مسافات. المناسيب بمقياسها الحقيقي.",
+    });
     $("#lv-csv").disabled = false;
   } catch (err) { showError(out, err); }
 }
@@ -3210,7 +4001,13 @@ function runProfile() {
     const vpiPts = vpis.map((v) => ({ chainage: E.parseChainage(v.chainage), level: v.level })).filter((v) => Number.isFinite(v.chainage) && Number.isFinite(v.level));
     const span = vpiPts.length >= 2 ? vpiPts[vpiPts.length - 1].chainage - vpiPts[0].chainage : 0;
     const dense = span > 0 ? calc("profile_design", { vpis, interval: span / 240 }).rows : [];
-    $("#pf-chart").innerHTML = profileDrawing(r.rows, vpiPts, dense);
+    const pd = profileData(r.rows, vpiPts, dense);
+    viz($("#pf-chart"), {
+      title: "القطاع الطولي",
+      sheet: profileDrawing(pd),
+      build: pd && profileScene(pd),
+      note: "في الـ 3D المناسيب متكبّرة رأسيًا عشان الفرق يبان. للقراية المظبوطة افتح 2D أو الجداول.",
+    });
     $("#pf-csv").disabled = false;
   } catch (err) { showError(out, err); }
 }
@@ -3240,7 +4037,13 @@ function runSection() {
     out.innerHTML = (r.warnings.length ? `<div class="notice">${r.warnings.map(esc).join("<br>")}</div>` : "") +
       readouts([["مساحة الحفر م²", r.cutArea.toFixed(2), "bad"], ["مساحة الردم م²", r.fillArea.toFixed(2), "ok"], ["الجنب الشمال", r.leftSide], ["الجنب اليمين", r.rightSide]]) +
       "<h3>نقاط خط التصميم</h3>" + table([{ key: "offset", label: "الإزاحة", num: 1 }, { key: "level", label: "المنسوب", num: 1 }], r.design);
-    $("#xs-chart").innerHTML = sectionDrawing(ground, r.design, r.cutArea, r.fillArea);
+    const sd = sectionData(ground, r.design);
+    viz($("#xs-chart"), {
+      title: "القطاع العرضي",
+      sheet: sectionDrawing(sd, r.cutArea, r.fillArea),
+      build: sd && sectionScene({ ...sd, cutArea: r.cutArea, fillArea: r.fillArea }),
+      note: "القطاع ممدود بطول الطريق عشان يبان كمجسم. المساحات المكتوبة هي مساحة القطاع نفسه.",
+    });
   } catch (err) { showError(out, err); }
 }
 $("#xs-run").onclick = runSection;
@@ -3260,6 +4063,14 @@ function runVolumes() {
     volLast = { columns: volCols, rows: r.rows };
     out.innerHTML = readouts([["إجمالي الحفر م³", r.totalCut.toFixed(2), "bad"], ["إجمالي الردم م³", r.totalFill.toFixed(2), "ok"], ["الفرق (حفر − ردم×معامل) م³", r.netBalance.toFixed(2)]]) +
       `<p class="hint">${esc(r.method)}. ${esc(r.balanceNote)}</p>` + table(volCols, r.rows);
+    const st = sections.map((s) => ({ ...s, chainage: E.parseChainage(s.chainage) })).filter((s) => Number.isFinite(s.chainage));
+    const mass = st.length ? [{ chainage: st[0].chainage, value: 0 }, ...r.rows.map((x) => ({ chainage: E.parseChainage(x.to), value: x.massOrdinate }))]
+      .filter((m) => Number.isFinite(m.chainage) && Number.isFinite(m.value)) : [];
+    viz($("#vol-chart"), {
+      title: "الكميات على طول المسار",
+      build: st.length >= 2 ? volumeScene({ sections: st, mass }) : null,
+      legend: '<span class="k cut">مساحة حفر م²</span><span class="k fill">مساحة ردم م²</span><span class="k mark">Mass haul</span>',
+    });
     $("#vol-csv").disabled = false;
   } catch (err) { showError(out, err); }
 }
@@ -3311,6 +4122,17 @@ $("#rv-file").onchange = async (e) => {
       if (r.issueCount) html += table(cols, r.issues, (x) => (x.severity === "عالي" ? "sev-high" : ""));
     }
     out.innerHTML = panel("QC", "تقرير المراجعة", html);
+    const flagged = new Set(tool === "check_tolerances"
+      ? r.rows.filter((x) => x.status !== "مقبول").map((x) => String(x.id))
+      : r.issues.map((x) => String(x.point ?? "")).filter(Boolean));
+    const pts = rowsOf(f).map((p, i) => ({ id: p.id ?? p.point ?? `#${i + 1}`, x: E.toNumber(p.x), y: E.toNumber(p.y), z: E.toNumber(p.z) }))
+      .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z));
+    viz($("#rv-chart"), {
+      title: `النقاط في 3D · ${pts.length} نقطة`,
+      build: pts.length >= 3 ? pointsScene(pts, flagged) : null,
+      legend: '<span class="k fill">منسوب واطي</span><span class="k mark">متوسط</span><span class="k cut">عالي / عليها ملاحظة</span>',
+      note: "المناسيب متكبّرة رأسيًا عشان التضاريس تبان. النقط الحمرا الكبيرة عليها ملاحظات في التقرير.",
+    });
     $("#rv-csv").disabled = false;
   } catch (err) { showError(out, err); }
 };
