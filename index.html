@@ -279,7 +279,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .auth-card p.sub { margin: 0 0 18px; color: var(--muted); }
 .auth-card form { display: flex; flex-direction: column; gap: 12px; }
 .auth-card input { font-size: 16px; padding: 11px 13px; }
-#auth-code { font-family: var(--f-num); font-size: 22px; letter-spacing: .4em; text-align: center; }
+.auth-seg { display: flex; margin-bottom: 16px; direction: rtl; }
+.auth-seg button { flex: 1; font-family: var(--f-body); font-size: 14px; padding: 7px 10px; }
 .auth-card button.primary { justify-content: center; padding: 11px 20px; font-size: 15px; }
 .auth-card .fine { font-size: 11.5px; color: var(--muted); margin: 14px 0 0; }
 
@@ -295,18 +296,21 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="auth-card">
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
     <h2 id="auth-title">أهلاً يا هندسة</h2>
-    <p class="sub">سجّل دخولك بإيميلك عشان تستخدم المهندس المساعد. هنبعتلك كود دخول، من غير باسورد.</p>
-    <form id="auth-email-form">
+    <p class="sub">ادخل بحسابك، أو اعمل حساب جديد في ثانية.</p>
+    <div class="seg auth-seg" role="tablist" aria-label="نوع الدخول">
+      <button type="button" role="tab" data-auth="in" aria-pressed="true">تسجيل دخول</button>
+      <button type="button" role="tab" data-auth="up" aria-pressed="false">حساب جديد</button>
+    </div>
+    <form id="auth-form">
+      <label for="auth-name" data-up hidden>الاسم<input id="auth-name" autocomplete="name" placeholder="م. أحمد فتحي"></label>
       <label for="auth-email">الإيميل<input id="auth-email" type="email" required autocomplete="email" inputmode="email" dir="ltr" placeholder="name@example.com"></label>
-      <button class="primary" type="submit">ابعتلي كود الدخول</button>
-    </form>
-    <form id="auth-code-form" hidden>
-      <label for="auth-code">اكتب الكود اللي وصل على <b id="auth-sent-to" dir="ltr"></b><input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" dir="ltr" placeholder="••••••"></label>
-      <button class="primary" type="submit">دخول</button>
-      <button type="button" class="link" id="auth-back">غيّر الإيميل</button>
+      <label for="auth-pass">الباسورد<input id="auth-pass" type="password" required minlength="6" autocomplete="current-password" dir="ltr" placeholder="6 حروف أو أرقام على الأقل"></label>
+      <label for="auth-pass2" data-up hidden>تأكيد الباسورد<input id="auth-pass2" type="password" minlength="6" autocomplete="new-password" dir="ltr"></label>
+      <label class="check" for="auth-show"><input id="auth-show" type="checkbox"> إظهار الباسورد</label>
+      <button class="primary" type="submit" id="auth-submit">دخول</button>
     </form>
     <p id="auth-msg" class="hint" role="status"></p>
-    <p class="fine">إيميلك بيتستخدم لتسجيل الدخول بس. الملفات اللي بترفعها بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
+    <p class="fine">الملفات اللي بترفعها بتتقري جوه المتصفح ومش بتترفع لأي سيرفر. حسابك بيتستخدم لتسجيل الدخول بس.</p>
   </div>
 </div>
 
@@ -3057,8 +3061,8 @@ document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
 $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
 
 // ---------- sign-in (public site only) ----------
-// Visitors sign in with a one-time code sent to their email (Supabase Auth). Inside the
-// claude.ai viewer the page belongs to the viewer already, so there is no gate there.
+// Visitors make an account with email + password and sign in with it (Supabase Auth). Inside
+// the claude.ai viewer the page belongs to the viewer already, so there is no gate there.
 const SUPABASE_URL = "https://hidjlsdcwnsgmrqnlphy.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpZGpsc2Rjd25zZ21ycW5scGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMjEwMDgsImV4cCI6MjEwODU5NzAwOH0.TzVLTgvJNxQZTAOivmm7QCOm3Dubq4vKCtvKmqAy1MM";
 {
@@ -3069,13 +3073,16 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     const signedIn = Boolean(user) || inViewer;
     root.classList.toggle("gate", !signedIn);
     $("#user-box").hidden = !user;
-    if (user) $("#user-email").textContent = user.email ?? "";
+    if (user) $("#user-email").textContent = user.user_metadata?.full_name || user.email || "";
     if (signedIn) V3.remountAll();
   };
   const arabicError = (err) => {
     const m = String(err?.message || err || "");
-    if (/rate limit|too many|security purposes/i.test(m)) return "طلبات كتير ورا بعض. استنى دقيقة وجرّب تاني.";
-    if (/expired|invalid/i.test(m)) return "الكود غلط أو انتهى. اطلب كود جديد.";
+    if (/invalid login credentials/i.test(m)) return "الإيميل أو الباسورد غلط.";
+    if (/already registered|already exists/i.test(m)) return "الإيميل ده عليه حساب بالفعل. ادخل من «تسجيل دخول».";
+    if (/email not confirmed/i.test(m)) return "الحساب ده محتاج تأكيد إيميل. كلّم صاحب الموقع.";
+    if (/password/i.test(m) && /least|short|weak/i.test(m)) return "الباسورد لازم يكون 6 حروف أو أرقام على الأقل.";
+    if (/rate limit|too many|security purposes/i.test(m)) return "محاولات كتير ورا بعض. استنى دقيقة وجرّب تاني.";
     if (/email/i.test(m) && /invalid|valid/i.test(m)) return "الإيميل مش مكتوب صح.";
     return `حصلت مشكلة: ${m}`;
   };
@@ -3084,33 +3091,40 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   else {
     sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
     sb.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
-    let email = "";
-    $("#auth-email-form").onsubmit = async (e) => {
-      e.preventDefault();
-      email = $("#auth-email").value.trim();
-      const btn = e.submitter || $("#auth-email-form button");
-      btn.disabled = true;
-      msg("بيبعت…");
-      const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname } });
-      btn.disabled = false;
-      if (error) return msg(arabicError(error), true);
-      $("#auth-sent-to").textContent = email;
-      $("#auth-email-form").hidden = true;
-      $("#auth-code-form").hidden = false;
-      $("#auth-code").focus();
-      msg("بعتنالك إيميل فيه كود الدخول (وفيه لينك كمان، أيهم يمشي). بص في الـ Spam لو ما لقيتوش.");
-    };
-    $("#auth-code-form").onsubmit = async (e) => {
-      e.preventDefault();
-      const token = $("#auth-code").value.replace(/\s/g, "");
-      if (!token) return;
-      msg("بيتأكد…");
-      const { error } = await sb.auth.verifyOtp({ email, token, type: "email" });
-      if (error) return msg(arabicError(error), true);
+    let mode = "in";
+    const setMode = (m) => {
+      mode = m;
+      document.querySelectorAll("[data-auth]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.auth === m)));
+      document.querySelectorAll("#auth-form [data-up]").forEach((el) => (el.hidden = m !== "up"));
+      $("#auth-pass").autocomplete = m === "up" ? "new-password" : "current-password";
+      $("#auth-submit").textContent = m === "up" ? "اعمل الحساب" : "دخول";
       msg("");
     };
-    $("#auth-back").onclick = () => { $("#auth-code-form").hidden = true; $("#auth-email-form").hidden = false; msg(""); $("#auth-email").focus(); };
-    $("#sign-out").onclick = async () => { await sb.auth.signOut(); $("#auth-code").value = ""; $("#auth-back").click(); };
+    document.querySelectorAll("[data-auth]").forEach((b) => (b.onclick = () => setMode(b.dataset.auth)));
+    $("#auth-show").onchange = (e) => { for (const id of ["#auth-pass", "#auth-pass2"]) $(id).type = e.target.checked ? "text" : "password"; };
+    $("#auth-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const email = $("#auth-email").value.trim();
+      const password = $("#auth-pass").value;
+      if (mode === "up" && password !== $("#auth-pass2").value) return msg("الباسورد والتأكيد مش زي بعض.", true);
+      const btn = $("#auth-submit");
+      btn.disabled = true;
+      msg(mode === "up" ? "بيعمل الحساب…" : "بيدخل…");
+      try {
+        if (mode === "up") {
+          const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: $("#auth-name").value.trim() } } });
+          if (error) return msg(arabicError(error), true);
+          // With "Confirm email" on in Supabase there is no session until the email link is opened.
+          if (!data.session) return msg("الحساب اتعمل بس محتاج تأكيد من الإيميل قبل الدخول. لو مفيش إيميل وصلك، كلّم صاحب الموقع.", true);
+        } else {
+          const { error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) return msg(arabicError(error), true);
+        }
+        msg("");
+        $("#auth-pass").value = $("#auth-pass2").value = "";
+      } finally { btn.disabled = false; }
+    };
+    $("#sign-out").onclick = async () => { await sb.auth.signOut(); setMode("in"); $("#auth-email").focus(); };
   }
 }
 
