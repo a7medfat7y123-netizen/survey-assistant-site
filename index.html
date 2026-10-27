@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="المهندس المساعد: أدوات مهندس المساحة في الموقع. حل الميزانية، البروفيل والمنحنيات الرأسية، الحفر والردم والكميات، ومراجعة ملفات الرفع.">
-<title>المهندس المساعد</title>
+<meta name="description" content="المهندس: أدوات مهندس المساحة في الموقع. حل الميزانية، البروفيل والمنحنيات الرأسية، الحفر والردم والكميات، ومراجعة ملفات الرفع.">
+<title>المهندس</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -94,10 +94,18 @@ header {
 }
 .bar { display: flex; align-items: center; gap: 14px; padding-block: 10px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.logo { width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 20px var(--glow); }
-.logo svg { width: 22px; height: 22px; }
-h1 { margin: 0; font-family: var(--f-head); font-size: 18px; font-weight: 800; line-height: 1.3; }
-.brand small { display: block; color: var(--muted); font-size: 12px; }
+.logo { width: 44px; height: 44px; flex: none; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 20px var(--glow), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo svg { width: 32px; height: 32px; }
+/* Wordmark: the name set on a surveyor's scale. */
+.wordmark { display: flex; flex-direction: column; min-width: 0; }
+h1, .brand-name {
+  margin: 0; font-family: var(--f-head); font-size: 22px; font-weight: 800; line-height: 1.25; letter-spacing: .01em;
+  background: linear-gradient(100deg, var(--ink) 0%, var(--ink) 35%, var(--accent) 70%, var(--accent-2) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.ruler { display: block; height: 6px; margin: 3px 0 2px; width: 100%; max-width: 150px; border-top: 1.5px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, transparent) 0 1px, transparent 1px 6px) top / 100% 3px no-repeat,
+              repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 85%, transparent) 0 1.5px, transparent 1.5px 30px) top / 100% 6px no-repeat; }
+.brand small { display: block; color: var(--muted); font-size: 11.5px; letter-spacing: .02em; }
 .bar .grow { flex: 1; }
 .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .pill { font-family: var(--f-num); font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; white-space: nowrap; background: var(--sheet); }
@@ -250,7 +258,7 @@ svg .vpi { fill: var(--sheet); stroke: var(--design); stroke-width: 1.5; }
 
 /* ---- welcome (3D site) ---- */
 .hero { padding: 0; overflow: hidden; }
-.hero-3d { position: relative; height: clamp(300px, 46vw, 470px); cursor: grab; touch-action: pan-y;
+.hero-3d { position: relative; height: clamp(340px, 56vw, 580px); cursor: grab; touch-action: pan-y;
   background: radial-gradient(120% 100% at 70% 0%, color-mix(in srgb, var(--accent) 22%, var(--paper)) 0%, var(--paper) 70%); }
 .hero-3d.flat { background: radial-gradient(120% 100% at 70% 0%, color-mix(in srgb, var(--accent) 30%, var(--paper)) 0%, var(--paper) 70%), var(--paper); }
 .hero-3d::after { content: ""; position: absolute; inset: auto 0 0; height: 45%; pointer-events: none; background: linear-gradient(transparent, var(--sheet)); }
@@ -285,8 +293,9 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .intro-card { width: min(560px, 100%); padding: 26px 24px 20px; border-radius: 24px; border: 1px solid var(--line); animation: rise .45s .05s ease-out both;
   background: linear-gradient(180deg, color-mix(in srgb, var(--sheet) 92%, var(--accent)) 0%, color-mix(in srgb, var(--sheet) 94%, transparent) 50%); box-shadow: 0 40px 100px -30px var(--shadow), 0 0 0 1px color-mix(in srgb, white 4%, transparent) inset; }
 .intro-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
-.intro-card .logo { width: 54px; height: 54px; border-radius: 16px; }
-.intro-card .logo svg { width: 30px; height: 30px; }
+.intro-card .logo { width: 62px; height: 62px; border-radius: 18px; }
+.intro-card .logo svg { width: 46px; height: 46px; }
+.intro-card .brand-name { font-size: inherit; }
 .intro-card h2 { font-size: clamp(22px, 4vw, 28px); font-weight: 800; margin: 2px 0 6px; line-height: 1.35; }
 .intro-card p.sub { margin: 0 0 18px; color: var(--muted); }
 .feat { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
@@ -310,11 +319,11 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
   <div class="intro-card">
     <div class="intro-top">
-      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="#04131b" stroke-linecap="round" stroke-linejoin="round"><path d="M7 31 A 19 19 0 0 0 41 31" stroke-width="1.6" stroke-dasharray="2.2 2.6" opacity=".75"/><path d="M24 3.5v4" stroke-width="2.4"/><path d="M22.2 11.5 12.5 39M25.8 11.5 34.6 36.5" stroke-width="2.8"/><path d="M33.4 35.6 36.6 42.6 36.3 35" fill="#04131b" stroke-width="1.2"/><circle cx="24" cy="10" r="3.4" fill="#04131b" stroke="none"/><circle cx="24" cy="10" r="1.2" fill="#e8f7ff" stroke="none"/><path d="M15.8 25.5h16.4" stroke-width="1.8"/><circle cx="12" cy="40.6" r="3.1" stroke-width="1.4"/><path d="M12 35.6v10M7 40.6h10" stroke-width="1.1"/></svg></div>
       <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
     </div>
     <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
-    <h2 id="intro-title">أهلاً بيك في المهندس المساعد</h2>
+    <h2 id="intro-title">أهلاً بيك في <span class="brand-name">المهندس</span></h2>
     <p class="sub">أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.</p>
     <ul class="feat">
       <li><span class="code">LV</span><b>دفتر الميزانية</b><small>حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح</small></li>
@@ -331,8 +340,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="wrap">
     <div class="bar">
       <div class="brand">
-        <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
-        <div><h1>المهندس المساعد</h1><small>أدوات مهندس المساحة في الموقع</small></div>
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="#04131b" stroke-linecap="round" stroke-linejoin="round"><path d="M7 31 A 19 19 0 0 0 41 31" stroke-width="1.6" stroke-dasharray="2.2 2.6" opacity=".75"/><path d="M24 3.5v4" stroke-width="2.4"/><path d="M22.2 11.5 12.5 39M25.8 11.5 34.6 36.5" stroke-width="2.8"/><path d="M33.4 35.6 36.6 42.6 36.3 35" fill="#04131b" stroke-width="1.2"/><circle cx="24" cy="10" r="3.4" fill="#04131b" stroke="none"/><circle cx="24" cy="10" r="1.2" fill="#e8f7ff" stroke="none"/><path d="M15.8 25.5h16.4" stroke-width="1.8"/><circle cx="12" cy="40.6" r="3.1" stroke-width="1.4"/><path d="M12 35.6v10M7 40.6h10" stroke-width="1.1"/></svg></div>
+        <div class="wordmark"><h1>المهندس</h1><span class="ruler" aria-hidden="true"></span><small>أدوات مهندس المساحة في الموقع</small></div>
       </div>
       <span class="grow"></span>
       <div class="meta">
@@ -360,7 +369,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <div class="hero-body">
       <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
       <h2 class="greet" id="greet">أهلاً يا هندسة</h2>
-      <p class="lead">المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
+      <p class="lead">المهندس جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
       <div class="quick">
         <button type="button" data-go="chat" data-ai><span class="code">AI</span>اسأل المساعد</button>
         <button type="button" data-go="level"><span class="code">LV</span>احسب ميزانية</button>
@@ -381,7 +390,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <h2><span class="callout">RFI</span>سجل الاستفسارات</h2>
       <div id="ai-off" class="notice" hidden>المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.</div>
       <div id="chat-log">
-        <div class="msg assistant"><span class="who">المهندس المساعد</span><div class="bubble">أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك.
+        <div class="msg assistant"><span class="who">المهندس</span><div class="bubble">أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك.
         كل الأرقام بتتحسب بأدوات حساب ثابتة ومتختبرة، وتقدر تفتح «خطوات الحساب» تحت كل رد وتراجعها.</div></div>
       </div>
       <div id="attachments"></div>
@@ -529,7 +538,7 @@ BM2,,,0.900</textarea>
   </section>
 
   <footer>
-    <div class="sign-title">المهندس المساعد · أدوات مهندس المساحة في الموقع</div>
+    <div class="sign-title">المهندس · أدوات مهندس المساحة في الموقع</div>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
@@ -2437,7 +2446,8 @@ const V3 = (() => {
     host.prepend(canvas);
 
     const scene = new THREE.Scene();
-    scene.add(new THREE.HemisphereLight(0xffffff, col("--hemi-ground"), 0.75));
+    const hemi = new THREE.HemisphereLight(0xffffff, col("--hemi-ground"), 0.75);
+    scene.add(hemi);
     const sun = new THREE.DirectionalLight(0xffffff, 0.9);
     sun.position.set(0.6, 1, 0.8);
     scene.add(sun);
@@ -2446,7 +2456,8 @@ const V3 = (() => {
     scene.add(rim);
 
     const frames = [];
-    const api = { col, css, mat, line, soup, quad, textSprite, onFrame: (fn) => frames.push(fn) };
+    const dark = document.documentElement.dataset.theme !== "light";
+    const api = { col, css, mat, line, soup, quad, textSprite, onFrame: (fn) => frames.push(fn), renderer, hemi, sun, rim, dark };
     const opts = build(scene, api) || {};
 
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100000);
@@ -2455,7 +2466,7 @@ const V3 = (() => {
     controls.dampingFactor = 0.08;
     controls.screenSpacePanning = true;
     controls.autoRotate = autoRotate && !reduced();
-    controls.autoRotateSpeed = 0.6;
+    controls.autoRotateSpeed = opts.rotateSpeed ?? 0.6;
     controls.addEventListener("start", () => { controls.autoRotate = false; host.classList.add("touched"); });
     if (!interactive) { controls.enabled = false; canvas.style.touchAction = "pan-y"; }
 
@@ -2465,6 +2476,20 @@ const V3 = (() => {
     const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 1);
     const dir = new THREE.Vector3(...(opts.view ?? [0.8, 0.6, 1])).normalize();
     const home = () => {
+      if (opts.camera) {
+        // A composed shot (the welcome scene) instead of fitting the whole model.
+        camera.position.set(...opts.camera.position);
+        controls.target.set(...opts.camera.target);
+        const d = camera.position.distanceTo(controls.target);
+        camera.near = 0.5;
+        camera.far = opts.camera.far ?? d * 30;
+        camera.updateProjectionMatrix();
+        controls.minDistance = d * 0.25;
+        controls.maxDistance = d * 2.2;
+        controls.maxPolarAngle = Math.PI * 0.49;
+        controls.update();
+        return;
+      }
       const dist = (radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2))) * (opts.fit ?? 0.82);
       camera.position.copy(center).addScaledVector(dir, dist);
       camera.near = dist / 200;
@@ -2894,127 +2919,545 @@ function pointsScene(points, flagged) {
   };
 }
 
-/** Welcome scene: a small construction site you can turn around. Decorative only. */
+
+/**
+ * Welcome scene at real scale: residential towers (one still going up), a tower crane working
+ * beside it, and a divided highway with traffic, street lights and palms. Decorative only.
+ */
 function siteScene() {
   return (scene, A) => {
-    // Terrain with gentle hills.
-    const tg = new THREE.PlaneGeometry(220, 130, 110, 65);
-    tg.rotateX(-Math.PI / 2);
-    const p = tg.attributes.position;
-    const colors = [];
-    const e1 = A.col("--earth"), e2 = A.col("--earth-2"), tc = new THREE.Color();
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), z = p.getZ(i);
-      const roadBand = Math.exp(-(((z - 8) / 9) ** 2));
-      const h = (Math.sin(x * 0.045) * 2.4 + Math.cos(z * 0.07 + x * 0.02) * 1.8 + Math.sin(x * 0.11 + z * 0.05) * 0.7) * (1 - roadBand * 0.85);
-      p.setY(i, h);
-      tc.copy(e1).lerp(e2, clamp((h + 3) / 7, 0, 1));
-      colors.push(tc.r, tc.g, tc.b);
+    const R = A.renderer;
+    const dark = A.dark;
+    R.shadowMap.enabled = true;
+    R.shadowMap.type = THREE.PCFSoftShadowMap;
+    R.toneMapping = THREE.ACESFilmicToneMapping;
+    R.toneMappingExposure = dark ? 1.15 : 0.92;
+    const aniso = R.capabilities.getMaxAnisotropy();
+    let seed = 11;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const lin = (hex) => new THREE.Color(hex).convertSRGBToLinear();
+    const std = (hex, roughness = 0.85, metalness = 0, extra = {}) => new THREE.MeshStandardMaterial({ color: lin(hex), roughness, metalness, ...extra });
+    const canvasTex = (c, repeatX = 1, repeatY = 1) => {
+      const t = new THREE.CanvasTexture(c);
+      t.encoding = THREE.sRGBEncoding;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(repeatX, repeatY);
+      t.anisotropy = aniso;
+      return t;
+    };
+    const shadowy = (o) => { o.traverse((m) => { if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } }); return o; };
+    const M = new THREE.Matrix4();
+
+    // ---- sky, fog and light ----
+    const horizon = dark ? "#3b4566" : "#d3e2ee";
+    const sky = document.createElement("canvas");
+    sky.width = 2; sky.height = 512;
+    const sg = sky.getContext("2d");
+    const grad = sg.createLinearGradient(0, 0, 0, 512);
+    const stops = dark
+      ? [[0, "#050d1c"], [0.3, "#0f2042"], [0.5, "#2a3a63"], [0.58, "#a8705e"], [0.64, "#e09a63"], [0.7, horizon], [1, horizon]]
+      : [[0, "#2f74bd"], [0.35, "#6fa6da"], [0.6, "#b7d3ea"], [0.7, horizon], [1, horizon]];
+    for (const [o, c] of stops) grad.addColorStop(o, c);
+    sg.fillStyle = grad;
+    sg.fillRect(0, 0, 2, 512);
+    scene.background = canvasTex(sky);
+    scene.fog = new THREE.Fog(lin(horizon), 320, 1500);
+
+    A.rim.intensity = 0;
+    A.hemi.color = lin(dark ? "#8ea3cc" : "#e4f1ff");
+    A.hemi.groundColor = lin(dark ? "#2c2219" : "#b39a76");
+    A.hemi.intensity = dark ? 0.45 : 0.7;
+    const sun = A.sun;
+    sun.color = lin(dark ? "#ffb27a" : "#fff3dd");
+    sun.intensity = dark ? 0.75 : 1.55;
+    sun.position.set(dark ? -320 : 220, dark ? 110 : 300, dark ? -160 : 160);
+    sun.castShadow = true;
+    const small = Math.min(innerWidth, innerHeight) < 700;
+    sun.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
+    Object.assign(sun.shadow.camera, { left: -280, right: 280, top: 280, bottom: -280, near: 10, far: 1100 });
+    sun.shadow.bias = -0.0005;
+    sun.shadow.normalBias = 0.5;
+    sun.target.position.set(20, 0, 0);
+    scene.add(sun.target);
+
+    // ---- desert ground and far dunes ----
+    const sand = document.createElement("canvas");
+    sand.width = sand.height = 256;
+    const sd = sand.getContext("2d");
+    sd.fillStyle = dark ? "#c7a97f" : "#b4966b";
+    sd.fillRect(0, 0, 256, 256);
+    const sandTones = ["#b8976a", "#d6bf98", "#a98a5f", "#cdb289", "#e0cba6"];
+    for (let i = 0; i < 9000; i++) {
+      sd.globalAlpha = 0.2 + rnd() * 0.35;
+      sd.fillStyle = sandTones[Math.floor(rnd() * sandTones.length)];
+      const s = 1 + rnd() * 2.5;
+      sd.fillRect(rnd() * 256, rnd() * 256, s, s);
     }
-    tg.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-    tg.computeVertexNormals();
-    scene.add(new THREE.Mesh(tg, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true })));
-
-    // Road on an embankment.
-    const emb = extrudeXY([[-9, -1], [9, -1], [5.5, 2.2], [-5.5, 2.2]], 220, A.mat(A.col("--fill"), { opacity: 0.85, flat: true }));
-    emb.rotation.y = Math.PI / 2;
-    emb.position.set(0, 0, 8);
-    scene.add(emb);
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(220, 0.25, 11), A.mat(A.col("--asphalt")));
-    deck.position.set(0, 2.3, 8);
-    scene.add(deck);
-    scene.add(A.line([[-110, 2.45, 8], [110, 2.45, 8]], A.col("--mark"), { dashed: true, dash: 3, gap: 2.5 }));
-    for (const z of [2.7, 13.3]) scene.add(A.line([[-110, 2.45, z], [110, 2.45, z]], new THREE.Color(0xf0f0f0)));
-    // Chainage boards.
-    for (const [x, t] of [[-40, "0+120"], [10, "0+160"], [60, "0+200"]]) {
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3), A.mat(A.col("--steel")));
-      post.position.set(x, 3.8, 14.4);
-      scene.add(post);
-      const s = A.textSprite(t, { size: 1.8 });
-      s.position.set(x, 6, 14.4);
-      scene.add(s);
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshStandardMaterial({ map: canvasTex(sand, 220, 220), roughness: 1 }));
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+    const duneMat = std("#c4a47a", 1);
+    for (let i = 0; i < 9; i++) {
+      const d = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 12), duneMat);
+      d.scale.set(160 + rnd() * 200, 18 + rnd() * 30, 90 + rnd() * 80);
+      d.position.set(-900 + i * 230 + rnd() * 80, -4, -700 - rnd() * 250);
+      scene.add(d);
     }
 
-    // Total station on a tripod, sighting a prism; a pulse runs along the line of sight.
-    const ts = new THREE.Group();
-    for (const a of [0, 2.1, 4.2]) ts.add(A.line([[0, 4.6, 0], [Math.cos(a) * 1.6, 0, Math.sin(a) * 1.6]], A.col("--steel")));
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.1, 0.7), A.mat(A.col("--mark"), { emissive: A.col("--mark"), emissiveIntensity: 0.15 }));
-    head.position.y = 5.3;
-    ts.add(head);
-    const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1, 14), A.mat(A.col("--steel")));
-    scope.rotation.z = Math.PI / 2;
-    scope.position.set(0.55, 5.45, 0);
-    ts.add(scope);
-    ts.position.set(-55, 1.2, -14);
-    scene.add(ts);
-    const prismPos = new THREE.Vector3(25, 2.4, 6);
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.2), A.mat(new THREE.Color(0xf0f0f0)));
-    pole.position.set(prismPos.x, prismPos.y + 2.1, prismPos.z);
-    scene.add(pole);
-    const prism = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 14), A.mat(A.col("--cut"), { emissive: A.col("--cut"), emissiveIntensity: 0.5 }));
-    prism.position.set(prismPos.x, prismPos.y + 4.3, prismPos.z);
-    scene.add(prism);
-    const from = new THREE.Vector3(-55 + 1.05, 1.2 + 5.45, -14);
-    const to = prism.position.clone();
-    scene.add(A.line([from.toArray(), to.toArray()], A.col("--cut"), { dashed: true, dash: 1.4, gap: 1 }));
-    const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.32, 14, 10), new THREE.MeshBasicMaterial({ color: A.col("--cut") }));
-    scene.add(pulse);
-    const hd = A.textSprite("HD 81.462 m", { color: A.css("--cut"), size: 1.7 });
-    hd.position.copy(from.clone().lerp(to, 0.5)).add(new THREE.Vector3(0, 2, 0));
-    scene.add(hd);
-    A.onFrame((t) => pulse.position.copy(from).lerp(to, (t * 0.45) % 1));
+    // ---- divided highway along X (centre line z = 60) ----
+    const ROAD_Z = 60, LEN = 2400, CW = 12.8;
+    const road = document.createElement("canvas");
+    road.width = 1024; road.height = 256;
+    const rg = road.getContext("2d");
+    rg.fillStyle = "#3b3e43";
+    rg.fillRect(0, 0, 1024, 256);
+    for (let i = 0; i < 30000; i++) {
+      const v = 42 + Math.floor(rnd() * 42);
+      rg.globalAlpha = 0.55;
+      rg.fillStyle = `rgb(${v},${v},${v + 4})`;
+      rg.fillRect(rnd() * 1024, rnd() * 256, 1.6, 1.6);
+    }
+    const mAcross = 256 / CW, mAlong = 1024 / 18; // pixels per metre
+    rg.globalAlpha = 0.16;
+    rg.fillStyle = "#16181b";
+    for (const lane of [0, 1, 2]) for (const off of [-0.85, 0.85]) rg.fillRect(0, (2 + lane * 3.6 + 1.8 + off - 0.3) * mAcross, 1024, 0.6 * mAcross);
+    rg.globalAlpha = 1;
+    rg.fillStyle = "#ecebe4";
+    rg.fillRect(0, (2 - 0.15) * mAcross, 1024, 0.15 * mAcross); // edge line at the hard shoulder
+    rg.fillRect(0, (CW - 0.4) * mAcross, 1024, 0.15 * mAcross); // edge line at the median
+    for (const k of [1, 2]) for (let x = 0; x < 1024; x += 9 * mAlong) rg.fillRect(x, (2 + k * 3.6 - 0.075) * mAcross, 3 * mAlong, 0.15 * mAcross);
+    const roadMat = new THREE.MeshStandardMaterial({ map: canvasTex(road, LEN / 18, 1), roughness: 0.92 });
+    for (const side of [-1, 1]) {
+      const geo = new THREE.PlaneGeometry(LEN, CW);
+      geo.rotateX(-Math.PI / 2);
+      const m = new THREE.Mesh(geo, roadMat);
+      m.position.set(0, 0.06, ROAD_Z + side * (1.5 + CW / 2));
+      if (side > 0) m.rotation.y = Math.PI;
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    const concrete = std("#b9b5ab", 0.9);
+    const median = new THREE.Mesh(new THREE.BoxGeometry(LEN, 0.12, 3), std("#8f8b82", 0.95));
+    median.position.set(0, 0.06, ROAD_Z);
+    median.receiveShadow = true;
+    scene.add(median);
+    const jersey = new THREE.Shape([[-0.32, 0], [0.32, 0], [0.2, 0.26], [0.1, 0.82], [-0.1, 0.82], [-0.2, 0.26]].map(([x, y]) => new THREE.Vector2(x, y)));
+    const barrierGeo = new THREE.ExtrudeGeometry(jersey, { depth: LEN, bevelEnabled: false });
+    barrierGeo.translate(0, 0, -LEN / 2);
+    barrierGeo.rotateY(Math.PI / 2);
+    const barrier = new THREE.Mesh(barrierGeo, concrete);
+    barrier.position.set(0, 0.1, ROAD_Z);
+    scene.add(shadowy(barrier));
+    const paving = std("#cfc8ba", 0.95);
+    for (const side of [-1, 1]) {
+      const edge = ROAD_Z + side * (1.5 + CW);
+      const curb = new THREE.Mesh(new THREE.BoxGeometry(LEN, 0.25, 0.3), concrete);
+      curb.position.set(0, 0.12, edge + side * 0.15);
+      const walk = new THREE.Mesh(new THREE.BoxGeometry(LEN, 0.2, 3.2), paving);
+      walk.position.set(0, 0.1, edge + side * (0.3 + 1.6));
+      scene.add(shadowy(curb), shadowy(walk));
+    }
 
-    // Benchmark.
-    const bm = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.8, 6), A.mat(A.col("--sheet-2")));
-    bm.position.set(-75, 2.2, 22);
-    scene.add(bm);
-    const bml = A.textSprite("BM 100.000", { size: 1.7 });
-    bml.position.set(-75, 4.4, 22);
-    scene.add(bml);
+    // Street lights on the median: twin arms, lamps that glow at night.
+    const poleXs = [];
+    for (let x = -1100; x <= 1100; x += 42) poleXs.push(x);
+    const steel = std("#8d949b", 0.45, 0.6);
+    const poles = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.12, 0.2, 12, 10), steel, poleXs.length);
+    const arms = new THREE.InstancedMesh(new THREE.BoxGeometry(0.12, 0.12, 5.4), steel, poleXs.length);
+    const lampMat = new THREE.MeshStandardMaterial({ color: lin("#f4f1e6"), emissive: lin("#ffd9a0"), emissiveIntensity: dark ? 3 : 0.05, roughness: 0.4 });
+    const lamps = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 0.18, 0.4), lampMat, poleXs.length * 2);
+    poleXs.forEach((x, i) => {
+      poles.setMatrixAt(i, M.makeTranslation(x, 6.2, ROAD_Z));
+      arms.setMatrixAt(i, M.makeTranslation(x, 12.1, ROAD_Z));
+      lamps.setMatrixAt(i * 2, M.makeTranslation(x, 12, ROAD_Z - 2.6));
+      lamps.setMatrixAt(i * 2 + 1, M.makeTranslation(x, 12, ROAD_Z + 2.6));
+    });
+    poles.castShadow = arms.castShadow = true;
+    scene.add(poles, arms, lamps);
+    if (dark) {
+      // Pools of light on the asphalt.
+      const pc = document.createElement("canvas");
+      pc.width = pc.height = 128;
+      const pg = pc.getContext("2d");
+      const rad = pg.createRadialGradient(64, 64, 0, 64, 64, 64);
+      rad.addColorStop(0, "rgba(255,205,140,0.55)");
+      rad.addColorStop(1, "rgba(255,205,140,0)");
+      pg.fillStyle = rad;
+      pg.fillRect(0, 0, 128, 128);
+      const poolGeo = new THREE.PlaneGeometry(16, 16);
+      poolGeo.rotateX(-Math.PI / 2);
+      const pools = new THREE.InstancedMesh(poolGeo, new THREE.MeshBasicMaterial({ map: canvasTex(pc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), poleXs.length * 2);
+      poleXs.forEach((x, i) => {
+        pools.setMatrixAt(i * 2, M.makeTranslation(x, 0.09, ROAD_Z - 7));
+        pools.setMatrixAt(i * 2 + 1, M.makeTranslation(x, 0.09, ROAD_Z + 7));
+      });
+      scene.add(pools);
+    }
 
-    // Building under construction: columns and slabs.
-    const bx = 55, bz = -35;
-    const colM = A.mat(A.col("--steel"));
-    const slabM = A.mat(A.col("--sheet-2"), { opacity: 0.92 });
-    for (let lvl = 0; lvl < 4; lvl++) {
-      const y = 2.6 + lvl * 4.2;
-      const s = new THREE.Mesh(new THREE.BoxGeometry(24, 0.45, 16), slabM);
-      s.position.set(bx, y + 4, bz);
-      if (lvl < 3) scene.add(s);
-      for (const dx of [-11, -3.7, 3.7, 11]) for (const dz of [-7, 0, 7]) {
-        if (lvl === 3 && dx > 4) continue;
-        const c = new THREE.Mesh(new THREE.BoxGeometry(0.6, 4.2, 0.6), colM);
-        c.position.set(bx + dx, y + 2, bz + dz);
-        scene.add(c);
+    // Date palms along both pavements.
+    const palmXs = [];
+    for (let x = -1050; x <= 1050; x += 24) palmXs.push(x + (rnd() - 0.5) * 4);
+    const palmSpots = palmXs.flatMap((x) => [[x, ROAD_Z - 1.5 - CW - 2.2], [x + 12, ROAD_Z + 1.5 + CW + 2.2]]);
+    const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.38, 8, 8), std("#7a5c3e", 1), palmSpots.length);
+    const frondGeo = new THREE.SphereGeometry(1, 8, 6);
+    frondGeo.scale(2.6, 0.18, 0.55);
+    frondGeo.translate(2.3, 0, 0);
+    const fronds = new THREE.InstancedMesh(frondGeo, std(dark ? "#3f5a35" : "#557a3c", 0.9), palmSpots.length * 9);
+    const q = new THREE.Quaternion(), e = new THREE.Euler(), s1 = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
+    palmSpots.forEach(([x, z], i) => {
+      const h = 7 + rnd() * 2.5;
+      trunks.setMatrixAt(i, M.compose(p.set(x, h / 2, z), q.identity(), s1.set(1, h / 8, 1)));
+      for (let k = 0; k < 9; k++) {
+        e.set(0, (k / 9) * Math.PI * 2 + rnd() * 0.3, -0.35 - rnd() * 0.35);
+        fronds.setMatrixAt(i * 9 + k, M.compose(p.set(x, h + 0.2, z), q.setFromEuler(e), s1.set(1, 1, 1)));
+      }
+    });
+    trunks.castShadow = fronds.castShadow = true;
+    scene.add(trunks, fronds);
+
+    // Kilometre marker boards on the pavement.
+    for (const [x, t] of [[-140, "0+120"], [-60, "0+200"], [20, "0+280"]]) {
+      const c = document.createElement("canvas");
+      c.width = 256; c.height = 128;
+      const g = c.getContext("2d");
+      g.fillStyle = "#0f6b3a"; g.fillRect(0, 0, 256, 128);
+      g.strokeStyle = "#ffffff"; g.lineWidth = 8; g.strokeRect(8, 8, 240, 112);
+      g.fillStyle = "#ffffff"; g.font = "bold 64px Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(t, 128, 68);
+      const board = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshStandardMaterial({ map: canvasTex(c), roughness: 0.6, side: THREE.DoubleSide }));
+      const zb = ROAD_Z + 1.5 + CW + 1.2;
+      board.position.set(x, 3.2, zb);
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.2), steel);
+      post.position.set(x, 1.6, zb);
+      scene.add(shadowy(board), shadowy(post));
+    }
+
+    // Traffic: right-hand driving, +x on the far carriageway.
+    const paints = ["#f2f2f0", "#c9ccd1", "#1c1e22", "#a3242a", "#1f4f8f", "#d8d2c4", "#5b6066"];
+    const glass = std("#14191f", 0.12, 0.85);
+    const tyre = std("#151515", 0.9);
+    const wheelGeo = new THREE.CylinderGeometry(0.36, 0.36, 0.28, 16);
+    wheelGeo.rotateX(Math.PI / 2);
+    const head = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: lin("#fff6dc"), emissiveIntensity: dark ? 4 : 0.4 });
+    const tail = new THREE.MeshStandardMaterial({ color: lin("#7a0a0a"), emissive: lin("#ff2a1a"), emissiveIntensity: dark ? 3 : 0.6 });
+    const makeCar = () => {
+      const g = new THREE.Group();
+      const truck = rnd() < 0.15;
+      const len = truck ? 9 : 4.5, wid = truck ? 2.4 : 1.85;
+      const body = new THREE.Mesh(new THREE.BoxGeometry(len, truck ? 1.9 : 0.75, wid), std(paints[Math.floor(rnd() * paints.length)], 0.32, 0.55));
+      body.position.y = truck ? 1.6 : 0.62;
+      g.add(body);
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(truck ? 2 : 2.5, truck ? 1.2 : 0.62, wid * 0.88), glass);
+      cabin.position.set(truck ? len / 2 - 1.2 : -0.25, truck ? 1.3 : 1.27, 0);
+      g.add(cabin);
+      for (const wx of [len / 2 - 0.9, -len / 2 + 0.9]) for (const wz of [wid / 2, -wid / 2]) {
+        const w = new THREE.Mesh(wheelGeo, tyre);
+        w.position.set(wx, 0.36, wz);
+        g.add(w);
+      }
+      for (const wz of [wid / 2 - 0.35, -wid / 2 + 0.35]) {
+        const hl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.38), head);
+        hl.position.set(len / 2 + 0.01, body.position.y, wz);
+        const tl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.38), tail);
+        tl.position.set(-len / 2 - 0.01, body.position.y, wz);
+        g.add(hl, tl);
+      }
+      return shadowy(g);
+    };
+    const cars = [];
+    const lanesFar = [63.3, 66.9, 70.5], lanesNear = [56.7, 53.1, 49.5];
+    for (const [lanes, dir] of [[lanesFar, 1], [lanesNear, -1]]) {
+      lanes.forEach((z, li) => {
+        for (let k = 0; k < 6; k++) {
+          const car = makeCar();
+          car.position.set(-900 + k * 300 + rnd() * 120, 0.06, z);
+          car.rotation.y = dir > 0 ? 0 : Math.PI;
+          scene.add(car);
+          cars.push({ car, v: dir * (26 - li * 4 + rnd() * 3) });
+        }
+      });
+    }
+    let last = 0;
+    A.onFrame((t) => {
+      const dt = Math.min(t - last, 0.1);
+      last = t;
+      for (const c of cars) {
+        c.car.position.x += c.v * dt;
+        if (c.car.position.x > 1000) c.car.position.x -= 2000;
+        if (c.car.position.x < -1000) c.car.position.x += 2000;
+      }
+    });
+
+    // ---- residential towers ----
+    const facade = (bays, floors, wall, glassTop, glassBottom, lit) => {
+      const bw = 32, fh = 24;
+      const c = document.createElement("canvas");
+      c.width = bays * bw; c.height = floors * fh;
+      const em = document.createElement("canvas");
+      em.width = c.width; em.height = c.height;
+      const g = c.getContext("2d"), ge = em.getContext("2d");
+      g.fillStyle = wall; g.fillRect(0, 0, c.width, c.height);
+      ge.fillStyle = "#000"; ge.fillRect(0, 0, em.width, em.height);
+      for (let f = 0; f < floors; f++) for (let b = 0; b < bays; b++) {
+        const x = b * bw + 3, y = f * fh + 5, w = bw - 6, h = fh - 8;
+        const gl = g.createLinearGradient(0, y, 0, y + h);
+        gl.addColorStop(0, glassTop); gl.addColorStop(1, glassBottom);
+        g.fillStyle = gl; g.fillRect(x, y, w, h);
+        g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(x + w / 2 - 0.5, y, 1, h); // mullion
+        if ((b + f) % 3 === 0) { g.fillStyle = "rgba(240,240,235,.75)"; g.fillRect(x - 2, y + h - 3, w + 4, 2); } // balcony rail
+        if (rnd() < lit) {
+          const warm = ["#ffd38a", "#ffe2b0", "#fff1d6", "#ffc06a"][Math.floor(rnd() * 4)];
+          ge.fillStyle = warm; ge.globalAlpha = 0.55 + rnd() * 0.45; ge.fillRect(x, y, w, h); ge.globalAlpha = 1;
+        }
+      }
+      const map = canvasTex(c), emissiveMap = canvasTex(em);
+      return { map, emissiveMap };
+    };
+    const roofMat = std("#9a958c", 0.95);
+    const glassPodium = std(dark ? "#2b3640" : "#56687a", 0.15, 0.7, { emissive: lin("#ffcf8a"), emissiveIntensity: dark ? 0.35 : 0 });
+    const aviation = [];
+    const tower = ({ x, z, w, floors, wall, glassTop, glassBottom, crown = true, spire = false }) => {
+      const h = floors * 3.3;
+      const tex = facade(Math.round(w / 3.3), floors, wall, glassTop, glassBottom, dark ? 0.42 : 0);
+      const side = new THREE.MeshStandardMaterial({ ...tex, emissive: 0xffffff, emissiveIntensity: dark ? 1.2 : 0, roughness: 0.55, metalness: 0.15 });
+      const g = new THREE.Group();
+      const shaft = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), [side, side, roofMat, roofMat, side, side]);
+      shaft.position.y = 9 + h / 2;
+      const podium = new THREE.Mesh(new THREE.BoxGeometry(w + 14, 9, w + 14), glassPodium);
+      podium.position.y = 4.5;
+      const podiumRoof = new THREE.Mesh(new THREE.BoxGeometry(w + 14.6, 0.6, w + 14.6), std(wall, 0.8));
+      podiumRoof.position.y = 9.2;
+      g.add(shaft, podium, podiumRoof);
+      // Stone fins at the corners, as on the towers of the new capital.
+      for (const [cx, cz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(1.1, h + 2, 1.1), std(wall, 0.7));
+        fin.position.set((cx * w) / 2, 9 + h / 2 + 1, (cz * w) / 2);
+        g.add(fin);
+      }
+      let top = 9 + h;
+      if (crown) {
+        const cr = new THREE.Mesh(new THREE.BoxGeometry(w * 0.7, 7, w * 0.7), std(dark ? "#1e2a35" : "#6f8597", 0.2, 0.8, { emissive: lin("#7fc8ff"), emissiveIntensity: dark ? 0.22 : 0 }));
+        cr.position.y = top + 3.5;
+        g.add(cr);
+        top += 7;
+      }
+      if (spire) {
+        const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.6, 26, 8), steel);
+        sp.position.y = top + 13;
+        g.add(sp);
+        top += 26;
+      }
+      const av = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), new THREE.MeshBasicMaterial({ color: lin("#ff2a1a") }));
+      av.position.y = top + 0.6;
+      g.add(av);
+      aviation.push(av);
+      g.position.set(x, 0, z);
+      return shadowy(g);
+    };
+    const stone = "#d9cdb8", stone2 = "#c8b9a0", white = "#e8e4dc";
+    const blueGlass = ["#7fa3c4", "#2c4762"], greenGlass = ["#8fb3ad", "#2f4e4a"], greyGlass = ["#9aa8b5", "#36424e"];
+    scene.add(
+      tower({ x: -40, z: -130, w: 30, floors: 46, wall: stone, glassTop: blueGlass[0], glassBottom: blueGlass[1], spire: true }),
+      tower({ x: 120, z: -150, w: 28, floors: 40, wall: white, glassTop: greyGlass[0], glassBottom: greyGlass[1] }),
+      tower({ x: 200, z: -60, w: 26, floors: 34, wall: stone2, glassTop: greenGlass[0], glassBottom: greenGlass[1] }),
+      tower({ x: -150, z: -60, w: 26, floors: 30, wall: white, glassTop: blueGlass[0], glassBottom: blueGlass[1] }),
+      tower({ x: 260, z: -230, w: 30, floors: 52, wall: stone, glassTop: greyGlass[0], glassBottom: greyGlass[1], spire: true }),
+      tower({ x: -250, z: -210, w: 28, floors: 38, wall: stone2, glassTop: greenGlass[0], glassBottom: greenGlass[1] }),
+    );
+
+    // Tower under construction: clad lower floors, bare frame above, core and formwork on top.
+    const BX = -70, BZ = 4, BW = 28, CLAD = 14, FRAME = 24, FH = 3.3;
+    const cladTex = facade(Math.round(BW / 3.3), CLAD, white, blueGlass[0], blueGlass[1], dark ? 0.25 : 0);
+    const cladMat = new THREE.MeshStandardMaterial({ ...cladTex, emissive: 0xffffff, emissiveIntensity: dark ? 1 : 0, roughness: 0.55, metalness: 0.15 });
+    const clad = new THREE.Mesh(new THREE.BoxGeometry(BW, CLAD * FH, BW), [cladMat, cladMat, roofMat, roofMat, cladMat, cladMat]);
+    clad.position.set(BX, (CLAD * FH) / 2, BZ);
+    scene.add(shadowy(clad));
+    const conc = std("#a9a59c", 0.95);
+    const slabs = new THREE.InstancedMesh(new THREE.BoxGeometry(BW + 0.8, 0.35, BW + 0.8), conc, FRAME - CLAD + 1);
+    for (let f = CLAD; f <= FRAME; f++) slabs.setMatrixAt(f - CLAD, M.makeTranslation(BX, f * FH, BZ));
+    const colsPerSide = 5;
+    const colSpots = [];
+    for (let i = 0; i < colsPerSide; i++) for (let j = 0; j < colsPerSide; j++) colSpots.push([BX - BW / 2 + 0.6 + (i * (BW - 1.2)) / (colsPerSide - 1), BZ - BW / 2 + 0.6 + (j * (BW - 1.2)) / (colsPerSide - 1)]);
+    const columns = new THREE.InstancedMesh(new THREE.BoxGeometry(0.7, FH, 0.7), conc, colSpots.length * (FRAME - CLAD));
+    let ci = 0;
+    for (let f = CLAD; f < FRAME; f++) for (const [cx, cz] of colSpots) columns.setMatrixAt(ci++, M.makeTranslation(cx, f * FH + FH / 2, cz));
+    const core = new THREE.Mesh(new THREE.BoxGeometry(9, (FRAME + 2) * FH, 9), conc);
+    core.position.set(BX, ((FRAME + 2) * FH) / 2, BZ);
+    const formwork = new THREE.Mesh(new THREE.BoxGeometry(10.5, 3.2, 10.5), std("#d9a43a", 0.8));
+    formwork.position.set(BX, (FRAME + 2) * FH + 1.6, BZ);
+    const net = new THREE.MeshStandardMaterial({ color: lin("#2f8f4f"), transparent: true, opacity: 0.45, side: THREE.DoubleSide, roughness: 1, depthWrite: false });
+    for (const [nx, nz, ry] of [[0, BW / 2 + 0.5, 0], [0, -BW / 2 - 0.5, 0], [BW / 2 + 0.5, 0, Math.PI / 2], [-BW / 2 - 0.5, 0, Math.PI / 2]]) {
+      const n = new THREE.Mesh(new THREE.PlaneGeometry(BW + 1, FH * 2.2), net);
+      n.position.set(BX + nx, FRAME * FH - FH * 0.9, BZ + nz);
+      n.rotation.y = ry;
+      scene.add(n);
+    }
+    slabs.castShadow = slabs.receiveShadow = columns.castShadow = true;
+    scene.add(slabs, columns, shadowy(core), shadowy(formwork));
+
+    // ---- tower crane (lattice mast, slewing jib, trolley, hook and load) ----
+    const truss = (hex, rough = 0.5) => {
+      const members = [];
+      return {
+        add(a, b, t = 0.16) { members.push([a, b, t]); },
+        mesh() {
+          const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), std(hex, rough, 0.35), members.length);
+          const zAxis = new THREE.Vector3(0, 0, 1), a3 = new THREE.Vector3(), b3 = new THREE.Vector3(), d = new THREE.Vector3(), mid = new THREE.Vector3(), sc = new THREE.Vector3(), qq = new THREE.Quaternion();
+          members.forEach(([a, b, t], i) => {
+            a3.set(...a); b3.set(...b);
+            d.subVectors(b3, a3);
+            const L = d.length();
+            qq.setFromUnitVectors(zAxis, d.normalize());
+            mesh.setMatrixAt(i, M.compose(mid.addVectors(a3, b3).multiplyScalar(0.5), qq, sc.set(t, t, L)));
+          });
+          mesh.castShadow = true;
+          return mesh;
+        },
+      };
+    };
+    const YELLOW = "#f0b400";
+    const CX = BX + BW / 2 + 5, CZ = BZ - 4, H = (FRAME + 2) * FH + 22;
+    const crane = new THREE.Group();
+    crane.position.set(CX, 0, CZ);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(7, 1.6, 7), conc);
+    base.position.y = 0.8;
+    crane.add(shadowy(base));
+    const mast = truss(YELLOW);
+    const a = 1.0, SEG = 2.5;
+    for (const [sx, sz] of [[a, a], [a, -a], [-a, -a], [-a, a]]) mast.add([sx, 1.6, sz], [sx, H, sz], 0.22);
+    const faces = [[[a, a], [a, -a]], [[a, -a], [-a, -a]], [[-a, -a], [-a, a]], [[-a, a], [a, a]]];
+    for (let y = 1.6, k = 0; y < H - 0.1; y += SEG, k++) {
+      for (const [[x0, z0], [x1, z1]] of faces) {
+        mast.add([x0, y, z0], [x1, y, z1], 0.1);
+        if (k % 2) mast.add([x0, y, z0], [x1, y + SEG, z1], 0.09);
+        else mast.add([x1, y, z1], [x0, y + SEG, z0], 0.09);
       }
     }
-    // Tower crane with a slewing jib.
-    const mast = new THREE.Mesh(new THREE.BoxGeometry(1.4, 34, 1.4), A.mat(A.col("--mark"), { flat: true }));
-    mast.position.set(30, 18, -48);
-    scene.add(mast);
-    const jib = new THREE.Group();
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(46, 1, 1), A.mat(A.col("--mark"), { flat: true }));
-    arm.position.x = 12;
-    jib.add(arm);
-    const cw = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 2), A.mat(A.col("--steel")));
-    cw.position.set(-9, -1, 0);
-    jib.add(cw);
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), A.mat(A.col("--sheet-2")));
-    cab.position.set(1.8, -1.5, 0);
-    jib.add(cab);
-    jib.add(A.line([[24, 0, 0], [24, -14, 0]], A.col("--steel")));
-    const load = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), A.mat(A.col("--cut")));
-    load.position.set(24, -14.6, 0);
-    jib.add(load);
-    jib.position.set(30, 35, -48);
-    scene.add(jib);
-    A.onFrame((t) => { jib.rotation.y = Math.sin(t * 0.25) * 0.9 - 0.6; });
+    crane.add(mast.mesh());
+    // Climbing ties to the core of the building every few floors.
+    const ties = truss("#6f757b");
+    for (const y of [30, 55, 78]) if (y < H - 10) { ties.add([-a, y, a], [BX - CX + 4.5, y, BZ - CZ], 0.18); ties.add([-a, y, -a], [BX - CX + 4.5, y, BZ - CZ - 3], 0.18); }
+    crane.add(ties.mesh());
 
-    // Level staff.
-    const staff = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4, 0.15), A.mat(new THREE.Color(0xf4f4f0)));
-    staff.position.set(-20, 4.6, 12);
-    scene.add(staff);
-    return { view: [0.55, 0.42, 1], fit: 0.42 };
+    const slew = new THREE.Group();
+    slew.position.y = H;
+    crane.add(slew);
+    const turntable = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 1.2, 20), std("#3a3f45", 0.5, 0.5));
+    turntable.position.y = 0.6;
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.4, 2), std("#f2f2ee", 0.5, 0.1));
+    cab.position.set(2.2, 0.4, 1.9);
+    const cabGlass = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.6, 1.8), std("#16232e", 0.1, 0.9, { emissive: lin("#9fd4ff"), emissiveIntensity: dark ? 0.5 : 0 }));
+    cabGlass.position.set(3.32, 0.6, 1.9);
+    slew.add(shadowy(turntable), shadowy(cab), cabGlass);
+    const towerHead = truss(YELLOW);
+    const apex = [0, 14, 0];
+    for (const [sx, sz] of [[a, a], [a, -a], [-a, -a], [-a, a]]) towerHead.add([sx, 1.2, sz], apex, 0.2);
+    for (const [[x0, z0], [x1, z1]] of faces) towerHead.add([x0 * 0.55, 7.5, z0 * 0.55], [x1 * 0.55, 7.5, z1 * 0.55], 0.1);
+    slew.add(towerHead.mesh());
+    // Jib: triangular lattice, 62 m.
+    const jib = truss(YELLOW);
+    const JL = 62, jb = 1.2, jt = 3.1, jw = 0.9;
+    jib.add([1, jb, jw], [JL, jb, jw], 0.18);
+    jib.add([1, jb, -jw], [JL, jb, -jw], 0.18);
+    jib.add([1, jt, 0], [JL - 2, jt, 0], 0.18);
+    jib.add([JL - 2, jt, 0], [JL, jb, 0], 0.12);
+    for (let x = 1, k = 0; x < JL - 0.1; x += 2.5, k++) {
+      jib.add([x, jb, -jw], [x, jb, jw], 0.08);
+      const xn = Math.min(x + 2.5, JL - 2);
+      if (k % 2) { jib.add([x, jb, jw], [xn, jt, 0], 0.08); jib.add([x, jb, -jw], [xn, jt, 0], 0.08); }
+      else { jib.add([x, jt, 0], [xn, jb, jw], 0.08); jib.add([x, jt, 0], [xn, jb, -jw], 0.08); }
+    }
+    // Counter-jib with walkway, winch and concrete counterweights.
+    const cjL = 21, cw = 1.2;
+    jib.add([-1, jb, cw], [-cjL, jb, cw], 0.2);
+    jib.add([-1, jb, -cw], [-cjL, jb, -cw], 0.2);
+    jib.add([-1, jb + 1.1, cw], [-cjL, jb + 1.1, cw], 0.06);
+    jib.add([-1, jb + 1.1, -cw], [-cjL, jb + 1.1, -cw], 0.06);
+    for (let x = -1; x > -cjL; x -= 2.5) { jib.add([x, jb, -cw], [x, jb, cw], 0.1); jib.add([x, jb, cw], [x, jb + 1.1, cw], 0.05); jib.add([x, jb, -cw], [x, jb + 1.1, -cw], 0.05); }
+    // Pendant ties from the apex.
+    jib.add(apex, [JL * 0.42, jt, 0], 0.07);
+    jib.add(apex, [JL * 0.78, jt, 0], 0.07);
+    jib.add(apex, [-cjL + 1, jb + 0.3, cw], 0.07);
+    jib.add(apex, [-cjL + 1, jb + 0.3, -cw], 0.07);
+    slew.add(jib.mesh());
+    const walkway = new THREE.Mesh(new THREE.BoxGeometry(cjL - 1, 0.08, cw * 2), std("#5d636a", 0.7, 0.5));
+    walkway.position.set(-(cjL + 1) / 2, jb + 0.05, 0);
+    const winch = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 1.8), std("#2f3438", 0.5, 0.5));
+    winch.position.set(-8, jb + 0.8, 0);
+    slew.add(shadowy(walkway), shadowy(winch));
+    for (let k = 0; k < 4; k++) {
+      const weight = new THREE.Mesh(new THREE.BoxGeometry(0.85, 3.4, 2.3), conc);
+      weight.position.set(-cjL + 1 + k * 0.9, jb - 1.3, 0);
+      slew.add(shadowy(weight));
+    }
+    const tipLight = new THREE.Mesh(new THREE.SphereGeometry(0.35, 10, 8), new THREE.MeshBasicMaterial({ color: lin("#ff2a1a") }));
+    tipLight.position.set(JL, jt, 0);
+    const apexLight = tipLight.clone();
+    apexLight.position.set(...apex);
+    slew.add(tipLight, apexLight);
+    aviation.push(tipLight, apexLight);
+    // Trolley, hoist ropes, hook block and a bundle of rebar.
+    const trolley = new THREE.Group();
+    const tBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.7, 2.2), std("#3a3f45", 0.5, 0.5));
+    tBody.position.y = jb - 0.4;
+    trolley.add(shadowy(tBody));
+    const ropeMat = std("#222222", 0.6, 0.4);
+    const ropes = [-0.35, 0.35].map((dz) => {
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1, 6), ropeMat);
+      r.position.z = dz;
+      trolley.add(r);
+      return r;
+    });
+    const hook = new THREE.Group();
+    const hookBlock = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.3, 0.6), std(YELLOW, 0.5, 0.3));
+    hook.add(shadowy(hookBlock));
+    const rebar = new THREE.Group();
+    const barMat = std("#6b4630", 0.7, 0.6);
+    for (let i = 0; i < 14; i++) {
+      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 12, 6), barMat);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.set(0, (i % 4) * 0.12, Math.floor(i / 4) * 0.12 - 0.2);
+      rebar.add(bar);
+    }
+    rebar.position.y = -4.2;
+    hook.add(shadowy(rebar));
+    hook.add(A.line([[-4, -4.1, 0], [0, -0.7, 0], [4, -4.1, 0]], lin("#222222")));
+    trolley.add(hook);
+    slew.add(trolley);
+    A.onFrame((t) => {
+      slew.rotation.y = 0.9 + Math.sin(t * 0.06) * 0.75;
+      trolley.position.x = 34 + Math.sin(t * 0.09) * 20;
+      const drop = 14 + Math.sin(t * 0.12) * 6;
+      for (const r of ropes) { r.scale.y = drop; r.position.y = jb - 0.75 - drop / 2; }
+      hook.position.y = jb - 0.75 - drop - 0.65;
+      const on = Math.sin(t * 3) > 0.2;
+      for (const l of aviation) l.visible = on;
+    });
+    scene.add(crane);
+
+    // ---- surveyor at the roadside: total station sighting a prism ----
+    const tsX = -175, tsZ = ROAD_Z + 1.5 + CW + 1.6;
+    const tripod = new THREE.Group();
+    for (const ang of [0, 2.1, 4.2]) tripod.add(A.line([[0, 1.45, 0], [Math.cos(ang) * 0.6, 0.2, Math.sin(ang) * 0.6]], lin("#c9a84a")));
+    const ts = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.36, 0.24), std("#f2c200", 0.5, 0.2));
+    ts.position.y = 1.65;
+    tripod.add(ts);
+    tripod.position.set(tsX, 0.2, tsZ);
+    scene.add(tripod);
+    const prismAt = new THREE.Vector3(tsX + 62, 2.2, tsZ);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2), std("#f4f4f0", 0.5));
+    pole.position.set(prismAt.x, 1.2, prismAt.z);
+    const prism = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 8), new THREE.MeshBasicMaterial({ color: lin("#ff5a3a") }));
+    prism.position.copy(prismAt);
+    scene.add(pole, prism);
+    const from = new THREE.Vector3(tsX + 0.15, 1.85, tsZ);
+    scene.add(A.line([from.toArray(), prismAt.toArray()], lin("#ff3a2a"), { dashed: true, dash: 0.8, gap: 0.5 }));
+    const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), new THREE.MeshBasicMaterial({ color: lin("#ff3a2a") }));
+    scene.add(pulse);
+    A.onFrame((t) => pulse.position.copy(from).lerp(prismAt, (t * 0.6) % 1));
+
+    return { camera: { position: [-205, 24, 125], target: [-50, 56, -20], far: 5000 }, rotateSpeed: 0.2 };
   };
 }
 
@@ -3026,7 +3469,7 @@ function siteScene() {
 const I18N = (() => {
   const EXACT = {
     // header, tabs, welcome
-    "المهندس المساعد": "Survey Assistant",
+    "المهندس": "Al-Mohandes",
     "أدوات مهندس المساحة في الموقع": "Site survey engineer's toolkit",
     "المساعد:": "Assistant:",
     "بيتصل…": "connecting…",
@@ -3043,7 +3486,7 @@ const I18N = (() => {
     "صباح الخير يا هندسة": "Good morning, engineer",
     "نهارك سعيد يا هندسة": "Good afternoon, engineer",
     "مساء الخير يا هندسة": "Good evening, engineer",
-    "المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع":
+    "المهندس جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع":
       "Your survey assistant on site. It reduces level books, computes design levels and vertical curves, cut, fill and quantities, and checks survey files",
     "واللوحات": " and drawings",
     ". وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.":
@@ -3057,7 +3500,7 @@ const I18N = (() => {
     "ابدأ الشغل وإخفي الترحيب": "Start working and hide the welcome",
     "رسالة الترحيب": "Welcome message",
     // intro screen
-    "أهلاً بيك في المهندس المساعد": "Welcome to Survey Assistant",
+    "أهلاً بيك في": "Welcome to",
     "أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.": "A site survey engineer's tools on one page. No sign-up, nothing to install.",
     "دفتر الميزانية": "Level book",
     "حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح": "HI and Rise/Fall, misclosure and adjustment",
@@ -3248,7 +3691,7 @@ const I18N = (() => {
     "موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي": "3D construction site: a total station sighting a prism on a road embankment, a building under construction and a tower crane",
     "مثال: راجع اللوحة دي واتأكد من المناسيب التصميمية والميول": "e.g. check this drawing's design levels and grades",
     // footer
-    "المهندس المساعد · أدوات مهندس المساحة في الموقع": "Survey Assistant · site survey engineer's toolkit",
+    "المهندس · أدوات مهندس المساحة في الموقع": "Al-Mohandes · site survey engineer's toolkit",
     "الإحداثيات": "Coordinates",
     "UTM أو محلي حسب المشروع": "UTM or local, per project",
     "المناسيب": "Levels",
@@ -3380,7 +3823,7 @@ const I18N = (() => {
     const html = document.documentElement;
     html.lang = lang;
     html.dir = lang === "en" ? "ltr" : "rtl";
-    document.title = lang === "en" ? "Survey Assistant" : "المهندس المساعد";
+    document.title = lang === "en" ? "Al-Mohandes" : "المهندس";
     try { localStorage.setItem("lang", lang); } catch { /* storage blocked */ }
     apply(document.body);
     document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
@@ -4129,7 +4572,7 @@ async function loadRows(input) {
 }
 
 // ---------- assistant ----------
-const SYSTEM = `أنت "المهندس المساعد": مهندس مساحة مساعد لمهندس موقع في مشاريع إنشاءات (طرق، بنية تحتية، مباني، أعمال ترابية) في مصر والمنطقة العربية. المهندس بيعتمد على إجاباتك في قرارات حقيقية في الموقع، فالدقة أهم من السرعة.
+const SYSTEM = `أنت "المهندس": مهندس مساحة مساعد لمهندس موقع في مشاريع إنشاءات (طرق، بنية تحتية، مباني، أعمال ترابية) في مصر والمنطقة العربية. المهندس بيعتمد على إجاباتك في قرارات حقيقية في الموقع، فالدقة أهم من السرعة.
 
 اللغة: رد بلغة المستخدم؛ بالعربي استخدم عربي هندسي مصري واضح، واكتب المصطلح الإنجليزي بين قوسين أول مرة (مثل منسوب (RL)، قطاع طولي (Profile)).
 
@@ -4160,7 +4603,7 @@ const log = $("#chat-log");
 function addMsg(role, html) {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
-  div.innerHTML = `<span class="who">${role === "user" ? "استفسار" : "المهندس المساعد"}</span><div class="bubble">${html}</div>`;
+  div.innerHTML = `<span class="who">${role === "user" ? "استفسار" : "المهندس"}</span><div class="bubble">${html}</div>`;
   log.appendChild(div);
   div.scrollIntoView({ block: "end" });
   return div;
