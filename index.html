@@ -10,9 +10,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
 <script>
-  // Before first paint: saved theme, and the sign-in gate on the public site.
-  try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
-  if (!(window.claude && typeof window.claude.use === "function")) document.documentElement.classList.add("gate");
+  // Before first paint: saved theme and language, and the welcome screen once per visit.
+  (function (h) {
+    try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") h.dataset.theme = t; } catch (e) {}
+    var en = false;
+    try { en = localStorage.getItem("lang") === "en"; } catch (e) {}
+    h.lang = en ? "en" : "ar";
+    h.dir = en ? "ltr" : "rtl";
+    var seen = false;
+    try { seen = sessionStorage.getItem("intro-seen") === "1"; } catch (e) {}
+    if (!seen) h.classList.add("show-intro");
+  })(document.documentElement);
 </script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
@@ -64,7 +72,7 @@
 [hidden] { display: none !important; }
 html { background: var(--paper); }
 body {
-  margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7; direction: rtl;
+  margin: 0; min-height: 100vh; color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.7;
   background-color: var(--paper);
   background-image:
     radial-gradient(900px 500px at 85% -10%, var(--glow), transparent 60%),
@@ -267,22 +275,29 @@ footer dd { margin: 0; }
 footer dd.mono { font-family: var(--f-num); direction: ltr; text-align: right; }
 footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 
-/* ---- sign-in gate (public site) ---- */
-.auth { display: none; }
-.gate .auth { display: grid; place-items: center; position: fixed; inset: 0; z-index: 50; padding: 16px; overflow-y: auto;
-  background: radial-gradient(800px 500px at 80% 0%, var(--glow), transparent 60%), radial-gradient(700px 500px at 0% 100%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 60%), var(--paper); }
-.gate header, .gate main { visibility: hidden; }
-.auth-card { width: min(420px, 100%); padding: 28px 24px 22px; border-radius: 22px; border: 1px solid var(--line); background: color-mix(in srgb, var(--sheet) 90%, transparent); backdrop-filter: blur(14px); box-shadow: 0 30px 80px -30px var(--shadow); }
-.auth-card .logo { width: 52px; height: 52px; border-radius: 15px; margin-bottom: 14px; }
-.auth-card .logo svg { width: 30px; height: 30px; }
-.auth-card h2 { font-size: 22px; margin: 0 0 4px; }
-.auth-card p.sub { margin: 0 0 18px; color: var(--muted); }
-.auth-card form { display: flex; flex-direction: column; gap: 12px; }
-.auth-card input { font-size: 16px; padding: 11px 13px; }
-.auth-seg { display: flex; margin-bottom: 16px; direction: rtl; }
-.auth-seg button { flex: 1; font-family: var(--f-body); font-size: 14px; padding: 7px 10px; }
-.auth-card button.primary { justify-content: center; padding: 11px 20px; font-size: 15px; }
-.auth-card .fine { font-size: 11.5px; color: var(--muted); margin: 14px 0 0; }
+/* ---- welcome screen (first thing on each visit) ---- */
+.intro { display: none; }
+.show-intro .intro { display: grid; place-items: center; position: fixed; inset: 0; z-index: 50; padding: 16px; overflow-y: auto;
+  background: color-mix(in srgb, var(--paper) 55%, transparent); backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2); animation: fade .35s ease-out both; }
+.show-intro body { overflow: hidden; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+.intro-card { width: min(560px, 100%); padding: 26px 24px 20px; border-radius: 24px; border: 1px solid var(--line); animation: rise .45s .05s ease-out both;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sheet) 92%, var(--accent)) 0%, color-mix(in srgb, var(--sheet) 94%, transparent) 50%); box-shadow: 0 40px 100px -30px var(--shadow), 0 0 0 1px color-mix(in srgb, white 4%, transparent) inset; }
+.intro-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.intro-card .logo { width: 54px; height: 54px; border-radius: 16px; }
+.intro-card .logo svg { width: 30px; height: 30px; }
+.intro-card h2 { font-size: clamp(22px, 4vw, 28px); font-weight: 800; margin: 2px 0 6px; line-height: 1.35; }
+.intro-card p.sub { margin: 0 0 18px; color: var(--muted); }
+.feat { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.feat li { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--sheet-2); }
+.feat .code { grid-row: span 2; font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 9px; padding: 6px 8px; }
+.feat b { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; }
+.feat small { color: var(--muted); font-size: 12px; line-height: 1.5; }
+#intro-go { width: 100%; justify-content: center; padding: 12px 20px; font-size: 16px; }
+.intro-card .fine { font-size: 11.5px; color: var(--muted); margin: 12px 0 0; text-align: center; }
+.lang-seg button { font-family: var(--f-body); }
+:root[dir="ltr"] .readout b, :root[dir="ltr"] footer dd.mono { text-align: left; }
 
 @media (max-width: 640px) {
   .meta .pill.opt { display: none; }
@@ -292,25 +307,23 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
 </style>
 
-<div id="auth" class="auth" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-  <div class="auth-card">
-    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
-    <h2 id="auth-title">أهلاً يا هندسة</h2>
-    <p class="sub">ادخل بحسابك، أو اعمل حساب جديد في ثانية.</p>
-    <div class="seg auth-seg" role="tablist" aria-label="نوع الدخول">
-      <button type="button" role="tab" data-auth="in" aria-pressed="true">تسجيل دخول</button>
-      <button type="button" role="tab" data-auth="up" aria-pressed="false">حساب جديد</button>
+<div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="intro-card">
+    <div class="intro-top">
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#04131b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M6 20l6-14 6 14M9 13h6"/><circle cx="12" cy="4" r="1.6" fill="#04131b"/></svg></div>
+      <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
     </div>
-    <form id="auth-form">
-      <label for="auth-name" data-up hidden>الاسم<input id="auth-name" autocomplete="name" placeholder="م. أحمد فتحي"></label>
-      <label for="auth-email">الإيميل<input id="auth-email" type="email" required autocomplete="email" inputmode="email" dir="ltr" placeholder="name@example.com"></label>
-      <label for="auth-pass">الباسورد<input id="auth-pass" type="password" required minlength="6" autocomplete="current-password" dir="ltr" placeholder="6 حروف أو أرقام على الأقل"></label>
-      <label for="auth-pass2" data-up hidden>تأكيد الباسورد<input id="auth-pass2" type="password" minlength="6" autocomplete="new-password" dir="ltr"></label>
-      <label class="check" for="auth-show"><input id="auth-show" type="checkbox"> إظهار الباسورد</label>
-      <button class="primary" type="submit" id="auth-submit">دخول</button>
-    </form>
-    <p id="auth-msg" class="hint" role="status"></p>
-    <p class="fine">الملفات اللي بترفعها بتتقري جوه المتصفح ومش بتترفع لأي سيرفر. حسابك بيتستخدم لتسجيل الدخول بس.</p>
+    <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
+    <h2 id="intro-title">أهلاً بيك في المهندس المساعد</h2>
+    <p class="sub">أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.</p>
+    <ul class="feat">
+      <li><span class="code">LV</span><b>دفتر الميزانية</b><small>حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح</small></li>
+      <li><span class="code">PR</span><b>القطاع الطولي</b><small>المناسيب التصميمية والمنحنيات الرأسية والحفر والردم</small></li>
+      <li><span class="code">QT</span><b>القطاعات والكميات</b><small>مساحات الحفر والردم والكميات والـ Mass haul</small></li>
+      <li><span class="code">QC</span><b>مراجعة ملفات الرفع</b><small>Excel و CSV و GSI و LandXML و DXF و DWG، والنقاط مجسّمة 3D</small></li>
+    </ul>
+    <button class="primary" type="button" id="intro-go">ابدأ</button>
+    <p class="fine">الملفات بتتقري جوه المتصفح بتاعك ومش بتترفع لأي سيرفر.</p>
   </div>
 </div>
 
@@ -327,8 +340,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <span class="pill opt" dir="ltr">± 0.001 m</span>
         <span class="pill opt" id="tb-date" dir="ltr">—</span>
         <span class="pill" data-ai>المساعد: <b id="ai-status">بيتصل…</b></span>
+        <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
         <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
-        <span id="user-box" class="user" hidden><span class="pill" id="user-email"></span><button id="sign-out" class="ghost" type="button">خروج</button></span>
       </div>
     </div>
     <nav id="tabs" role="tablist">
@@ -533,7 +546,6 @@ BM2,,,0.900</textarea>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 const Engine = (() => {
 "use strict";
@@ -3006,6 +3018,386 @@ function siteScene() {
   };
 }
 
+// Arabic / English switch for the published page. The page is written in Arabic; in English
+// every Arabic text node and label is swapped for its translation (and swapped back), including
+// results the app and the engine add later. Text not in the dictionary stays Arabic.
+"use strict";
+
+const I18N = (() => {
+  const EXACT = {
+    // header, tabs, welcome
+    "المهندس المساعد": "Survey Assistant",
+    "أدوات مهندس المساحة في الموقع": "Site survey engineer's toolkit",
+    "المساعد:": "Assistant:",
+    "بيتصل…": "connecting…",
+    "متصل": "online",
+    "غير متاح": "unavailable",
+    "☀ فاتح": "☀ Light",
+    "☾ غامق": "☾ Dark",
+    "المساعد": "Assistant",
+    "الميزانية": "Levelling",
+    "البروفيل": "Profile",
+    "الكميات": "Quantities",
+    "مراجعة الداتا": "Data QC",
+    "أهلاً يا هندسة": "Welcome, engineer",
+    "صباح الخير يا هندسة": "Good morning, engineer",
+    "نهارك سعيد يا هندسة": "Good afternoon, engineer",
+    "مساء الخير يا هندسة": "Good evening, engineer",
+    "المهندس المساعد جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع":
+      "Your survey assistant on site. It reduces level books, computes design levels and vertical curves, cut, fill and quantities, and checks survey files",
+    "واللوحات": " and drawings",
+    ". وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.":
+      ". Every drawing is a 3D model you can turn around, and every number comes from fixed, tested calculation tools, never from guesswork.",
+    "اسأل المساعد": "Ask the assistant",
+    "احسب ميزانية": "Reduce levels",
+    "ارسم بروفيل": "Draw a profile",
+    "احسب كميات": "Compute quantities",
+    "راجع ملف رفع": "Check a survey file",
+    "السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.": "Safety first: helmet before the instrument, and check on site before you build.",
+    "ابدأ الشغل وإخفي الترحيب": "Start working and hide the welcome",
+    "رسالة الترحيب": "Welcome message",
+    // intro screen
+    "أهلاً بيك في المهندس المساعد": "Welcome to Survey Assistant",
+    "أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.": "A site survey engineer's tools on one page. No sign-up, nothing to install.",
+    "دفتر الميزانية": "Level book",
+    "حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح": "HI and Rise/Fall, misclosure and adjustment",
+    "القطاع الطولي": "Longitudinal profile",
+    "المناسيب التصميمية والمنحنيات الرأسية والحفر والردم": "Design levels, vertical curves, cut and fill",
+    "القطاعات والكميات": "Sections and quantities",
+    "مساحات الحفر والردم والكميات والـ Mass haul": "Cut/fill areas, volumes and mass haul",
+    "مراجعة ملفات الرفع": "Survey file QC",
+    "Excel و CSV و GSI و LandXML و DXF و DWG، والنقاط مجسّمة 3D": "Excel, CSV, GSI, LandXML, DXF and DWG, with points in 3D",
+    "ابدأ": "Start",
+    "اللغة": "Language",
+    "الملفات بتتقري جوه المتصفح بتاعك ومش بتترفع لأي سيرفر.": "Files are read inside your browser and never uploaded to a server.",
+    // assistant
+    "سجل الاستفسارات": "Request log",
+    "المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.": "The AI assistant isn't available in this view. The calculators in the other tabs work as usual.",
+    "أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك. كل الأرقام بتتحسب بأدوات حساب ثابتة ومتختبرة، وتقدر تفتح «خطوات الحساب» تحت كل رد وتراجعها.":
+      "Hello engineer. Send your question, or upload a drawing (PDF / image / DWG / DXF) or a survey file (Excel / CSV / GSI / LandXML / KML) and I'll check it and do the calculations. All numbers come from fixed, tested tools, and you can open the calculation steps under each reply.",
+    "إرفاق ملف": "Attach file",
+    "إرسال": "Send",
+    "محادثة جديدة": "New conversation",
+    "استفسار": "Request",
+    "إزالة": "Remove",
+    "(مفيش رد)": "(no reply)",
+    "حصل خطأ.": "Something went wrong.",
+    "طلبات كتير ورا بعض. استنى دقيقة وجرب تاني.": "Too many requests. Wait a minute and try again.",
+    "المساعد الذكي مش متاح هنا. افتح الصفحة من claude.ai وأنت مسجل دخول، أو استخدم الحاسبات في باقي التابات.": "The AI assistant isn't available here. Open the page from claude.ai while signed in, or use the calculators in the other tabs.",
+    // level book
+    "دفتر الميزانية (Level Book)": "Level book",
+    "منسوب الروبير الابتدائي (م)": "Opening benchmark RL (m)",
+    "منسوب روبير القفل (م)": "Closing benchmark RL (m)",
+    "طول الخط (كم)": "Line length (km)",
+    "ثابت الخطأ المسموح C (مم/√كم)": "Allowable misclosure constant C (mm/√km)",
+    "ميزانية مقفولة على نفس الروبير": "Closed loop on the same benchmark",
+    "القراءات بالترتيب: المحطة، BS، IS، FS (الصق من Excel أو افصل بفاصلة، وسيب الخانة الفاضية فاضية)": "Readings in order: station, BS, IS, FS (paste from Excel or separate with commas, leave empty cells empty)",
+    "احسب": "Calculate",
+    "تحميل من ملف": "Load from file",
+    "تصدير CSV": "Export CSV",
+    "مثال محلول جاهز؛ امسحه وحط قراءاتك.": "A worked example is filled in; clear it and enter your readings.",
+    "نتيجة الميزانية": "Level book result",
+    "المحطة": "Station",
+    "التصحيح": "Correction",
+    "RL المصحح": "Adjusted RL",
+    "آخر − أول منسوب": "Last − first RL",
+    "خطأ القفل (مم)": "Misclosure (mm)",
+    "المسموح ± (مم)": "Allowable ± (mm)",
+    "التحقق الحسابي سليم": "Arithmetic check OK",
+    "خطأ في الحساب": "Arithmetic error",
+    "القفل مقبول": "Closure accepted",
+    "القفل مرفوض": "Closure rejected",
+    "مسار الميزانية": "Levelling run",
+    "منسوب النقطة RL": "Point RL",
+    "خط النظر عند HI": "Line of sight at HI",
+    "الجهاز": "Instrument",
+    "المحطات متساوية المسافات في الرسم لأن الدفتر مفيهوش مسافات. المناسيب بمقياسها الحقيقي.": "Stations are evenly spaced in the drawing because the level book has no distances. Levels are to true scale.",
+    // profile
+    "القطاع الطولي والمناسيب التصميمية": "Longitudinal profile and design levels",
+    "نقاط تقاطع الميول VPI: المحطة، المنسوب، طول المنحنى الرأسي (اختياري)": "Vertical intersection points (VPI): chainage, level, vertical curve length (optional)",
+    "المحطات ومنسوب الأرض الطبيعية (اختياري)": "Stations and existing ground level (optional)",
+    "لو مفيش محطات: كل (م)": "If no stations: every (m)",
+    "تحميل المحطات من ملف": "Load stations from file",
+    "جداول القطاع الطولي": "Profile tables",
+    "جدول الميول": "Grades",
+    "المنحنيات الرأسية": "Vertical curves",
+    "جدول المحطات": "Stations",
+    "من": "From",
+    "إلى": "To",
+    "الطول": "Length",
+    "الميل %": "Grade %",
+    "النوع": "Type",
+    "منسوب BVC": "BVC level",
+    "منسوب EVC": "EVC level",
+    "الإحداثي الأوسط": "Middle ordinate",
+    "منسوب الأرض": "Ground level",
+    "المنسوب التصميمي": "Design level",
+    "منسوب التصميم": "Design level",
+    "حفر": "Cut",
+    "ردم": "Fill",
+    "الأرض": "Ground",
+    "التصميم": "Design",
+    "في الـ 3D المناسيب متكبّرة رأسيًا عشان الفرق يبان. للقراية المظبوطة افتح 2D أو الجداول.": "Levels are exaggerated vertically in 3D so differences show. For exact reading open 2D or the tables.",
+    "مقعر (sag)": "Sag",
+    "محدب (crest)": "Crest",
+    "حفر (cut) = الأرض الطبيعية أعلى من التصميم، ردم (fill) = الأرض أوطى": "Cut = ground above design, fill = ground below design",
+    // section and quantities
+    "القطاع العرضي: مساحة الحفر والردم": "Cross section: cut and fill areas",
+    "نقاط الأرض الطبيعية: الإزاحة (الشمال سالب)، المنسوب": "Ground points: offset (left negative), level",
+    "منسوب التأسيس عند المحور": "Formation level at centreline",
+    "العرض يسار (م)": "Width left (m)",
+    "العرض يمين (م)": "Width right (m)",
+    "الميل العرضي %": "Crossfall %",
+    "ميل الحفر (أفقي:1)": "Cut slope (H:1)",
+    "ميل الردم (أفقي:1)": "Fill slope (H:1)",
+    "احسب القطاع": "Calculate section",
+    "القطاع العرضي": "Cross section",
+    "مساحة الحفر م²": "Cut area m²",
+    "مساحة الردم م²": "Fill area m²",
+    "الجنب الشمال": "Left side",
+    "الجنب اليمين": "Right side",
+    "نقاط خط التصميم": "Design line points",
+    "الإزاحة": "Offset",
+    "المنسوب": "Level",
+    "القطاع ممدود بطول الطريق عشان يبان كمجسم. المساحات المكتوبة هي مساحة القطاع نفسه.": "The section is extruded along the road so it reads as a solid. The areas shown are those of the section itself.",
+    "يمين": "right",
+    "يسار": "left",
+    "غير معروف": "unknown",
+    "على الأرض": "on ground",
+    "الكميات بين القطاعات": "Volumes between sections",
+    "المحطة، مساحة الحفر (م²)، مساحة الردم (م²)": "Chainage, cut area (m²), fill area (m²)",
+    "الطريقة": "Method",
+    "متوسط المساحات الطرفية": "Average end area",
+    "المنشوري (Simpson)": "Prismoidal (Simpson)",
+    "متوسط المساحات الطرفية (Average End Area)": "Average end area",
+    "معامل الردم (حفر لكل م³ ردم مدموك)": "Fill factor (cut per m³ of compacted fill)",
+    "احسب الكميات": "Calculate volumes",
+    "حفر م³": "Cut m³",
+    "ردم م³": "Fill m³",
+    "حفر تراكمي": "Cumulative cut",
+    "ردم تراكمي": "Cumulative fill",
+    "إجمالي الحفر م³": "Total cut m³",
+    "إجمالي الردم م³": "Total fill m³",
+    "الفرق (حفر − ردم×معامل) م³": "Balance (cut − fill × factor) m³",
+    "الموجب = فائض حفر، السالب = عجز محتاج ردم من برّه": "Positive = surplus cut, negative = shortfall needing imported fill",
+    "الكميات على طول المسار": "Quantities along the route",
+    "مساحة حفر م²": "Cut area m²",
+    "مساحة ردم م²": "Fill area m²",
+    // review
+    "مراجعة بيانات الرفع": "Survey data QC",
+    "نوع البيانات": "Data type",
+    "نقاط رفع (رقم، X، Y، Z)": "Survey points (ID, X, Y, Z)",
+    "محطات ومناسيب (بروفيل)": "Stations and levels (profile)",
+    "مقارنة منفذ بتصميمي": "As-built vs design",
+    "حد المنسوب الشاذ (م)": "Outlier level threshold (m)",
+    "حد القفزة في المنسوب (م)": "Level spike threshold (m)",
+    "التفاوت المسموح ± (مم)": "Tolerance ± (mm)",
+    "أقصى ميل %": "Max grade %",
+    "ارفع ملف Excel أو CSV أو TXT أو GSI أو LandXML أو KML أو DXF أو DWG. الأعمدة بتتعرف بالعربي أو الإنجليزي (رقم النقطة، شرقي/X، شمالي/Y، منسوب/Z، محطة، تصميمي، منفذ)، حتى لو فيها أخطاء إملائية. لو الملف فيه X وY وZ، النقاط هتظهر مجسّمة 3D.":
+      "Upload an Excel, CSV, TXT, GSI, LandXML, KML, DXF or DWG file. Columns are recognised in Arabic or English (point ID, easting/X, northing/Y, level/Z, chainage, design, as-built), even with typos. If the file has X, Y and Z, the points are shown in 3D.",
+    "رفع ملف ومراجعته": "Upload and check a file",
+    "تصدير الملاحظات CSV": "Export findings CSV",
+    "بيقرأ ويراجع…": "Reading and checking…",
+    "تقرير المراجعة": "QC report",
+    "النقطة": "Point",
+    "تصميمي": "Design",
+    "منفذ": "As-built",
+    "الفرق مم": "Diff mm",
+    "الحالة": "Status",
+    "كل النقاط مقبولة": "All points accepted",
+    "إجمالي": "Total",
+    "مقبول": "Accepted",
+    "مرفوض": "Rejected",
+    "أعلى من المسموح": "Above tolerance",
+    "أوطى من المسموح": "Below tolerance",
+    "ناقص بيانات": "Missing data",
+    "الخطورة": "Severity",
+    "السطر": "Row",
+    "التفاصيل": "Details",
+    "عالي": "High",
+    "متوسط": "Medium",
+    "منخفض": "Low",
+    "الداتا سليمة": "Data is clean",
+    "الصفوف": "Rows",
+    "السليمة": "Valid",
+    "الملاحظات": "Findings",
+    "أقل منسوب": "Lowest level",
+    "أعلى منسوب": "Highest level",
+    "منسوب واطي": "Low level",
+    "عالي / عليها ملاحظة": "High / flagged",
+    "المناسيب متكبّرة رأسيًا عشان التضاريس تبان. النقط الحمرا الكبيرة عليها ملاحظات في التقرير.": "Levels are exaggerated vertically so the terrain shows. Large red points have findings in the report.",
+    "قيمة ناقصة/غير رقمية": "Missing / non-numeric value",
+    "رقم نقطة مكرر": "Duplicate point ID",
+    "إحداثيات مكررة": "Duplicate coordinates",
+    "منسوب شاذ مقارنة بالجيران": "Level outlier vs neighbours",
+    "محطة أو منسوب مش رقم": "Chainage or level not a number",
+    "محطة مكررة": "Duplicate chainage",
+    "ترتيب المحطات": "Chainage order",
+    "فجوة في الرفع": "Gap in survey",
+    "ميل حاد": "Steep grade",
+    "قفزة في المنسوب (spike)": "Level spike",
+    "الملف ده مفيهوش جدول بيانات (PDF/صورة/نص). ابعته للمساعد في تاب «المساعد».": "This file has no data table (PDF/image/text). Send it to the assistant in the Assistant tab.",
+    "ملف الإكسل فاضي.": "The Excel file is empty.",
+    "ما قدرتش أحفظ الملف.": "Couldn't save the file.",
+    // drawing cards
+    "طريقة العرض": "View",
+    "رجّع الزاوية الأصلية": "Reset the view",
+    "↺ الزاوية": "↺ Reset view",
+    "اسحب للّف · العجلة أو صباعين للتقريب · كليك يمين للتحريك": "Drag to orbit · wheel or pinch to zoom · right-click to pan",
+    "مساعد مهندس المساحة في الموقع": "Site survey engineer's assistant",
+    "موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي": "3D construction site: a total station sighting a prism on a road embankment, a building under construction and a tower crane",
+    "مثال: راجع اللوحة دي واتأكد من المناسيب التصميمية والميول": "e.g. check this drawing's design levels and grades",
+    // footer
+    "المهندس المساعد · أدوات مهندس المساحة في الموقع": "Survey Assistant · site survey engineer's toolkit",
+    "الإحداثيات": "Coordinates",
+    "UTM أو محلي حسب المشروع": "UTM or local, per project",
+    "المناسيب": "Levels",
+    "من روبير المشروع · لأقرب 0.001 م": "From the project benchmark · to 0.001 m",
+    "الحسابات": "Calculations",
+    "محرك ثابت متختبر": "Fixed, tested engine",
+    "الإصدار": "Version",
+    "الملفات بتتقري جوه المتصفح بتاعك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.":
+      "Files are read inside your browser. The 3D drawings are for illustration; exact figures are in the tables and the 2D drawings. Any result that decisions rest on (sign-off, quantities for payment, critical grades) must be checked on site.",
+    // engine messages (fixed text)
+    "أول سطر لازم يكون فيه قراءة خلفية (BS) على الروبير.": "The first row must have a backsight (BS) on the benchmark.",
+    "أول سطر لازم يكون BS بس.": "The first row must be a BS only.",
+    "آخر سطر لازم يكون قراءة أمامية (FS).": "The last row must be a foresight (FS).",
+    "آخر سطر ما ينفعش يكون فيه BS (نقطة دوران من غير قراءة أمامية بعدها).": "The last row can't have a BS (a change point with no foresight after it).",
+    "HI + Rise/Fall (الطريقتين مع بعض للتحقق)": "HI + Rise/Fall (both methods, as a check)",
+    "المنحنى الرأسي لازم يكون على VPI داخلي (مش أول أو آخر نقطة).": "A vertical curve must be on an interior VPI (not the first or last).",
+    "في منحنيين رأسيين متداخلين — قلل الأطوال.": "Two vertical curves overlap — shorten them.",
+    "interval لازم يكون أكبر من صفر.": "The interval must be greater than zero.",
+    "مفيش تداخل في العرض بين خط الأرض وخط التصميم.": "The ground and design lines don't overlap across the width.",
+    "العرض لازم يكون موجب.": "Width must be positive.",
+    "الميول الجانبية لازم تكون أكبر من صفر.": "Side slopes must be greater than zero.",
+    "المساحات لازم تكون موجبة.": "Areas must be positive.",
+    "الطريقة المنشورية (Simpson) محتاجة عدد فترات زوجي (عدد قطاعات فردي). استخدم average_end_area أو ضيف قطاع.": "The prismoidal (Simpson) method needs an even number of intervals (odd number of sections). Use average end area or add a section.",
+    "الطريقة المنشورية محتاجة مسافات متساوية بين القطاعات.": "The prismoidal method needs equal spacing between sections.",
+    "toleranceMm لازم يكون أكبر من صفر.": "Tolerance must be greater than zero.",
+  };
+
+  // Text with numbers or names in it: [Arabic pattern, English replacement].
+  const PATTERNS = [
+    [/^سطر (\d+) \((.*)\): القراءة المتوسطة \(IS\) ما تتجمعش مع BS أو FS في نفس السطر\.$/, "Row $1 ($2): an intermediate sight (IS) can't share a row with BS or FS."],
+    [/^سطر (\d+) \((.*)\): لازم يكون فيه IS أو FS\.$/, "Row $1 ($2): needs an IS or an FS."],
+    [/^سطر (\d+) غير صالح\.$/, "Row $1 is invalid."],
+    [/^سطر (\d+) \((.*)\): قراءة (\w+) = (.*) خارج المدى المعقول للقامة \(0–10 م\)\. اتأكد إن الوحدة متر\.$/, "Row $1 ($2): $3 reading = $4 is outside a sensible staff range (0–10 m). Check the unit is metres."],
+    [/^(.*)·√n mm \(n = (\d+) وقفات جهاز\)$/, "$1·√n mm (n = $2 setups)"],
+    [/^المسموح = (.*) · التصحيح لكل وقفة (.*) مم$/, "Allowable = $1 · correction per setup $2 mm"],
+    [/^VPI رقم (\d+): المحطة \(chainage\) غير مفهومة: (.*)$/, "VPI $1: chainage not understood: $2"],
+    [/^محطات الـ VPI لازم تكون تصاعدية \(VPI (\d+)\)\.$/, "VPI chainages must increase (VPI $1)."],
+    [/^طول المنحنى عند VPI (\d+) سالب\.$/, "Curve length at VPI $1 is negative."],
+    [/^المنحنى عند VPI (\d+) \(L=(.*) م\) أطول من المماسات المجاورة\.$/, "The curve at VPI $1 (L=$2 m) is longer than the adjacent tangents."],
+    [/^محطة رقم (\d+): chainage غير مفهوم: (.*)$/, "Station $1: chainage not understood: $2"],
+    [/^المحطة (.*) خارج مدى خط التصميم\.$/, "Station $1 is outside the design line."],
+    [/^(.*)\[(\d+)\]: لازم offset و level أرقام\.$/, "$1[$2]: offset and level must be numbers."],
+    [/^(.*): في نقطتين على نفس الـ offset \((.*)\)\.$/, "$1: two points at the same offset ($2)."],
+    [/^خط التصميم مش قافل على الأرض عند الأطراف \(فرق يسار (.*) م، يمين (.*) م\) — المساحة محسوبة على العرض المشترك بس\.$/, "The design line doesn't close on the ground at the edges (left gap $1 m, right $2 m) — area computed over the shared width only."],
+    [/^خط الأرض مش واصل لحافة التصميم \((.*)\)\.$/, "The ground line doesn't reach the design edge ($1)."],
+    [/^الميل الجانبي \((.*)\) ما قابلش الأرض جوه مدى خط الأرض — مدّ الرفع لبرّه\.$/, "The side slope ($1) doesn't meet the ground within the surveyed width — extend the survey outwards."],
+    [/^قطاع (\d+): chainage غير مفهوم\.$/, "Section $1: chainage not understood."],
+    [/^القطاعات لازم تكون مترتبة تصاعديًا \(قطاع (\d+)\)\.$/, "Sections must be in increasing order (section $1)."],
+    [/^ناقص: (.*)$/, "Missing: $1"],
+    [/^نفس رقم النقطة في سطر (.*)$/, "Same point ID as row $1"],
+    [/^نفس مكان النقطة (.*) \(فرق المنسوب (.*) م\)$/, "Same position as point $1 (level difference $2 m)"],
+    [/^Z=(.*) والوسيط حواليه (.*) \(فرق (.*) م\)، ومفيش نقطة قريبة منسوبها قريب منه(.*)$/, "Z=$1 while the local median is $2 (difference $3 m), and no nearby point has a similar level$4"],
+    [/^نفس محطة سطر (.*)$/, "Same chainage as row $1"],
+    [/^أصغر من المحطة اللي قبلها (.*)$/, "Smaller than the previous chainage $1"],
+    [/^مسافة (.*) م والمعتاد (.*) م$/, "Spacing $1 m where $2 m is typical"],
+    [/^ميل (.*)% أكبر من (.*)%$/, "Grade $1% exceeds $2%"],
+    [/^المنسوب (.*) بيبعد (.*) م عن الخط بين الجيران$/, "Level $1 is $2 m off the line between its neighbours"],
+    [/^(\d+) نقطة خارج التفاوت$/, (m, n) => `${n} point${n === "1" ? "" : "s"} out of tolerance`],
+    [/^(\d+) ملاحظة$/, (m, n) => `${n} finding${n === "1" ? "" : "s"}`],
+    [/^النقاط في 3D · (\d+) نقطة$/, "Points in 3D · $1 points"],
+    [/^(.*) → (.*) · مبالغة رأسية ≈ ×(.*)$/, "$1 → $2 · vertical exaggeration ≈ ×$3"],
+    [/^CUT (.*) m² · FILL (.*) m² · الإزاحة بالمتر، الشمال سالب$/, "CUT $1 m² · FILL $2 m² · offsets in metres, left negative"],
+    [/^حصلت مشكلة: (.*)$/, "Something went wrong: $1"],
+    // File summary under the QC report: name: table "x": N rows. Columns: a | b. Recognised: a→x، b→y.
+    [/^(.*): جدول "(.*)": (\d+) صف\. الأعمدة: (.*?)\.(?: اتعرفت: (.*)\.)?$/, (m, f, t, n, cols, rec) =>
+      `${f}: table "${t}": ${n} rows. Columns: ${cols}.${rec ? ` Recognised: ${rec.replace(/، /g, ", ")}.` : ""}`],
+  ];
+
+  const AR = /[؀-ۿ]/;
+  function tr(text) {
+    const core = text.trim().replace(/\s+/g, " ");
+    if (!core || !AR.test(core)) return null;
+    if (EXACT[core] !== undefined) return text.replace(text.trim(), EXACT[core]);
+    if (core.endsWith(".") && EXACT[core.slice(0, -1)] !== undefined) return text.replace(text.trim(), `${EXACT[core.slice(0, -1)]}.`);
+    for (const [re, en] of PATTERNS) if (re.test(core)) return text.replace(text.trim(), core.replace(re, en));
+    // Notes the app joins from two engine sentences ("method. note").
+    const parts = core.split(/(?<=\.)\s+/);
+    if (parts.length > 1) {
+      const out = parts.map((p) => (AR.test(p) ? tr(p) : p));
+      if (out.every((p) => p !== null)) return out.join(" ");
+    }
+    return null;
+  }
+
+  let lang = "ar";
+  const ATTRS = ["placeholder", "aria-label", "title"];
+  const original = new WeakMap(); // text node -> its Arabic text
+
+  function apply(root) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    for (let n = walker.currentNode.nodeType === 3 ? walker.currentNode : walker.nextNode(); n; n = walker.nextNode()) nodes.push(n);
+    for (const n of nodes) {
+      const p = n.parentElement;
+      if (!p || p.closest("script, style, textarea, [data-no-i18n]")) continue;
+      if (lang === "en") {
+        const ar = original.get(n) ?? n.data;
+        const en = tr(ar);
+        if (en !== null) { original.set(n, ar); if (n.data !== en) n.data = en; }
+      } else if (original.has(n)) {
+        n.data = original.get(n);
+        original.delete(n);
+      }
+    }
+    const els = root.nodeType === 1 ? [root, ...root.querySelectorAll("[placeholder],[aria-label],[title]")] : [];
+    for (const el of els) for (const a of ATTRS) {
+      if (!el.hasAttribute?.(a)) continue;
+      const key = `ar${a.replace("-", "")}`;
+      if (lang === "en") {
+        const ar = el.dataset[key] ?? el.getAttribute(a);
+        const en = tr(ar);
+        if (en !== null) { el.dataset[key] = ar; el.setAttribute(a, en); }
+      } else if (el.dataset[key] !== undefined) {
+        el.setAttribute(a, el.dataset[key]);
+        delete el.dataset[key];
+      }
+    }
+  }
+
+  // Results the app writes later are translated as they arrive.
+  const observer = new MutationObserver((records) => {
+    if (lang !== "en") return;
+    for (const r of records) for (const n of r.addedNodes) apply(n.nodeType === 3 ? n.parentElement : n);
+  });
+
+  function set(next) {
+    lang = next === "en" ? "en" : "ar";
+    const html = document.documentElement;
+    html.lang = lang;
+    html.dir = lang === "en" ? "ltr" : "rtl";
+    document.title = lang === "en" ? "Survey Assistant" : "المهندس المساعد";
+    try { localStorage.setItem("lang", lang); } catch { /* storage blocked */ }
+    apply(document.body);
+    document.querySelectorAll("[data-lang]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+    if (typeof V3 !== "undefined") V3.remountAll();
+  }
+
+  function start() {
+    observer.observe(document.body, { childList: true, subtree: true });
+    let saved = "ar";
+    try { saved = localStorage.getItem("lang") || "ar"; } catch { /* storage blocked */ }
+    document.querySelectorAll("[data-lang]").forEach((b) => (b.onclick = () => set(b.dataset.lang)));
+    set(saved);
+  }
+
+  return { start, set, tr, get lang() { return lang; } };
+})();
+
 // Browser app for the published page. The calculation engine (global `Engine`) is the
 // same tested code as the server, bundled by scripts/build-page.mjs. Files are read in
 // the browser; the assistant talks to Claude through the viewer's claude.ai account
@@ -3060,72 +3452,16 @@ if (!inViewer) {
 document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
 $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
 
-// ---------- sign-in (public site only) ----------
-// Visitors make an account with email + password and sign in with it (Supabase Auth). Inside
-// the claude.ai viewer the page belongs to the viewer already, so there is no gate there.
-const SUPABASE_URL = "https://hidjlsdcwnsgmrqnlphy.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpZGpsc2Rjd25zZ21ycW5scGh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMjEwMDgsImV4cCI6MjEwODU5NzAwOH0.TzVLTgvJNxQZTAOivmm7QCOm3Dubq4vKCtvKmqAy1MM";
+// ---------- welcome screen (first thing on each visit) ----------
 {
-  const root = document.documentElement;
-  const sb = !inViewer && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, detectSessionInUrl: true, flowType: "implicit" } }) : null;
-  const msg = (text, bad = false) => { $("#auth-msg").textContent = text; $("#auth-msg").className = `hint ${bad ? "bad" : ""}`; };
-  const setUser = (user) => {
-    const signedIn = Boolean(user) || inViewer;
-    root.classList.toggle("gate", !signedIn);
-    $("#user-box").hidden = !user;
-    if (user) $("#user-email").textContent = user.user_metadata?.full_name || user.email || "";
-    if (signedIn) V3.remountAll();
+  const close = () => {
+    document.documentElement.classList.remove("show-intro");
+    try { sessionStorage.setItem("intro-seen", "1"); } catch { /* storage blocked */ }
+    V3.remountAll();
   };
-  const arabicError = (err) => {
-    const m = String(err?.message || err || "");
-    if (/invalid login credentials/i.test(m)) return "الإيميل أو الباسورد غلط.";
-    if (/already registered|already exists/i.test(m)) return "الإيميل ده عليه حساب بالفعل. ادخل من «تسجيل دخول».";
-    if (/email not confirmed/i.test(m)) return "الحساب ده محتاج تأكيد إيميل. كلّم صاحب الموقع.";
-    if (/password/i.test(m) && /least|short|weak/i.test(m)) return "الباسورد لازم يكون 6 حروف أو أرقام على الأقل.";
-    if (/rate limit|too many|security purposes/i.test(m)) return "محاولات كتير ورا بعض. استنى دقيقة وجرّب تاني.";
-    if (/email/i.test(m) && /invalid|valid/i.test(m)) return "الإيميل مش مكتوب صح.";
-    return `حصلت مشكلة: ${m}`;
-  };
-  if (inViewer) setUser(null);
-  else if (!sb) { root.classList.add("gate"); msg("مش قادر أوصل لخدمة تسجيل الدخول. اتأكد من النت وحدّث الصفحة.", true); }
-  else {
-    sb.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    sb.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null));
-    let mode = "in";
-    const setMode = (m) => {
-      mode = m;
-      document.querySelectorAll("[data-auth]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.auth === m)));
-      document.querySelectorAll("#auth-form [data-up]").forEach((el) => (el.hidden = m !== "up"));
-      $("#auth-pass").autocomplete = m === "up" ? "new-password" : "current-password";
-      $("#auth-submit").textContent = m === "up" ? "اعمل الحساب" : "دخول";
-      msg("");
-    };
-    document.querySelectorAll("[data-auth]").forEach((b) => (b.onclick = () => setMode(b.dataset.auth)));
-    $("#auth-show").onchange = (e) => { for (const id of ["#auth-pass", "#auth-pass2"]) $(id).type = e.target.checked ? "text" : "password"; };
-    $("#auth-form").onsubmit = async (e) => {
-      e.preventDefault();
-      const email = $("#auth-email").value.trim();
-      const password = $("#auth-pass").value;
-      if (mode === "up" && password !== $("#auth-pass2").value) return msg("الباسورد والتأكيد مش زي بعض.", true);
-      const btn = $("#auth-submit");
-      btn.disabled = true;
-      msg(mode === "up" ? "بيعمل الحساب…" : "بيدخل…");
-      try {
-        if (mode === "up") {
-          const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: $("#auth-name").value.trim() } } });
-          if (error) return msg(arabicError(error), true);
-          // With "Confirm email" on in Supabase there is no session until the email link is opened.
-          if (!data.session) return msg("الحساب اتعمل بس محتاج تأكيد من الإيميل قبل الدخول. لو مفيش إيميل وصلك، كلّم صاحب الموقع.", true);
-        } else {
-          const { error } = await sb.auth.signInWithPassword({ email, password });
-          if (error) return msg(arabicError(error), true);
-        }
-        msg("");
-        $("#auth-pass").value = $("#auth-pass2").value = "";
-      } finally { btn.disabled = false; }
-    };
-    $("#sign-out").onclick = async () => { await sb.auth.signOut(); setMode("in"); $("#auth-email").focus(); };
-  }
+  $("#intro-go").onclick = close;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.documentElement.classList.contains("show-intro")) close(); });
+  if (document.documentElement.classList.contains("show-intro")) $("#intro-go").focus();
 }
 
 // ---------- theme (dark by default) ----------
@@ -4157,6 +4493,7 @@ runLevel();
 runProfile();
 runSection();
 runVolumes();
+I18N.start();
 
 </script>
 
