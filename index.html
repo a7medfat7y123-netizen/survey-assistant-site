@@ -368,9 +368,9 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 @media (max-width: 480px) {
   #tab-trav .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   #tab-trav .grid > .wide { grid-column: 1 / -1; }
-  #tr-out .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  #tr-out .readout { padding: 8px 10px; }
-  #tr-out .readout b { font-size: 16px; }
+  #tr-out .readouts, #gp-out .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #tr-out .readout, #gp-out .readout { padding: 8px 10px; }
+  #tr-out .readout b, #gp-out .readout b { font-size: 16px; }
 }
 #tr-rows { font-family: var(--f-num); text-align: left; }
 .tr-formats { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
@@ -646,6 +646,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <nav id="tabs" role="tablist">
         <button role="tab" data-tab="chat" aria-selected="true" data-ai><span class="code">AI</span>المساعد</button>
         <button role="tab" data-tab="level" aria-selected="false"><span class="code">LV</span>الميزانية</button>
+        <button role="tab" data-tab="gps" aria-selected="false"><span class="code">GP</span>تحويل GPS</button>
         <button role="tab" data-tab="trav" aria-selected="false"><span class="code">TR</span>الترافيرس</button>
         <button role="tab" data-tab="profile" aria-selected="false"><span class="code">PR</span>البروفيل</button>
         <button role="tab" data-tab="qty" aria-selected="false"><span class="code">QT</span>الكميات</button>
@@ -772,6 +773,66 @@ BM2,,,0.900</textarea>
     </div>
     <div id="lv-chart"></div>
     <div id="lv-out" class="out"></div>
+  </section>
+
+  <section id="tab-gps" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">GP</span>تحويل إحداثيات GPS</h2>
+      <p class="hint">بيفك إحداثيات الـ GPS مهما كان شكلها، ويحوّلها لـ Easting و Northing ومنسوب.</p>
+      <label class="block" for="gp-text">نقط الـ GPS، كل نقطة في سطر: رقم النقطة (اختياري)، خط العرض، خط الطول، والارتفاع. أو الصق جمل NMEA من الجهاز.
+        <textarea id="gp-text" class="data" rows="7" spellcheck="false" dir="ltr"></textarea>
+      </label>
+      <div class="grid">
+        <label for="gp-grid" class="wide">النظام
+          <select id="gp-grid">
+            <option value="utm">UTM على WGS 84</option>
+            <option value="etm:auto">الشبكة المصرية: الحزام بيتحدد لوحده</option>
+            <option value="etm:red">الشبكة المصرية: الحزام الأحمر</option>
+            <option value="etm:purple">الشبكة المصرية: الحزام الأرجواني</option>
+            <option value="etm:xpurple">الشبكة المصرية: الأرجواني الممتد</option>
+            <option value="etm:blue">الشبكة المصرية: الحزام الأزرق</option>
+          </select>
+        </label>
+        <label for="gp-zone">زون UTM (فاضي = يتحسب من خط الطول)<input id="gp-zone" type="number" min="1" max="60" step="1" dir="ltr"></label>
+        <label for="gp-height" class="wide">الارتفاع اللي معاك
+          <select id="gp-height">
+            <option value="geoid">إهليلجي (h من جهاز GNSS): يطرح منه الجيويد EGM2008</option>
+            <option value="asis">منسوب جاهز (MSL): يفضل زي ما هو</option>
+          </select>
+        </label>
+        <label for="gp-order">لو مفيش N و E: الترتيب
+          <select id="gp-order">
+            <option value="lat">خط العرض الأول</option>
+            <option value="lon">خط الطول الأول</option>
+          </select>
+        </label>
+        <label class="check" for="gp-avg"><input id="gp-avg" type="checkbox"> رصد ثابت: خد متوسط كل القراءات كنقطة واحدة</label>
+      </div>
+      <label class="block" for="gp-bm">روبيرات منسوبها معلوم (اختياري): رقم النقطة والمنسوب. روبير أو اتنين بيعملوا إزاحة، وتلاتة أو أكتر بيعملوا مستوى مايل.
+        <textarea id="gp-bm" class="data" rows="3" spellcheck="false" dir="ltr" placeholder="BM1, 22.905"></textarea>
+      </label>
+      <div class="actions">
+        <button id="gp-run" class="primary" type="button">حوّل</button>
+        <label class="file-btn secondary" for="gp-file">تحميل من ملف</label><input type="file" id="gp-file" accept=".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.txt,.nmea,.nma,.log,.gpx,.kml,.kmz,.geojson,.json" hidden>
+        <button id="gp-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <button id="gp-penz" class="secondary primary" type="button" disabled>تصدير نقط P,E,N,Z</button>
+        <button id="gp-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+        <span class="hint">المثال كل سطر فيه مكتوب بشكل مختلف عشان تشوف الأشكال اللي بيفهمها؛ امسحه وحط نقطك.</span>
+      </div>
+      <details class="tr-formats">
+        <summary>الصيغ اللي بيقراها</summary>
+        <ul>
+          <li>درجات عشري: &#x2066;30.044420, 31.235712&#x2069; زي اللي بتنسخه من خرائط جوجل.</li>
+          <li>درجات ودقايق وثواني: &#x2066;30°02'39.8"N 31°14'08.5"E&#x2069; أو &#x2066;N 30 02 39.84 E 31 14 08.52&#x2069;، والحرف قبل الرقم أو بعده، أو شمال وشرق بالعربي.</li>
+          <li>جمل NMEA من الجهاز (GGA وGNS وRMC وGLL): بيقرا نوع الحل (RTK Fixed أو Float) وعدد الأقمار والـ HDOP والارتفاع، ويشيل الجمل اللي الـ checksum بتاعها غلط.</li>
+          <li>ملفات GPX وKML وKMZ وGeoJSON، وExcel أو CSV بعناوين عربي أو إنجليزي (خط العرض، خط الطول، الارتفاع، رقم النقطة).</li>
+          <li>رقم النقطة قبل الإحداثيات، والارتفاع والكود بعدها.</li>
+        </ul>
+      </details>
+      <p class="hint">المنسوب من الجيويد EGM2008 تقريبي (في حدود عشرات السنتيمترات)؛ للدقة اربطه بروبير معلوم.</p>
+    </div>
+    <div id="gp-plot"></div>
+    <div id="gp-out" class="out"></div>
   </section>
 
   <section id="tab-trav" class="tab" hidden>
@@ -1017,6 +1078,87 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
+    "تحويل GPS": "GPS",
+    "تحويل إحداثيات GPS": "GPS coordinates",
+    "بيفك إحداثيات الـ GPS مهما كان شكلها، ويحوّلها لـ Easting و Northing ومنسوب.": "Reads GPS coordinates however they are written and turns them into easting, northing and level.",
+    "نقط الـ GPS، كل نقطة في سطر: رقم النقطة (اختياري)، خط العرض، خط الطول، والارتفاع. أو الصق جمل NMEA من الجهاز.": "GPS points, one per line: point number (optional), latitude, longitude and height. Or paste NMEA sentences from the receiver.",
+    "النظام": "System",
+    "UTM على WGS 84": "UTM on WGS 84",
+    "الشبكة المصرية: الحزام بيتحدد لوحده": "Egyptian grid: belt chosen automatically",
+    "الشبكة المصرية: الحزام الأحمر": "Egyptian grid: Red Belt",
+    "الشبكة المصرية: الحزام الأرجواني": "Egyptian grid: Purple Belt",
+    "الشبكة المصرية: الأرجواني الممتد": "Egyptian grid: Extended Purple Belt",
+    "الشبكة المصرية: الحزام الأزرق": "Egyptian grid: Blue Belt",
+    "زون UTM (فاضي = يتحسب من خط الطول)": "UTM zone (blank = from the longitude)",
+    "الارتفاع اللي معاك": "The heights you have",
+    "إهليلجي (h من جهاز GNSS): يطرح منه الجيويد EGM2008": "Ellipsoidal (h from a GNSS receiver): subtract the EGM2008 geoid",
+    "منسوب جاهز (MSL): يفضل زي ما هو": "Already levels (MSL): keep them",
+    "لو مفيش N و E: الترتيب": "With no N and E letters, the order",
+    "خط العرض الأول": "Latitude first",
+    "خط الطول الأول": "Longitude first",
+    "رصد ثابت: خد متوسط كل القراءات كنقطة واحدة": "Static occupation: average all readings into one point",
+    "روبيرات منسوبها معلوم (اختياري): رقم النقطة والمنسوب. روبير أو اتنين بيعملوا إزاحة، وتلاتة أو أكتر بيعملوا مستوى مايل.": "Benchmarks of known level (optional): point number and level. One or two give a shift; three or more give an inclined plane.",
+    "حوّل": "Convert",
+    "تصدير نقط P,E,N,Z": "Export points P,E,N,Z",
+    "المثال كل سطر فيه مكتوب بشكل مختلف عشان تشوف الأشكال اللي بيفهمها؛ امسحه وحط نقطك.": "Each line of the example is written a different way, to show what it reads; clear it and enter your points.",
+    "درجات عشري: \u206630.044420, 31.235712\u2069 زي اللي بتنسخه من خرائط جوجل.": "Decimal degrees: 30.044420, 31.235712, as copied from Google Maps.",
+    "درجات ودقايق وثواني: \u206630°02'39.8\"N 31°14'08.5\"E\u2069 أو \u2066N 30 02 39.84 E 31 14 08.52\u2069، والحرف قبل الرقم أو بعده، أو شمال وشرق بالعربي.": "Degrees, minutes and seconds: 30°02'39.8\"N 31°14'08.5\"E or N 30 02 39.84 E 31 14 08.52, with the letter before or after the number, or the Arabic words for north and east.",
+    "جمل NMEA من الجهاز (GGA وGNS وRMC وGLL): بيقرا نوع الحل (RTK Fixed أو Float) وعدد الأقمار والـ HDOP والارتفاع، ويشيل الجمل اللي الـ checksum بتاعها غلط.": "NMEA sentences from the receiver (GGA, GNS, RMC, GLL): it reads the solution (RTK fixed or float), the satellites, the HDOP and the height, and drops sentences with a wrong checksum.",
+    "ملفات GPX وKML وKMZ وGeoJSON، وExcel أو CSV بعناوين عربي أو إنجليزي (خط العرض، خط الطول، الارتفاع، رقم النقطة).": "GPX, KML, KMZ and GeoJSON files, and Excel or CSV with Arabic or English headers (latitude, longitude, height, point).",
+    "رقم النقطة قبل الإحداثيات، والارتفاع والكود بعدها.": "The point number before the coordinates, the height and the code after them.",
+    "المنسوب من الجيويد EGM2008 تقريبي (في حدود عشرات السنتيمترات)؛ للدقة اربطه بروبير معلوم.": "A level from the EGM2008 geoid is approximate (to some tens of centimetres); for accuracy, tie it to a known benchmark.",
+    "مسقط نقط الـ GPS": "Plan of the GPS points",
+    "روبير معلوم المنسوب": "Benchmark of known level",
+    "خط العرض": "Latitude",
+    "خط الطول": "Longitude",
+    "الارتفاع h (م)": "Height h (m)",
+    "الجيويد N (م)": "Geoid N (m)",
+    "E (م)": "E (m)",
+    "N (م)": "N (m)",
+    "المنسوب قبل المعايرة (م)": "Level before fitting (m)",
+    "المنسوب (م)": "Level (m)",
+    "الحل": "Solution",
+    "الأقمار": "Satellites",
+    "الكود": "Code",
+    "عدد النقط": "Points",
+    "المنسوب": "Level",
+    "زي ما هو": "As given",
+    "المعايرة": "Fitting",
+    "مستوى مايل": "Inclined plane",
+    "إزاحة ثابتة": "Constant shift",
+    "الإزاحة (م)": "Shift (m)",
+    "بواقي الروبيرات RMS (مم)": "Benchmark residuals RMS (mm)",
+    "الميل شرق (مم/كم)": "Slope east (mm/km)",
+    "الميل شمال (مم/كم)": "Slope north (mm/km)",
+    "عدد القراءات": "Readings",
+    "الانتشار σE / σN (م)": "Spread σE / σN (m)",
+    "الانتشار في المنسوب σ (م)": "Spread in level σ (m)",
+    "الروبيرات": "Benchmarks",
+    "الروبير": "Benchmark",
+    "المنسوب المعلوم (م)": "Known level (m)",
+    "المحسوب (م)": "Computed (m)",
+    "الباقي (مم)": "Residual (mm)",
+    "نقط الـ GPS على الشبكة": "GPS points on the grid",
+    "الحزام الأحمر": "Red Belt",
+    "الحزام الأرجواني": "Purple Belt",
+    "الأرجواني الممتد": "Extended Purple Belt",
+    "الحزام الأزرق": "Blue Belt",
+    "متوسط": "Mean",
+    "مفيش fix": "No fix",
+    "GPS مستقل": "Autonomous GPS",
+    "تقديري": "Estimated",
+    "يدوي": "Manual",
+    "محاكاة": "Simulated",
+    "مفيش إحداثيات GPS في الشيت. لازم أعمدة خط العرض وخط الطول، أو كل صف فيه نقطة مكتوبة.": "No GPS coordinates in the sheet. It needs latitude and longitude columns, or a point written in each row.",
+    "ملف KMZ مفيهوش KML.": "The KMZ file has no KML in it.",
+    "الملف ده مش نص ولا Excel. ارفع CSV أو TXT أو NMEA أو GPX أو KML أو Excel.": "This file is neither text nor Excel. Upload CSV, TXT, NMEA, GPX, KML or Excel.",
+    "جمل RMC و GLL مفيهاش ارتفاع؛ المنسوب مش هيتحسب.": "RMC and GLL sentences carry no height; no level will be computed.",
+    "ارتفاعات الملف اتاخدت منسوب فوق سطح البحر زي ما الأجهزة بتكتبها فيه.": "The heights in the file were taken as levels above sea level, as devices write them there.",
+    "مفيش إحداثيات. الصق نقط GPS أو حمّل ملف.": "No coordinates. Paste GPS points or load a file.",
+    "مفيش نقط GPS اتقرت. اكتب كل نقطة في سطر: خط العرض، خط الطول، والارتفاع لو موجود.": "No GPS points could be read. Write one point per line: latitude, longitude, and the height if you have it.",
+    "النقط واقعة في أكتر من حزام؛ اتحسبت كلها على حزام واحد عشان تركب مع بعض.": "The points fall in more than one belt; all were computed on one belt so they fit together.",
+    "الروبيرات على خط واحد تقريبًا، فاتعمل إزاحة ثابتة بدل المستوى المايل.": "The benchmarks are nearly on one line, so a constant shift was used instead of an inclined plane.",
+    "روبيرين: الإزاحة متوسط الفرقين، والفرق بينهم بيبان في البواقي.": "Two benchmarks: the shift is the mean of the two differences, and their disagreement shows in the residuals.",
     "المشاريع": "Projects",
     "ملاحظات المشاريع": "Project notes",
     "لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.": "Each project keeps its own notes, each with its date and time: what was done, benchmarks and approved coordinates, site problems, and what comes next.",
@@ -1465,6 +1607,16 @@ const I18N = (() => {
     // Project notes.
     [/^\(اتعدلت (.*)\)$/, "(edited $1)"],
     [/^اتسترجعت النسخة: مشاريع جديدة (\d+)، ملاحظات جديدة أو أحدث (\d+)\.$/, "Backup restored: $1 new projects, $2 new or newer notes."],
+    // GPS.
+    [/^(\d+) جملة NMEA اتشالت لأن الـ checksum بتاعها غلط\.$/, "$1 NMEA sentence(s) dropped for a wrong checksum."],
+    [/^(\d+) جملة NMEA من غير fix اتشالت\.$/, "$1 NMEA sentence(s) without a fix dropped."],
+    [/^(\d+) سطر في الشيت ما اتقراش كإحداثيات\.$/, "$1 row(s) of the sheet could not be read as coordinates."],
+    [/^سطور ما اتقريتش كإحداثيات: (.*)\.$/, (m, l) => `Lines not read as coordinates: ${l.replace(/، /g, ", ")}.`],
+    [/^النقط واقعة في أكتر من زون UTM؛ اتحسبت كلها على زون (\d+) عشان تركب مع بعض\.$/, "The points fall in more than one UTM zone; all were computed in zone $1 so they fit together."],
+    [/^(\d+) نقطة برّه نطاق نموذج الجيويد المتخزّن \(مصر وما حواليها\)، فمنسوبها ما اتحسبش؛ اختار «زي ما هو» أو معايرة بروبير\.$/, "$1 point(s) outside the stored geoid model (Egypt and around it), so no level was computed; choose “as given” or fit to a benchmark."],
+    [/^(\d+) نقطة من غير ارتفاع، فمن غير منسوب\.$/, "$1 point(s) without a height, so without a level."],
+    [/^الروبير (.*) مش موجود في النقط\.$/, "Benchmark $1 is not among the points."],
+    [/^الروبير (.*) مفيهوش منسوب محسوب\.$/, "Benchmark $1 has no computed level."],
     // Traverse.
     [/^المحطة (.*): المسافة "(.*)" مش رقم\.$/, 'Station $1: the distance "$2" is not a number.'],
     [/^زاوية المحطة (.*): "(.*)" مش مفهوم\. اكتبه ⁦123 45 30⁩ أو ⁦123\.4530⁩\.$/, 'Angle at station $1: "$2" is not understood. Write it as 123 45 30 or 123.4530.'],
@@ -4480,6 +4632,510 @@ function traverseRowsFromMatrix(matrix, options = {}) {
   return { rows: out, notes, kind, references };
 }
 
+// ---- src/engine/geoid-egypt.js
+// EGM2008 geoid heights (N, metres above the WGS 84 ellipsoid) for Egypt and around it: every 5′
+// from latitude 32.5° down to 21.5° and longitude 24° to 37.5°, in millimetres (int16, little-endian),
+// row by row from the north-west corner. Taken from the 2.5′ NGA grid that PROJ publishes
+// (cdn.proj.org/us_nga_egm08_25.tif); 5′ bilinear stays within 18 cm of it over Egypt.
+// Generated file: do not edit.
+
+const GEOID_EGYPT = {
+  model: "EGM2008",
+  north: 32.5, south: 21.5, west: 24, east: 37.5, step: 0.08333333333333333,
+  rows: 133, cols: 163,
+  data: "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xyXAJb8lzSW7JXwlTCVNJW0lcCVqJWIl8iQRJH8j9CK4IXkggh+cHjYeIx5LHuIe5h/nIF8hRyEHIFQe2RxdGyoa4Bh+F1YWVRWKFCMUERQvNT01UjWCNcE1FDaINhs34zfZOPo5STu0PBI+Sz8yQNhAVEGiQbpBkEFEQd9AcUASQMI/TT+9Phc+SD1ZPFA7PjotOTs4aTemNuc1KjWHNA40tzNyMyAzujJHMssxUjHXMFMwxS86L7suVS75LaotXC0WLeAsrSyHLFUsCyymKz4r7yrBKqQqjip/KnMqfiqWKqUqoyqQKmcqHirOKW8pDCnJKJYoZig6KB8oFSggKBko5ye3J5QndidjJ04nBSeZJjom8SW3JbElwCWfJV0lKSUEJfAkHiVhJagl6yUPJh8mCSbOJZ4lgSVrJUolIiUcJR4lACXTJMEk0STuJPQk2CS+JN8kHSVCJS4l3SQvJCUjViKhIa0g0x8IH0seCR4CHioemB5zH4kg4yCKIFofuR1DHO8a9hnoGIoXRBYqFTIUqhODE+M07jQENSk1azW7NSs2wzaHN3U4lTngOjw8rT36PuE/kUAdQXlBi0FWQQRBn0A5QOQ/jT8QP4U+4j0bPTI8KjsEOtw45DcMN0Q2gDXGNB80nzM/M+wykzItMr0xSTHVMF4w4i9bL9kuVy7oLY0tPC3vLJ8sXSwqLAQs0it/KxYrtipuKkMqLiofKg8qCCohKkgqRyosKhcq4imTKUkp9SiiKFsoHyj3J8knoyeoJ8knyCeQJ1AnGyfrJrsmkiZlJiMm1iWCJS4lEiUuJTklFSXaJJ4koyT7JFIloiXaJe8l7yXSJaElbSVNJTYlDyXSJLckpyRnJCAk/CMFJBwkMiQ+JFAkqSQMJUIlLiWxJNkjtiKmIdggRCCvH+keNx7bHbQd8B16HjEfCyAuIJQfkB4yHdAbqxqpGdIYxRdMFvsU5BNCEwcTpDSlNL804DQgNXI13DVxNjU3JDg4OXU6wzsiPWE+VD8pQMpAJEEyQQBBo0AvQNE/ej8QP5M+Fj5xPbM80Tu9Oo05ZjhyN5g20zUPNVM0qDMbM6wySjLvMZQxNDHPMGcw9C+FLw0vjy4NLpYtOC3kLJgsQyzxK74rkitZKworpCpHKvwpzCmyKZ0pkCmWKbUp1CnIKacpiilOKQcpvShtKCYo6Se0J38nTic7J0knYCddJzAn6SahJnEmOiYAJsolhSVEJQAlwCSpJMIk2yS9JHwkViSRJPEkNCWGJbMlwSXAJa4lhiVOJScl8SS1JIAkXSQ7JO4jpCOAI3UjhCOhI8Aj6SNLJNMkOyU7JZAkZyMtIjIhiSANIIUf5R5CHuIdxR3sHV8ezh5IH5MfIh8yHg4dxhu4GrUZ9BjyF1EW9RS+E+4SnBI=",
+};
+
+// ---- src/engine/gps.js
+// GPS / GNSS points: read from NMEA sentences ($GPGGA …), from coordinates written in any common
+// way (decimal degrees, degrees minutes seconds, signs or N S E W letters, a point number before
+// and a height after), from GPX, KML, GeoJSON or a table; turned into UTM or the Egyptian grid, and
+// the height into a level: as given, through the EGM2008 geoid, and fitted to benchmarks of known
+// level (a shift from one or two, an inclined plane from three or more).
+
+
+// ---------- geoid ----------
+let gpsGeoidCache = null;
+const gpsGeoidData = () => {
+  if (!gpsGeoidCache) {
+    const bin = atob(GEOID_EGYPT.data);
+    const view = new DataView(new ArrayBuffer(bin.length));
+    for (let i = 0; i < bin.length; i++) view.setUint8(i, bin.charCodeAt(i));
+    gpsGeoidCache = Array.from({ length: bin.length / 2 }, (_, i) => view.getInt16(i * 2, true));
+  }
+  return gpsGeoidCache;
+};
+
+/** EGM2008 geoid height N (metres above the WGS 84 ellipsoid) in Egypt and around it, or null outside. */
+function geoidHeight(lat, lon) {
+  const G = GEOID_EGYPT;
+  if (!(lat <= G.north && lat >= G.south && lon >= G.west && lon <= G.east)) return null;
+  const y = (G.north - lat) / G.step, x = (lon - G.west) / G.step;
+  const i = Math.min(G.rows - 2, Math.floor(y)), j = Math.min(G.cols - 2, Math.floor(x));
+  const fy = y - i, fx = x - j, d = gpsGeoidData(), v = (a, b) => d[a * G.cols + b] / 1000;
+  return v(i, j) * (1 - fx) * (1 - fy) + v(i, j + 1) * fx * (1 - fy) + v(i + 1, j) * (1 - fx) * fy + v(i + 1, j + 1) * fx * fy;
+}
+
+// ---------- reading ----------
+const gpsBlank = (v) => v === undefined || v === null || String(v).trim() === "";
+// Arabic digits and separators to Latin ones, and the Arabic words for the hemispheres to N S E W
+// (single letters stay: «ج» may well be a point's name).
+const gpsLatin = (s) => String(s ?? "")
+  .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/٫/g, ".").replace(/،/g, ",")
+  .replace(/شمالا?/g, " N ").replace(/جنوبا?/g, " S ").replace(/شرقا?/g, " E ").replace(/غربا?/g, " W ");
+const GPS_NUM = /^[-+]?\d*\.?\d+$/;
+const gpsNum = (s) => (GPS_NUM.test(String(s).trim()) ? Number(s) : null);
+
+/** One coordinate: decimal degrees or d m s with any marks, a sign or a hemisphere letter. */
+function gpsCoord(text) {
+  let s = gpsLatin(text).trim().replace(/\s+/g, " ");
+  if (!s) return null;
+  let hemi = null;
+  const pre = s.match(/^([NSEW])(?![A-Za-z])\s*/i), post = s.match(/\s*([NSEW])$/i);
+  if (pre) { hemi = pre[1].toUpperCase(); s = s.slice(pre[0].length); }
+  else if (post) { hemi = post[1].toUpperCase(); s = s.slice(0, s.length - post[0].length); }
+  let sign = 1;
+  if (/^[-−]/.test(s)) { sign = -1; s = s.slice(1); } else if (s.startsWith("+")) s = s.slice(1);
+  const marked = /[°º'′’"″”:]|\d\s+\d/.test(s);
+  const parts = s.replace(/[°º'′’"″”:]/g, " ").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length || parts.length > 3 || !parts.every((p) => /^\d*\.?\d+$/.test(p))) return null;
+  const [d, m = 0, sec = 0] = parts.map(Number);
+  if (parts.length > 1 && (!Number.isInteger(d) || m >= 60 || sec >= 60)) return null;
+  if (parts.length > 2 && !Number.isInteger(m)) return null;
+  let value = sign * (d + m / 60 + sec / 3600);
+  if (hemi === "S" || hemi === "W") value = -Math.abs(value);
+  return { value, hemi, marked: marked || hemi !== null };
+}
+
+// A point from its coordinates: N/S marks the latitude, E/W the longitude, otherwise the order says.
+function gpsPlace(c1, c2, latFirst) {
+  let lat, lon;
+  if (c1.hemi && "NS".includes(c1.hemi) || c2.hemi && "EW".includes(c2.hemi)) [lat, lon] = [c1.value, c2.value];
+  else if (c1.hemi && "EW".includes(c1.hemi) || c2.hemi && "NS".includes(c2.hemi)) [lat, lon] = [c2.value, c1.value];
+  else [lat, lon] = latFirst ? [c1.value, c2.value] : [c2.value, c1.value];
+  if (Math.abs(lat) > 90 && Math.abs(lon) <= 90) [lat, lon] = [lon, lat];
+  if (!(Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) return null;
+  return { lat, lon };
+}
+
+// Degree-marked coordinates, with the hemisphere letter before them (N 30°02′39.8″) or after (30°02′39.8″N).
+const GPS_MARKED_PRE = /([NSEW])\s*(-?\d+(?:\.\d+)?)\s*[°º]\s*(?:(\d+(?:\.\d+)?)\s*['′’]\s*)?(?:(\d+(?:\.\d+)?)\s*(?:["″”]|''|′′))?()/gi;
+const GPS_MARKED_POST = /()(-?\d+(?:\.\d+)?)\s*[°º]\s*(?:(\d+(?:\.\d+)?)\s*['′’]\s*)?(?:(\d+(?:\.\d+)?)\s*(?:["″”]|''|′′)\s*)?([NSEW](?![A-Za-z]))?/gi;
+
+/** One written point: "P1, 30.0444, 31.2357, 45.6", "30°02'39.8\"N 31°14'08.5\"E", "N 30 02 39.84 E 31 14 08.52". */
+function gpsTextPoint(line, latFirst) {
+  const s = gpsLatin(line).trim();
+  if (!s) return null;
+  const rest = (text) => {
+    const words = text.split(/[\s,;\t]+/).filter(Boolean);
+    const nums = words.filter((w) => gpsNum(w) !== null).map(Number);
+    const texts = words.filter((w) => gpsNum(w) === null);
+    return { nums, texts };
+  };
+  const finish = (pl, before, after) => {
+    if (!pl) return null;
+    const b = rest(before), a = rest(after);
+    const id = b.texts.join(" ") || (b.nums.length && Number.isInteger(b.nums[0]) ? String(b.nums[0]) : "") || null;
+    return { ...pl, id, h: a.nums.length ? a.nums[0] : null, code: a.texts.join(" ") || null };
+  };
+  // Degree marks: each coordinate is a number with °.
+  const pre = [...s.matchAll(GPS_MARKED_PRE)];
+  const marked = pre.length >= 2 ? pre : [...s.matchAll(GPS_MARKED_POST)];
+  if (marked.length >= 2) {
+    const [a, b] = marked;
+    const c = (m) => gpsCoord(`${m[1] ?? ""} ${m[2]} ${m[3] ?? ""} ${m[4] ?? ""} ${m[5] ?? ""}`);
+    const c1 = c(a), c2 = c(b);
+    if (!c1 || !c2) return null;
+    return finish(gpsPlace(c1, c2, latFirst), s.slice(0, a.index), s.slice(b.index + b[0].length));
+  }
+  // Hemisphere letters between numbers: N 30 02 39.84 E 31 14 08.52, or 30.0444N 31.2357E.
+  const letters = [...s.matchAll(/(?<![A-Za-z])([NSEW])(?![A-Za-z])/gi)];
+  if (letters.length === 2 && /[NS]/i.test(letters[0][1] + letters[1][1]) && /[EW]/i.test(letters[0][1] + letters[1][1])) {
+    const [l1, l2] = letters;
+    // Letters before the numbers (N 30 … E 31 …) leave more numbers after the second letter than
+    // before the first; letters after them (30 … N 31 … E) the other way. A point name (P3) is no number.
+    const numsIn = (t) => t.split(/[\s,;\t]+/).filter((w) => gpsNum(w) !== null).length;
+    const nBefore = numsIn(s.slice(0, l1.index)), nAfter = numsIn(s.slice(l2.index + 1));
+    const prefix = nAfter > nBefore || (nAfter === nBefore && !/\d\s*$/.test(s.slice(0, l1.index)));
+    let seg1, seg2, before, after;
+    if (prefix) {
+      before = s.slice(0, l1.index);
+      seg1 = s.slice(l1.index + 1, l2.index);
+      const tail = s.slice(l2.index + 1).trim().split(/[\s,;\t]+/).filter(Boolean);
+      const k = Math.min(3, tail.findIndex((t) => gpsNum(t) === null) === -1 ? tail.length : tail.findIndex((t) => gpsNum(t) === null));
+      // A fourth number after a whole d m s (or after a decimal) is the height.
+      const take = tail.slice(0, k);
+      const n = take.length >= 3 || (take.length >= 1 && !Number.isInteger(Number(take[0]))) ? (take.length >= 3 ? 3 : 1) : take.length;
+      seg2 = tail.slice(0, n).join(" ");
+      after = tail.slice(n).join(" ");
+    } else {
+      const head = s.slice(0, l1.index).trim().split(/[\s,;\t]+/).filter(Boolean);
+      const firstNum = head.findIndex((t) => gpsNum(t) !== null);
+      before = head.slice(0, firstNum === -1 ? head.length : firstNum).join(" ");
+      seg1 = head.slice(firstNum === -1 ? head.length : firstNum).join(" ");
+      seg2 = s.slice(l1.index + 1, l2.index);
+      after = s.slice(l2.index + 1);
+    }
+    const c1 = gpsCoord(`${l1[1]} ${seg1.replace(/[,;\t]/g, " ")}`), c2 = gpsCoord(`${l2[1]} ${seg2.replace(/[,;\t]/g, " ")}`);
+    if (!c1 || !c2) return null;
+    return finish(gpsPlace(c1, c2, latFirst), before, after);
+  }
+  // Fields between commas, semicolons or tabs: each may be a number or d m s with spaces.
+  if (/[,;\t]/.test(s)) {
+    const fields = s.split(/[,;\t]/).map((f) => f.trim()).filter((f, i, a) => f !== "" || i < a.length - 1);
+    const kinds = fields.map((f) => {
+      const n = gpsNum(f);
+      if (n !== null) return { f, n };
+      const c = /\d/.test(f) ? gpsCoord(f) : null;
+      return c ? { f, c } : { f, text: true };
+    });
+    const coordIdx = kinds.map((k, i) => (k.c ? i : -1)).filter((i) => i >= 0);
+    const numIdx = kinds.map((k, i) => (k.n !== null && k.n !== undefined ? i : -1)).filter((i) => i >= 0);
+    let i1, i2;
+    if (coordIdx.length >= 2) [i1, i2] = coordIdx;
+    else {
+      // Plain numbers: lat lon | lat lon h | id lat lon | id lat lon h …
+      const isId = numIdx.length >= 3 && Number.isInteger(kinds[numIdx[0]].n) && !/\./.test(kinds[numIdx[0]].f)
+        && (numIdx.length >= 4 || (!Number.isInteger(kinds[numIdx[1]].n) && !Number.isInteger(kinds[numIdx[2]].n)));
+      const use = isId ? numIdx.slice(1) : numIdx;
+      if (use.length < 2) return null;
+      [i1, i2] = use;
+    }
+    const cOf = (k) => k.c ?? { value: k.n, hemi: null, marked: false };
+    const pl = gpsPlace(cOf(kinds[i1]), cOf(kinds[i2]), latFirst);
+    if (!pl) return null;
+    const before = fields.slice(0, i1).join(" "), after = fields.slice(i2 + 1).join(" ");
+    return finish(pl, before, after);
+  }
+  // Spaces only, counted: 2 lat lon · 3 lat lon h · 6 d m s d m s · 7 + h, with an id word before.
+  const words = s.split(/\s+/);
+  const firstNum = words.findIndex((w) => gpsNum(w) !== null);
+  if (firstNum === -1) return null;
+  let id = words.slice(0, firstNum).join(" ") || null;
+  let nums = [];
+  let k = firstNum;
+  for (; k < words.length && gpsNum(words[k]) !== null; k++) nums.push(Number(words[k]));
+  const code = words.slice(k).join(" ") || null;
+  const allInt = (a) => a.every((x) => Number.isInteger(x));
+  if (!id && (nums.length === 4 || nums.length === 8) && Number.isInteger(nums[0]) && !/\./.test(words[firstNum])) { id = String(nums[0]); nums = nums.slice(1); }
+  let c1, c2, h = null;
+  if (nums.length >= 6 && allInt([nums[0], nums[1], nums[3], nums[4]]) && nums[1] < 60 && nums[4] < 60) {
+    c1 = gpsCoord(nums.slice(0, 3).join(" "));
+    c2 = gpsCoord(nums.slice(3, 6).join(" "));
+    h = nums[6] ?? null;
+  } else if (nums.length >= 2) {
+    c1 = { value: nums[0], hemi: null };
+    c2 = { value: nums[1], hemi: null };
+    h = nums[2] ?? null;
+  } else return null;
+  if (!c1 || !c2) return null;
+  const pl = gpsPlace(c1, c2, latFirst);
+  return pl ? { ...pl, id, h, code } : null;
+}
+
+// ---------- NMEA ----------
+const GPS_QUALITY = { 0: "مفيش fix", 1: "GPS مستقل", 2: "DGPS", 3: "PPS", 4: "RTK Fixed", 5: "RTK Float", 6: "تقديري", 7: "يدوي", 8: "محاكاة" };
+// GNS modes, one letter per constellation: the best of them, RTK fixed first.
+const GPS_MODE_ORDER = [["R", 4], ["F", 5], ["P", 3], ["D", 2], ["A", 1], ["E", 6], ["M", 7], ["S", 8]];
+const gpsNmeaAngle = (v, hemi, degDigits) => {
+  if (!/^\d+(\.\d+)?$/.test(v ?? "")) return null;
+  const deg = Number(v.slice(0, degDigits)), min = Number(v.slice(degDigits));
+  if (!(min < 60)) return null;
+  const x = deg + min / 60;
+  return /[SW]/i.test(hemi ?? "") ? -x : x;
+};
+const gpsTime = (t) => (/^\d{6}/.test(t ?? "") ? `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4, 6)}` : null);
+
+function gpsNmea(lines, notes) {
+  const fixes = [], fallback = [];
+  let badSum = 0, noFix = 0;
+  for (const [line, raw] of lines.entries()) {
+    const m = raw.trim().match(/^\$([A-Z]{2})(GGA|GNS|RMC|GLL),(.*?)(?:\*([0-9A-Fa-f]{2}))?\s*$/);
+    if (!m) continue;
+    if (m[4]) {
+      const body = raw.trim().slice(1, raw.trim().indexOf("*"));
+      let x = 0;
+      for (const ch of body) x ^= ch.charCodeAt(0);
+      if (x !== parseInt(m[4], 16)) { badSum++; continue; }
+    }
+    const f = m[3].split(",");
+    if (m[2] === "GGA" || m[2] === "GNS") {
+      const q = m[2] === "GGA" ? toNumber(f[5]) : GPS_MODE_ORDER.find(([c]) => String(f[5] ?? "").includes(c))?.[1] ?? 0;
+      const lat = gpsNmeaAngle(f[1], f[2], 2), lon = gpsNmeaAngle(f[3], f[4], 3);
+      if (!q || lat === null || lon === null) { noFix++; continue; }
+      const alt = toNumber(f[8]), sep = toNumber(m[2] === "GGA" ? f[10] : f[9]);
+      fixes.push({
+        line,
+        id: gpsTime(f[0]), lat, lon, time: gpsTime(f[0]),
+        h: alt !== null && sep !== null ? alt + sep : null, msl: alt, sep,
+        quality: GPS_QUALITY[q] ?? String(q), qualityCode: q, sats: toNumber(f[6]), hdop: toNumber(f[7]), code: null,
+      });
+    } else {
+      const off = m[2] === "RMC" ? 2 : 0;
+      if ((m[2] === "RMC" ? f[1] : f[5]) === "V") { noFix++; continue; }
+      const lat = gpsNmeaAngle(f[off], f[off + 1], 2), lon = gpsNmeaAngle(f[off + 2], f[off + 3], 3);
+      if (lat === null || lon === null) { noFix++; continue; }
+      const t = gpsTime(m[2] === "RMC" ? f[0] : f[4]);
+      fallback.push({ line, id: t, lat, lon, time: t, h: null, msl: null, sep: null, quality: null, sats: null, hdop: null, code: null });
+    }
+  }
+  if (badSum) notes.push(`${badSum} جملة NMEA اتشالت لأن الـ checksum بتاعها غلط.`);
+  if (noFix) notes.push(`${noFix} جملة NMEA من غير fix اتشالت.`);
+  const out = fixes.length ? fixes : fallback;
+  if (!fixes.length && fallback.length) notes.push("جمل RMC و GLL مفيهاش ارتفاع؛ المنسوب مش هيتحسب.");
+  out.forEach((p, i) => { if (!p.id) p.id = String(i + 1); });
+  return out;
+}
+
+// ---------- GPX, KML, GeoJSON ----------
+const gpsAttr = (attrs, name) => attrs.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, "i"))?.[1] ?? null;
+const gpsTag = (body, name) => body.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)</${name}>`, "i"))?.[1].replace(/<!\[CDATA\[|\]\]>/g, "").trim() ?? null;
+
+function gpsGpx(text) {
+  const out = [];
+  for (const m of text.matchAll(/<(wpt|trkpt|rtept)\b([^>]*?)(?:\/>|>([\s\S]*?)<\/\1>)/gi)) {
+    const lat = toNumber(gpsAttr(m[2], "lat")), lon = toNumber(gpsAttr(m[2], "lon"));
+    if (lat === null || lon === null) continue;
+    const body = m[3] ?? "";
+    out.push({ id: gpsTag(body, "name") ?? String(out.length + 1), lat, lon, h: null, msl: toNumber(gpsTag(body, "ele")), code: gpsTag(body, "desc") ?? gpsTag(body, "sym"), time: gpsTag(body, "time") });
+  }
+  return out;
+}
+
+function gpsKml(text) {
+  const out = [];
+  for (const pm of text.matchAll(/<Placemark\b[^>]*>([\s\S]*?)<\/Placemark>/gi)) {
+    const name = gpsTag(pm[1], "name");
+    const coords = [...pm[1].matchAll(/<coordinates>([\s\S]*?)<\/coordinates>/gi)].flatMap((c) => c[1].trim().split(/\s+/));
+    coords.forEach((t, i) => {
+      const [lon, lat, h] = t.split(",").map(toNumber);
+      if (lat === null || lon === null || lat === undefined) return;
+      out.push({ id: coords.length > 1 ? `${name ?? "P"}-${i + 1}` : name ?? String(out.length + 1), lat, lon, h: null, msl: h ?? null, code: null });
+    });
+  }
+  return out;
+}
+
+function gpsGeoJson(text) {
+  let j;
+  try { j = JSON.parse(text); } catch { return null; }
+  const out = [];
+  const add = (c, name) => { if (Array.isArray(c) && typeof c[0] === "number") out.push({ id: name ?? String(out.length + 1), lat: c[1], lon: c[0], h: null, msl: c[2] ?? null, code: null }); };
+  const geom = (g, name) => {
+    if (!g) return;
+    const lists = { Point: [g.coordinates], MultiPoint: g.coordinates, LineString: g.coordinates, MultiLineString: g.coordinates?.flat(), Polygon: g.coordinates?.[0], MultiPolygon: g.coordinates?.map((p) => p[0]).flat() }[g.type];
+    if (g.type === "GeometryCollection") return g.geometries?.forEach((x) => geom(x, name));
+    (lists ?? []).forEach((c, i, a) => add(c, a.length > 1 ? `${name ?? "P"}-${i + 1}` : name));
+  };
+  const feats = j.type === "FeatureCollection" ? j.features ?? [] : j.type === "Feature" ? [j] : [{ geometry: j }];
+  for (const f of feats) geom(f.geometry, f.properties?.name ?? f.properties?.id ?? f.id);
+  return out;
+}
+
+// ---------- tables ----------
+const gpsHead = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()[\]/:'"°#*]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const GPS_HEADS = [
+  ["lat", /^(lat|lats|latitude|latitudedeg|latdeg|φ|phi|خطالعرض|خطعرض|العرض|عرض|دائرهالعرض)$/],
+  ["lon", /^(lon|long|lng|longitude|longitudedeg|londeg|λ|lambda|خطالطول|خططول|الطول|طول)$/],
+  ["h", /^(h|height|ellipsoidalheight|ellipsoidheight|ellheight|hae|eh|elh|ارتفاع|الارتفاع|ارتفاعاهليلجي|الارتفاعالاهليلجي)$/],
+  ["msl", /^(alt|altitude|elevation|ele|elev|msl|mslheight|orthometricheight|orthoheight|منسوب|المنسوب)$/],
+  ["id", /^(id|no|name|point|pt|pointid|pointname|pointno|station|رقم|نقطه|النقطه|الاسم|اسم|رقمالنقطه|المحطه)$/],
+  ["code", /^(code|desc|description|feature|كود|وصف|الوصف)$/],
+];
+
+// A sheet with headers naming lat and lon; null when it has none.
+function gpsTable(matrix) {
+  const rows = (matrix ?? []).filter((r) => Array.isArray(r) && r.some((c) => !gpsBlank(c)));
+  for (let h = 0; h < Math.min(rows.length, 10); h++) {
+    const cols = {};
+    rows[h].forEach((c, i) => {
+      if (typeof c === "number") return;
+      const key = GPS_HEADS.find(([, re]) => re.test(gpsHead(c)))?.[0];
+      if (key && cols[key] === undefined) cols[key] = i;
+    });
+    if (cols.lat === undefined || cols.lon === undefined) continue;
+    const notes = [];
+    const points = [];
+    let bad = 0;
+    for (const r of rows.slice(h + 1)) {
+      const la = gpsCoord(r[cols.lat]), lo = gpsCoord(r[cols.lon]);
+      if (!la || !lo) { if (r.some((c) => !gpsBlank(c))) bad++; continue; }
+      const pl = gpsPlace({ ...la, hemi: la.hemi ?? "N" }, { ...lo, hemi: lo.hemi ?? "E" }, true);
+      if (!pl) { bad++; continue; }
+      // An ellipsoidal height column ("Height", "h") and a sea-level one ("Elevation", "MSL") are kept apart.
+      const hv = cols.h !== undefined ? toNumber(r[cols.h]) : null, mv = cols.msl !== undefined ? toNumber(r[cols.msl]) : null;
+      points.push({ ...pl, id: gpsBlank(r[cols.id]) ? String(points.length + 1) : String(r[cols.id]).trim(), h: hv, msl: mv, code: gpsBlank(r[cols.code]) ? null : String(r[cols.code]).trim() });
+    }
+    if (bad) notes.push(`${bad} سطر في الشيت ما اتقراش كإحداثيات.`);
+    return { points, notes, format: "table" };
+  }
+  return null;
+}
+
+/** Points from a sheet: by Arabic or English headers (lat, lon, height or elevation, point, code), or written in its cells. */
+function gpsPointsFromMatrix(matrix, options = {}) {
+  const t = gpsTable(matrix);
+  if (t) return t;
+  // No headers: each row as a written line.
+  const rows = (matrix ?? []).filter((r) => Array.isArray(r) && r.some((c) => !gpsBlank(c)));
+  return parseGpsText(rows.map((r) => r.map((c) => (gpsBlank(c) ? "" : String(c))).join("\t")).join("\n"), options);
+}
+
+/**
+ * Points from GPS text: NMEA sentences, GPX, KML, GeoJSON, or one written point per line.
+ * options.latFirst (default true): for two plain numbers with no N/S/E/W, which comes first.
+ * Returns { points: [{ id, lat, lon, h, msl?, sep?, quality?, sats?, hdop?, time?, code }], notes, format }.
+ */
+function parseGpsText(text, options = {}) {
+  const latFirst = options.latFirst !== false;
+  const t = String(text ?? "").replace(/^﻿/, "");
+  const notes = [];
+  if (!t.trim()) fail("مفيش إحداثيات. الصق نقط GPS أو حمّل ملف.");
+  const FILE_HEIGHT = "ارتفاعات الملف اتاخدت منسوب فوق سطح البحر زي ما الأجهزة بتكتبها فيه.";
+  if (/<gpx\b/i.test(t)) return { points: gpsGpx(t), notes: [FILE_HEIGHT], format: "gpx" };
+  if (/<kml\b|<Placemark\b/i.test(t)) return { points: gpsKml(t), notes: [FILE_HEIGHT], format: "kml" };
+  if (/^\s*[{[]/.test(t)) {
+    const g = gpsGeoJson(t);
+    if (g) return { points: g, notes: [FILE_HEIGHT], format: "geojson" };
+  }
+  const lines = t.split(/\r?\n/);
+  if (lines.some((l) => /^\s*\$[A-Z]{2}(GGA|GNS|RMC|GLL),/.test(l))) {
+    const points = gpsNmea(lines, notes);
+    // Points written out by hand among the sentences are read too; other sentences ($GPGSV …) are not points.
+    const bad = [];
+    lines.forEach((l, i) => {
+      if (!l.trim() || l.trim().startsWith("$")) return;
+      const p = gpsTextPoint(l, latFirst);
+      if (p) points.push({ ...p, line: i, id: p.id ?? String(points.length + 1) });
+      else bad.push(i + 1);
+    });
+    if (bad.length) notes.push(`سطور ما اتقريتش كإحداثيات: ${bad.slice(0, 12).join("، ")}${bad.length > 12 ? "…" : ""}.`);
+    // In the order they were written.
+    points.sort((a, b) => a.line - b.line);
+    for (const pt of points) delete pt.line;
+    return { points, notes, format: "nmea" };
+  }
+  // A header line naming lat and lon: read as a table.
+  const first = lines.find((l) => l.trim());
+  if (first && /[A-Za-z؀-ۿ]{2}/.test(first) && !/\d/.test(first.replace(/[A-Za-z]\d/g, ""))) {
+    const delim = /\t/.test(first) ? "\t" : /;/.test(first) ? ";" : /,|،/.test(first) ? /[,،]/ : /\s+/;
+    const matrix = lines.filter((l) => l.trim()).map((l) => gpsLatin(l).split(delim).map((c) => c.trim()));
+    const r = gpsTable(matrix);
+    if (r?.points.length) return r;
+  }
+  const points = [];
+  const bad = [];
+  lines.forEach((l, i) => {
+    if (!l.trim()) return;
+    const p = gpsTextPoint(l, latFirst);
+    if (p) points.push({ ...p, id: p.id ?? String(points.length + 1) });
+    else bad.push(i + 1);
+  });
+  if (bad.length) notes.push(`سطور ما اتقريتش كإحداثيات: ${bad.slice(0, 12).join("، ")}${bad.length > 12 ? "…" : ""}.`);
+  return { points, notes, format: "text" };
+}
+
+// ---------- converting ----------
+const gpsMode = (values) => {
+  const count = new Map();
+  for (const v of values) count.set(v, (count.get(v) ?? 0) + 1);
+  return [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+};
+
+/**
+ * GPS points to grid coordinates and levels.
+ * input: {
+ *   points: [{ id, lat, lon, h, msl?, sep? , … }] (degrees, WGS 84) — or text: GPS text as parseGpsText reads it,
+ *   grid: { kind: "utm", zone? } | { kind: "etm", belt: "auto" | "red" | "purple" | "xpurple" | "blue" },
+ *   height: "geoid" (heights are ellipsoidal: level = h − N from EGM2008) | "asis" (heights are already levels),
+ *   benchmarks: [{ id, level }]  points of known level the levels are fitted to,
+ *   average: true to take every reading as one point occupied (a static log),
+ * }
+ */
+function convertGps(input) {
+  const read = input?.points ? { points: input.points, notes: [], format: input.format ?? "points" } : parseGpsText(input?.text, { latFirst: input?.latFirst });
+  const notes = [...read.notes];
+  let pts = read.points.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
+  if (!pts.length) fail("مفيش نقط GPS اتقرت. اكتب كل نقطة في سطر: خط العرض، خط الطول، والارتفاع لو موجود.");
+  const heightMode = input.height === "asis" ? "asis" : "geoid";
+  // One zone or belt for every point, so the coordinates fit together.
+  const g = input.grid?.kind === "etm" ? { kind: "etm", belt: input.grid.belt ?? "auto" } : { kind: "utm", zone: toNumber(input.grid?.zone) ?? undefined };
+  if (g.kind === "utm" && g.zone === undefined) {
+    g.zone = gpsMode(pts.map((p) => utmZoneOf(p.lon)));
+    if (new Set(pts.map((p) => utmZoneOf(p.lon))).size > 1) notes.push(`النقط واقعة في أكتر من زون UTM؛ اتحسبت كلها على زون ${g.zone} عشان تركب مع بعض.`);
+  }
+  if (g.kind === "utm") g.south = gpsMode(pts.map((p) => p.lat < 0));
+  if (g.kind === "etm" && g.belt === "auto") {
+    g.belt = gpsMode(pts.map((p) => etmBeltFor(p.lat, p.lon)));
+    if (new Set(pts.map((p) => etmBeltFor(p.lat, p.lon))).size > 1) notes.push("النقط واقعة في أكتر من حزام؛ اتحسبت كلها على حزام واحد عشان تركب مع بعض.");
+  }
+  let outside = 0, noHeight = 0;
+  const one = (p) => {
+    const xy = geoToGrid(p.lat, p.lon, g);
+    const N = geoidHeight(p.lat, p.lon);
+    let level = null;
+    if (heightMode === "asis") level = p.msl ?? p.h ?? null;
+    else if (p.h !== null && p.h !== undefined) { if (N === null) outside++; else level = p.h - N; }
+    else if (p.msl !== null && p.msl !== undefined) level = p.msl;
+    if (level === null) noHeight++;
+    return { ...p, h: p.h ?? null, geoid: N, easting: xy.E, northing: xy.N, level, convergence: xy.convergence, scale: xy.scale };
+  };
+  let rows = pts.map(one);
+  if (outside) notes.push(`${outside} نقطة برّه نطاق نموذج الجيويد المتخزّن (مصر وما حواليها)، فمنسوبها ما اتحسبش؛ اختار «زي ما هو» أو معايرة بروبير.`);
+  if (noHeight && noHeight - outside > 0) notes.push(`${noHeight - outside} نقطة من غير ارتفاع، فمن غير منسوب.`);
+  // A static occupation: one point from every reading, with the spread of the readings.
+  let average = null;
+  if (input.average && rows.length > 1) {
+    const mean = (k) => { const v = rows.map((r) => r[k]).filter((x) => x !== null && x !== undefined); return v.length ? v.reduce((s, x) => s + x, 0) / v.length : null; };
+    const sd = (k) => { const v = rows.map((r) => r[k]).filter((x) => x !== null && x !== undefined); if (v.length < 2) return null; const m = v.reduce((s, x) => s + x, 0) / v.length; return Math.sqrt(v.reduce((s, x) => s + (x - m) ** 2, 0) / (v.length - 1)); };
+    average = { count: rows.length, sigmaE: sd("easting"), sigmaN: sd("northing"), sigmaLevel: sd("level") };
+    const best = gpsMode(rows.map((r) => r.quality ?? ""));
+    rows = [one({ id: input.averageId || "متوسط", lat: mean("lat"), lon: mean("lon"), h: mean("h"), msl: mean("msl"), code: null, quality: best || null, sats: null, hdop: null })];
+  }
+  // Benchmarks of known level: a shift, or an inclined plane through three or more.
+  let calibration = null;
+  const bms = (input.benchmarks ?? []).filter((b) => !gpsBlank(b?.id) && toNumber(b.level) !== null);
+  if (bms.length) {
+    const key = (s) => String(s).trim().toLowerCase();
+    const used = [];
+    for (const b of bms) {
+      const r = rows.find((x) => key(x.id) === key(b.id));
+      if (!r) { notes.push(`الروبير ${b.id} مش موجود في النقط.`); continue; }
+      if (r.level === null) { notes.push(`الروبير ${b.id} مفيهوش منسوب محسوب.`); continue; }
+      used.push({ id: r.id, known: toNumber(b.level), computed: r.level, e: r.easting, n: r.northing });
+    }
+    if (used.length) {
+      const e0 = used.reduce((s, b) => s + b.e, 0) / used.length, n0 = used.reduce((s, b) => s + b.n, 0) / used.length;
+      const d = used.map((b) => b.known - b.computed);
+      let a = d.reduce((s, x) => s + x, 0) / d.length, be = 0, bn = 0, method = "shift";
+      if (used.length >= 3) {
+        // Least squares for d = a + be·(E − E0) + bn·(N − N0).
+        let sxx = 0, sxy = 0, syy = 0, sxd = 0, syd = 0;
+        used.forEach((b, i) => { const x = b.e - e0, y = b.n - n0; sxx += x * x; sxy += x * y; syy += y * y; sxd += x * (d[i] - a); syd += y * (d[i] - a); });
+        const det = sxx * syy - sxy * sxy;
+        const span = Math.max(...used.map((b) => Math.hypot(b.e - e0, b.n - n0)));
+        if (Math.abs(det) > 1e-9 * Math.max(1, sxx * syy) && span > 1) {
+          be = (sxd * syy - syd * sxy) / det;
+          bn = (syd * sxx - sxd * sxy) / det;
+          method = "plane";
+        } else notes.push("الروبيرات على خط واحد تقريبًا، فاتعمل إزاحة ثابتة بدل المستوى المايل.");
+      }
+      const fit = (e, n) => a + be * (e - e0) + bn * (n - n0);
+      for (const r of rows) if (r.level !== null) { r.levelBefore = r.level; r.level += fit(r.easting, r.northing); }
+      const benchmarks = used.map((b) => ({ id: b.id, known: b.known, computed: b.computed, residual: b.known - (b.computed + fit(b.e, b.n)) }));
+      const rms = Math.sqrt(benchmarks.reduce((s, b) => s + b.residual ** 2, 0) / benchmarks.length);
+      calibration = { method, shift: a, slopeE: be, slopeN: bn, origin: { E: e0, N: n0 }, benchmarks, rms };
+      if (used.length === 2) notes.push("روبيرين: الإزاحة متوسط الفرقين، والفرق بينهم بيبان في البواقي.");
+    }
+  }
+  return {
+    format: read.format,
+    grid: { kind: g.kind, zone: g.zone ?? null, south: g.kind === "utm" ? Boolean(g.south) : null, belt: g.kind === "etm" ? g.belt : null },
+    height: heightMode, geoidModel: GEOID_EGYPT.model,
+    points: rows, average, calibration, notes,
+  };
+}
+
 // ---- src/engine/registry.js
 // One registry of calculation tools, shared by the REST API (the calculator tabs)
 // and the AI assistant (as Claude tool definitions), so both use the same math.
@@ -4553,6 +5209,29 @@ const TOOLS = [
       required: ["startRL"],
     },
     run: (input, ctx) => reduceLevelBook({ ...input, rows: rowsFrom(input, "rows", ctx) }),
+  },
+  {
+    name: "convert_gps",
+    description:
+      "Convert GPS / GNSS points (نقاط GPS) to grid coordinates and levels. Reads NMEA sentences ($GPGGA, $GNGGA, GNS, RMC), " +
+      "coordinates in decimal degrees or d m s with N/S/E/W or signs, GPX, KML or GeoJSON text, or one point per line (point number first, height last). " +
+      "Projects to UTM (one zone for all points) or the Egyptian belts (Egypt 1907 by EPSG:7697), and turns heights into levels: " +
+      "height \"geoid\" takes the heights as ellipsoidal and subtracts the EGM2008 geoid (stored for Egypt and around it; NMEA uses altitude + geoid separation), " +
+      "\"asis\" keeps them. Benchmarks of known level shift the levels (one or two) or fit an inclined plane (three or more). average folds a static log into one point.",
+    input_schema: {
+      type: "object",
+      properties: {
+        text: { type: "string", description: "The GPS points as text, in any of the forms above." },
+        latFirst: { type: "boolean", description: "For two plain numbers with no N/S/E/W: latitude first (default true)." },
+        grid: { type: "object", properties: { kind: { type: "string", enum: ["utm", "etm"] }, zone: num, belt: { type: "string", enum: ["auto", "red", "purple", "xpurple", "blue"] } } },
+        height: { type: "string", enum: ["geoid", "asis"] },
+        benchmarks: { type: "array", items: { type: "object", properties: { id: { type: "string" }, level: num }, required: ["id", "level"] } },
+        average: { type: "boolean" },
+        averageId: { type: "string" },
+      },
+      required: ["text"],
+    },
+    run: (input) => convertGps(input),
   },
   {
     name: "solve_traverse",
@@ -5288,7 +5967,7 @@ ${parts.join("\n")}
   return svg;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix };
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight };
 })();
 </script>
 <script>
@@ -7916,6 +8595,180 @@ window.addEventListener("storage", (e) => { if (e.key === PJ_KEY) { pjLoad(); pj
 pjLoad();
 pjRender();
 
+// ---------- GPS ----------
+// A worked example, each line written another way (decimal degrees, degrees minutes seconds with
+// marks, letters before the numbers, a receiver's NMEA sentence), with ellipsoidal heights.
+const GP_EXAMPLE = [
+  "BM1, 30.044420, 31.235712, 38.215",
+  "P2, 30°02'41.20\"N, 31°14'10.40\"E, 37.902",
+  "P3 N 30 02 43.15 E 31 14 06.90 38.477",
+  "$GPGGA,103015.00,3002.7400,N,03114.0980,E,4,14,0.7,22.950,M,15.318,M,1.0,0001*75",
+].join("\n");
+const GP_BELTS = { red: "الحزام الأحمر", purple: "الحزام الأرجواني", xpurple: "الأرجواني الممتد", blue: "الحزام الأزرق" };
+let gpLast = null; // the table for the CSV
+let gpRes = null; // the last result
+// Degrees as d°mm′ss.sss″ with the hemisphere letter.
+const gpDms = (v, pos, neg) => {
+  let t = Math.round(Math.abs(v) * 3600 * 1000);
+  const d = Math.floor(t / 3600000);
+  t -= d * 3600000;
+  const m = Math.floor(t / 60000);
+  t -= m * 60000;
+  return `${d}°${String(m).padStart(2, "0")}′${(t / 1000).toFixed(3).padStart(6, "0")}″${v < 0 ? neg : pos}`;
+};
+function gpInput() {
+  const [kind, belt] = $("#gp-grid").value.split(":");
+  // A benchmark per line: its point number, then its level ("BM1, 22.905", "BM1 = 22.905").
+  const benchmarks = $("#gp-bm").value.split(/\r?\n/)
+    .map((l) => l.trim().split(/\s*[,;\t=]\s*|\s+/).filter(Boolean))
+    .filter((w) => w.length >= 2)
+    .map((w) => ({ id: w.slice(0, -1).join(" "), level: w[w.length - 1] }));
+  return {
+    text: $("#gp-text").value, latFirst: $("#gp-order").value !== "lon",
+    grid: kind === "etm" ? { kind, belt } : { kind: "utm", zone: numOrUndef($("#gp-zone").value) },
+    height: $("#gp-height").value, benchmarks, average: $("#gp-avg").checked,
+    averageId: I18N.lang === "en" ? "Mean" : "متوسط",
+  };
+}
+// A plan of the points in grid coordinates, benchmarks as squares, with north and a scale.
+function gpPlan(r) {
+  const pts = r.points;
+  if (pts.length < 2) return "";
+  const bm = new Set((r.calibration?.benchmarks ?? []).map((b) => b.id));
+  const es = pts.map((p) => p.easting), ns = pts.map((p) => p.northing);
+  const minE = Math.min(...es), maxE = Math.max(...es), minN = Math.min(...ns), maxN = Math.max(...ns);
+  const W = 640, pad = 46;
+  const sE = Math.max(maxE - minE, 1e-3), sN = Math.max(maxN - minN, 1e-3);
+  const H = Math.round(Math.min(520, Math.max(260, (W - 2 * pad) * (sN / sE) + 2 * pad)));
+  const k = Math.min((W - 2 * pad) / sE, (H - 2 * pad) / sN);
+  const ox = (W - sE * k) / 2, oy = (H - sN * k) / 2;
+  const X = (e) => ox + (e - minE) * k, Y = (n) => H - oy - (n - minN) * k;
+  const many = pts.length > 60;
+  const marks = pts.map((p) => (bm.has(p.id)
+    ? `<rect class="known" x="${(X(p.easting) - 6).toFixed(1)}" y="${(Y(p.northing) - 6).toFixed(1)}" width="12" height="12" rx="2"/>`
+    : `<circle class="st" cx="${X(p.easting).toFixed(1)}" cy="${Y(p.northing).toFixed(1)}" r="${many ? 2.5 : 4.5}"/>`)).join("");
+  const labels = many ? "" : pts.map((p) => `<text x="${(X(p.easting) + 8).toFixed(1)}" y="${(Y(p.northing) - 8).toFixed(1)}">${esc(p.id)}</text>`).join("");
+  const want = ((W - 2 * pad) * 0.22) / k, p10 = 10 ** Math.floor(Math.log10(want));
+  const len = [5, 2, 1].map((m) => m * p10).find((v) => v <= want) ?? p10, bar = len * k;
+  return `<figure class="tr-plan"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="مسقط نقط الـ GPS">
+    ${marks}${labels}
+    <g class="north" transform="translate(${W - 26} 34)"><line x1="0" y1="16" x2="0" y2="-10"/><path d="M0 -20 6 -6 0 -9 -6 -6Z"/><text x="0" y="32" text-anchor="middle">N</text></g>
+    <g class="scale" transform="translate(${pad} ${H - 14})"><line x1="0" y1="0" x2="${bar.toFixed(1)}" y2="0"/><line x1="0" y1="-4" x2="0" y2="4"/><line x1="${bar.toFixed(1)}" y1="-4" x2="${bar.toFixed(1)}" y2="4"/><text x="${(bar / 2).toFixed(1)}" y="-7" text-anchor="middle">${+len.toPrecision(3)} م</text></g>
+  </svg>${bm.size ? `<div class="legend"><span><i class="known"></i>روبير معلوم المنسوب</span></div>` : ""}</figure>`;
+}
+function gpRender(r) {
+  gpRes = r;
+  const rows = r.points, cal = r.calibration;
+  const has = (k) => rows.some((p) => p[k] !== null && p[k] !== undefined && p[k] !== "");
+  const z = (v) => (typeof v === "number" && Math.abs(v) < 5e-7 ? 0 : v);
+  const cols = [
+    { key: "id", label: "النقطة" }, { key: "latT", label: "خط العرض" }, { key: "lonT", label: "خط الطول" },
+    ...(has("h") ? [{ key: "h", label: "الارتفاع h (م)", num: 1 }] : []),
+    ...(r.height === "geoid" && has("geoid") ? [{ key: "geoid", label: "الجيويد N (م)", num: 1 }] : []),
+    { key: "easting", label: "E (م)", num: 1 }, { key: "northing", label: "N (م)", num: 1 },
+    ...(cal ? [{ key: "levelBefore", label: "المنسوب قبل المعايرة (م)", num: 1 }] : []),
+    { key: "level", label: "المنسوب (م)", num: 1 },
+    ...(has("quality") ? [{ key: "quality", label: "الحل" }] : []),
+    ...(has("sats") ? [{ key: "sats", label: "الأقمار", num: 1, d: 0 }] : []),
+    ...(has("hdop") ? [{ key: "hdop", label: "HDOP", num: 1, d: 1 }] : []),
+    ...(has("code") ? [{ key: "code", label: "الكود" }] : []),
+  ];
+  const lines = rows.map((p) => ({ ...p, latT: gpDms(p.lat, "N", "S"), lonT: gpDms(p.lon, "E", "W"), level: z(p.level) }));
+  // The CSV keeps the decimal degrees too, to a ten-thousandth of a second, and the metres to the millimetre.
+  const round = (v, d) => (typeof v === "number" ? Math.round(v * 10 ** d) / 10 ** d : v);
+  const csvCols = [...cols.slice(0, 3), { key: "lat", label: "Lat" }, { key: "lon", label: "Lon" }, ...cols.slice(3)];
+  gpLast = { columns: csvCols, rows: lines.map((x) => Object.fromEntries(csvCols.map((c) => [c.key, round(x[c.key], c.key === "lat" || c.key === "lon" ? 9 : 4)]))) };
+  const g = r.grid;
+  const items = [["عدد النقط", String(rows.length)], ["النظام", g.kind === "utm" ? `UTM ${g.zone}${g.south ? "S" : "N"}` : GP_BELTS[g.belt] ?? g.belt]];
+  items.push(["المنسوب", r.height === "geoid" ? "h − N (EGM2008)" : "زي ما هو"]);
+  const Ns = rows.map((p) => p.geoid).filter((x) => x !== null && x !== undefined);
+  if (r.height === "geoid" && Ns.length) {
+    const lo = Math.min(...Ns), hi = Math.max(...Ns);
+    items.push(["الجيويد N (م)", hi - lo > 0.0005 ? `${lo.toFixed(3)} – ${hi.toFixed(3)}` : lo.toFixed(3)]);
+  }
+  if (cal) {
+    items.push(["المعايرة", cal.method === "plane" ? "مستوى مايل" : "إزاحة ثابتة"], ["الإزاحة (م)", z(cal.shift).toFixed(3)], ["بواقي الروبيرات RMS (مم)", (cal.rms * 1000).toFixed(1)]);
+    if (cal.method === "plane") items.push(["الميل شرق (مم/كم)", (cal.slopeE * 1e6).toFixed(1)], ["الميل شمال (مم/كم)", (cal.slopeN * 1e6).toFixed(1)]);
+  }
+  if (r.average) {
+    const f = (v) => (v === null || v === undefined ? "—" : v.toFixed(3));
+    items.push(["عدد القراءات", String(r.average.count)], ["الانتشار σE / σN (م)", `${f(r.average.sigmaE)} / ${f(r.average.sigmaN)}`], ["الانتشار في المنسوب σ (م)", f(r.average.sigmaLevel)]);
+  }
+  const bmTable = cal ? `<h3>الروبيرات</h3>${table([{ key: "id", label: "الروبير" }, { key: "known", label: "المنسوب المعلوم (م)", num: 1 }, { key: "computed", label: "المحسوب (م)", num: 1 }, { key: "mm", label: "الباقي (مم)", num: 1, d: 1 }], cal.benchmarks.map((b) => ({ ...b, mm: z(b.residual) * 1000 })))}` : "";
+  const notes = r.notes.length ? `<div class="notice">${r.notes.map(esc).join("<br>")}</div>` : "";
+  $("#gp-out").innerHTML = panel("GP", "نقط الـ GPS على الشبكة", `${readouts(items)}${notes}${table(cols, lines)}${bmTable}`);
+  $("#gp-plot").innerHTML = gpPlan(r);
+  for (const b of ["#gp-csv", "#gp-penz", "#gp-note"]) $(b).disabled = false;
+}
+function runGps() {
+  try { gpRender(calc("convert_gps", gpInput())); }
+  catch (err) {
+    gpRes = gpLast = null;
+    $("#gp-plot").innerHTML = "";
+    for (const b of ["#gp-csv", "#gp-penz", "#gp-note"]) $(b).disabled = true;
+    showError($("#gp-out"), err);
+  }
+}
+// The points as a project note, in the language on screen.
+function gpNoteText() {
+  const r = gpRes, en = I18N.lang === "en", g = r.grid;
+  const ltr = (x) => (en ? x : `⁦${x}⁩`);
+  const sys = g.kind === "utm" ? `UTM ${g.zone}${g.south ? "S" : "N"}` : en ? `Egyptian grid, ${g.belt} belt` : GP_BELTS[g.belt];
+  const head = en
+    ? [`GPS to grid: ${r.points.length} points, ${sys}, levels ${r.height === "geoid" ? "h − N (EGM2008)" : "as given"}.`]
+    : [`تحويل GPS: ${r.points.length} نقطة، ${sys}، المنسوب ${r.height === "geoid" ? ltr("h − N (EGM2008)") : "زي ما هو"}.`];
+  const c = r.calibration;
+  if (c) head.push(en ? `Fitted to ${c.benchmarks.length} benchmark(s) (${c.method === "plane" ? "inclined plane" : "shift"}), RMS ${(c.rms * 1000).toFixed(1)} mm.` : `اتظبط على ${c.benchmarks.length} روبير (${c.method === "plane" ? "مستوى مايل" : "إزاحة ثابتة"})، البواقي ${ltr((c.rms * 1000).toFixed(1))} مم.`);
+  const list = r.points.slice(0, 30).map((p) => `${p.id}: E ${ltr(p.easting.toFixed(3))}${en ? ", " : "، "}N ${ltr(p.northing.toFixed(3))}${en ? ", " : "، "}Z ${p.level === null ? "—" : ltr(p.level.toFixed(3))}`);
+  if (r.points.length > 30) list.push(en ? `… and ${r.points.length - 30} more.` : `… و${r.points.length - 30} نقطة كمان.`);
+  return [...head, ...list].join("\n");
+}
+// A sheet's points written back as a table the box reads again (kept apart: ellipsoidal height and sea level).
+const gpTable = (points) => ["Point\tLat\tLon\tHeight\tElevation\tCode", ...points.map((p) => [p.id ?? "", p.lat, p.lon, p.h ?? "", p.msl ?? "", p.code ?? ""].join("\t"))].join("\n");
+$("#gp-run").onclick = runGps;
+for (const id of ["#gp-grid", "#gp-height", "#gp-order", "#gp-avg"]) $(id).addEventListener("change", () => {
+  $("label[for=gp-zone]").hidden = $("#gp-grid").value !== "utm";
+  runGps();
+});
+bindCsv($("#gp-csv"), "gps-points.csv", () => gpLast);
+// P,E,N,Z,D with no header line: what Civil 3D, total stations and most CAD tools import.
+$("#gp-penz").onclick = async () => {
+  if (!gpRes || !downloads) return;
+  const q = (v) => (/[",]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+  const data = gpRes.points.map((p) => [p.id, p.easting.toFixed(3), p.northing.toFixed(3), p.level === null ? "" : p.level.toFixed(3), p.code ?? ""].map(q).join(",")).join("\r\n") + "\r\n";
+  try { await downloads.save({ filename: "gps-PENZD.csv", data }); }
+  catch (err) { if (err?.code !== "declined") showError($("#gp-out"), err); }
+};
+$("#gp-note").onclick = () => { if (gpRes) pjCompose(gpNoteText()); };
+$("#gp-file").onchange = async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const ext = extOf(file.name);
+    let text;
+    if (SHEET_EXT.has(ext)) {
+      await needLib("xlsx");
+      const wb = XLSX.read(bytes, { type: "array" });
+      const got = wb.SheetNames.map((s) => E.gpsPointsFromMatrix(XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false }))).find((p) => p.points.length);
+      if (!got) throw new Error("مفيش إحداثيات GPS في الشيت. لازم أعمدة خط العرض وخط الطول، أو كل صف فيه نقطة مكتوبة.");
+      text = gpTable(got.points);
+    } else if (ext === ".kmz" || latin1(bytes.subarray(0, 2)) === "PK") {
+      await needLib("fflate");
+      const kml = Object.entries(fflate.unzipSync(bytes)).find(([n]) => n.toLowerCase().endsWith(".kml"));
+      if (!kml) throw new Error("ملف KMZ مفيهوش KML.");
+      text = fflate.strFromU8(kml[1]);
+    } else {
+      text = decodeText(bytes);
+      if (text === null) throw new Error("الملف ده مش نص ولا Excel. ارفع CSV أو TXT أو NMEA أو GPX أو KML أو Excel.");
+    }
+    $("#gp-text").value = text;
+    runGps();
+  } catch (err) { showError($("#gp-out"), err); }
+};
+$("#gp-text").value = GP_EXAMPLE;
+
 // ---------- traverse ----------
 // Worked examples from true coordinates, with small field errors so the adjustment shows.
 const TR_EXAMPLES = {
@@ -8742,6 +9595,7 @@ runProfile();
 runSection();
 runVolumes();
 runTraverse();
+runGps();
 if (START_CALC && Engine.CALCULATORS.some((c) => c.id === START_CALC)) openDrawerAt({ type: "calc", id: START_CALC });
 I18N.start();
 
