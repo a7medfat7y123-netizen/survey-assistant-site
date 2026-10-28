@@ -8,7 +8,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
 <script>
   // Before first paint: saved theme and language, and the welcome screen once per visit.
   (function (h) {
@@ -30,6 +30,7 @@
    every drawing a 3D model you can turn, with the exact 2D sheet one click away. */
 :root {
   --paper: #090e13;
+  --gold: #e7b75a;
   --sheet: #10171f;
   --sheet-2: #16202a;
   --ink: #e6edf4;
@@ -63,7 +64,7 @@
 }
 :root[data-theme="light"] {
   --paper: #eef2f6; --sheet: #ffffff; --sheet-2: #f4f7fa; --ink: #13202b; --muted: #5a6876; --line: #cfd8e1; --hair: #e3e9ef;
-  --accent: #0b7fb5; --accent-2: #4f5bd5; --accent-soft: rgba(11, 127, 181, .1); --cut: #c2461f; --cut-soft: rgba(194, 70, 31, .1);
+  --accent: #0b7fb5; --accent-2: #4f5bd5; --gold: #9a6b12; --accent-soft: rgba(11, 127, 181, .1); --cut: #c2461f; --cut-soft: rgba(194, 70, 31, .1);
   --fill: #1f8a4c; --fill-soft: rgba(31, 138, 76, .1); --warn: #8f600a; --warn-soft: rgba(247, 192, 74, .18);
   --ground: #8a5a26; --design: #0b7fb5; --mark: #e0b21c; --asphalt: #5b6570; --earth: #c9ae8b; --earth-2: #b39469; --steel: #4a5866;
   --hemi-ground: #8a7a66; --shadow: rgba(20, 35, 50, .14); --glow: rgba(11, 127, 181, .18); color-scheme: light;
@@ -94,17 +95,13 @@ header {
 }
 .bar { display: flex; align-items: center; gap: 14px; padding-block: 10px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.logo { width: 44px; height: 44px; flex: none; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 20px var(--glow), inset 0 1px 0 rgba(255,255,255,.35); }
-.logo svg { width: 32px; height: 32px; }
-/* Wordmark: the name set on a surveyor's scale. */
+.logo { width: 54px; height: 54px; flex: none; color: var(--gold); filter: drop-shadow(0 4px 14px color-mix(in srgb, var(--gold) 30%, transparent)); }
+.logo svg { display: block; width: 100%; height: 100%; }
+/* Wordmark: the name in Ruqaa script, in the seal's gold. */
 .wordmark { display: flex; flex-direction: column; min-width: 0; }
 h1, .brand-name {
-  margin: 0; font-family: var(--f-head); font-size: 22px; font-weight: 800; line-height: 1.25; letter-spacing: .01em;
-  background: linear-gradient(100deg, var(--ink) 0%, var(--ink) 35%, var(--accent) 70%, var(--accent-2) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  margin: 0; font-family: "Aref Ruqaa", var(--f-head); font-size: 32px; font-weight: 700; line-height: 1.15; color: var(--gold);
 }
-.ruler { display: block; height: 6px; margin: 3px 0 2px; width: 100%; max-width: 150px; border-top: 1.5px solid color-mix(in srgb, var(--accent) 70%, transparent);
-  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 70%, transparent) 0 1px, transparent 1px 6px) top / 100% 3px no-repeat,
-              repeating-linear-gradient(90deg, color-mix(in srgb, var(--accent) 85%, transparent) 0 1.5px, transparent 1.5px 30px) top / 100% 6px no-repeat; }
 .brand small { display: block; color: var(--muted); font-size: 11.5px; letter-spacing: .02em; }
 .bar .grow { flex: 1; }
 .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -265,12 +262,14 @@ svg .vpi { fill: var(--sheet); stroke: var(--design); stroke-width: 1.5; }
 .hero-body { position: relative; margin-top: -120px; padding: 0 22px 22px; z-index: 1; pointer-events: none; }
 .hero-body > * { pointer-events: auto; }
 .eyebrow { font-family: var(--f-num); font-size: 11.5px; letter-spacing: .14em; color: var(--accent); margin: 0; }
-h2.greet { margin: 2px 0 8px; font-size: clamp(24px, 4vw, 34px); font-weight: 800; line-height: 1.35; }
-.lead { margin: 0 0 14px; max-width: 64ch; color: color-mix(in srgb, var(--ink) 85%, var(--muted)); }
+h2.greet { margin: 2px 0 8px; font-family: "Aref Ruqaa", var(--f-head); font-size: clamp(32px, 5.5vw, 46px); font-weight: 700; line-height: 1.25; color: var(--gold);
+  text-shadow: 0 2px 18px color-mix(in srgb, var(--paper) 80%, transparent); }
+:root[dir="ltr"] h2.greet { font-family: var(--f-head); font-weight: 800; font-size: clamp(26px, 4.5vw, 38px); }
+.lead { margin: 0 0 16px; max-width: 58ch; font-size: 15.5px; color: color-mix(in srgb, var(--ink) 85%, var(--muted)); }
 .quick { display: flex; flex-wrap: wrap; gap: 8px; }
 .quick button { font: inherit; font-size: 13.5px; background: color-mix(in srgb, var(--sheet-2) 85%, transparent); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 7px 13px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; backdrop-filter: blur(6px); transition: .15s; }
-.quick button:hover { border-color: var(--accent); transform: translateY(-1px); }
-.quick button .code { font-family: var(--f-num); font-size: 10.5px; color: var(--accent); padding: 1px 6px; border-radius: 6px; background: var(--accent-soft); }
+.quick button:hover { border-color: var(--gold); transform: translateY(-1px); }
+.quick button .code { font-family: var(--f-num); font-size: 10.5px; color: var(--gold); padding: 1px 6px; border-radius: 6px; background: color-mix(in srgb, var(--gold) 12%, transparent); }
 .safety { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
 .safety .tape { width: 46px; height: 10px; flex: none; border-radius: 3px; background: repeating-linear-gradient(-45deg, var(--mark) 0 6px, #111 6px 12px); }
 .safety .grow { flex: 1; min-width: 160px; }
@@ -285,26 +284,67 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 
 /* ---- welcome screen (first thing on each visit) ---- */
 .intro { display: none; }
-.show-intro .intro { display: grid; place-items: center; position: fixed; inset: 0; z-index: 50; padding: 16px; overflow-y: auto;
-  background: color-mix(in srgb, var(--paper) 55%, transparent); backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2); animation: fade .35s ease-out both; }
+/* The whole screen is the 3D site; the title block sits over the fade at the bottom. */
+.show-intro .intro { display: grid; justify-items: center; align-items: end; position: fixed; inset: 0; z-index: 50; padding: 16px 16px max(20px, 4vh); overflow-y: auto;
+  background: var(--paper); animation: fade .35s ease-out both; }
 .show-intro body { overflow: hidden; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
-.intro-card { width: min(560px, 100%); padding: 26px 24px 20px; border-radius: 24px; border: 1px solid var(--line); animation: rise .45s .05s ease-out both;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--sheet) 92%, var(--accent)) 0%, color-mix(in srgb, var(--sheet) 94%, transparent) 50%); box-shadow: 0 40px 100px -30px var(--shadow), 0 0 0 1px color-mix(in srgb, white 4%, transparent) inset; }
-.intro-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
-.intro-card .logo { width: 62px; height: 62px; border-radius: 18px; }
-.intro-card .logo svg { width: 46px; height: 46px; }
-.intro-card .brand-name { font-size: inherit; }
-.intro-card h2 { font-size: clamp(22px, 4vw, 28px); font-weight: 800; margin: 2px 0 6px; line-height: 1.35; }
-.intro-card p.sub { margin: 0 0 18px; color: var(--muted); }
-.feat { list-style: none; margin: 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-.feat li { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--sheet-2); }
-.feat .code { grid-row: span 2; font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 9px; padding: 6px 8px; }
+.intro-3d { position: fixed; inset: 0; cursor: grab;
+  background: radial-gradient(120% 90% at 60% 0%, color-mix(in srgb, var(--accent) 22%, var(--paper)) 0%, var(--paper) 70%); }
+.intro-3d::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(38% 26% at 50% 60%, color-mix(in srgb, var(--paper) 55%, transparent), transparent),
+              linear-gradient(to top, var(--paper) 0%, color-mix(in srgb, var(--paper) 80%, transparent) 34%, transparent 62%),
+              radial-gradient(140% 100% at 50% 40%, transparent 55%, color-mix(in srgb, var(--paper) 70%, transparent) 100%); }
+.intro .lang-seg { position: fixed; top: 22px; inset-inline-end: 22px; z-index: 2; }
+/* Total station eyepiece: frame corners and a live readout of the camera's angles. */
+.finder { position: fixed; inset: 10px; pointer-events: none; z-index: 1; }
+.finder .corner { position: absolute; width: 30px; height: 30px; border: 0 solid color-mix(in srgb, var(--gold) 70%, transparent); animation: fade .6s 1.2s both; }
+.finder .corner:nth-child(1) { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.finder .corner:nth-child(2) { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.finder .corner:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+.finder .corner:nth-child(4) { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+.hud { position: absolute; top: 12px; inset-inline-start: 14px; direction: ltr; font-family: var(--f-num); font-size: 12px; line-height: 1.7; color: var(--ink);
+  padding: 8px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); background: color-mix(in srgb, var(--paper) 55%, transparent);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .6s 1.4s both; font-variant-numeric: tabular-nums; }
+.hud p { margin: 0; display: flex; gap: 10px; justify-content: space-between; }
+.hud b { color: var(--gold); font-weight: 600; min-width: 2.2em; }
+.hud .hud-head { font-size: 10px; letter-spacing: .14em; color: var(--muted); justify-content: flex-start; align-items: center; gap: 6px; }
+.hud .hud-head i { width: 7px; height: 7px; border-radius: 50%; background: #ff3a2a; box-shadow: 0 0 8px #ff3a2a; animation: blink 1.6s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+@media (max-width: 480px) { .hud { font-size: 10.5px; padding: 6px 9px; } }
+.intro-card { position: relative; z-index: 1; width: min(760px, 100%); text-align: center; animation: rise .5s .1s ease-out both; pointer-events: none; }
+.intro-card > * { pointer-events: auto; }
+.intro-top { display: flex; justify-content: center; margin-bottom: 2px; }
+.intro-card .logo { width: 88px; height: 88px; animation: seal .7s .2s ease-out both; }
+@keyframes seal { from { opacity: 0; transform: rotate(-25deg) scale(.85); } to { opacity: 1; transform: none; } }
+.intro-card h2 { display: block; margin: 0 0 2px; line-height: 1.2; }
+/* The name catches a gold glint once it lands. */
+.intro-card .brand-name { font-size: clamp(52px, 10vw, 76px); filter: drop-shadow(0 4px 22px var(--paper));
+  background: linear-gradient(100deg, var(--gold) 42%, color-mix(in srgb, var(--gold) 30%, white) 50%, var(--gold) 58%) 120% 0 / 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: glint 1.6s 1.1s ease-in-out both; }
+@keyframes glint { from { background-position: 120% 0; } to { background-position: -20% 0; } }
+.feat li { animation: rise .5s ease-out both; }
+.feat li:nth-child(1) { animation-delay: .5s; } .feat li:nth-child(2) { animation-delay: .6s; }
+.feat li:nth-child(3) { animation-delay: .7s; } .feat li:nth-child(4) { animation-delay: .8s; }
+.intro-card p.sub { margin: 0 auto 14px; max-width: 44ch; color: var(--ink); font-size: 16px; text-wrap: balance; text-shadow: 0 1px 12px var(--paper); }
+/* A levelling staff in the seal's gold, as the divider. */
+.scale { display: block; height: 8px; width: min(220px, 70%); margin: 0 auto 18px; opacity: .7; border-bottom: 1.5px solid var(--gold);
+  background: repeating-linear-gradient(90deg, var(--gold) 0 1px, transparent 1px 8px) bottom / 100% 4px no-repeat,
+              repeating-linear-gradient(90deg, var(--gold) 0 1.5px, transparent 1.5px 40px) bottom / 100% 8px no-repeat; }
+.feat { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.feat li { display: grid; justify-items: center; gap: 2px; padding: 12px 8px 10px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--line));
+  background: color-mix(in srgb, var(--sheet) 62%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.feat .code { width: 34px; height: 34px; margin-bottom: 4px; display: grid; place-items: center; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  font-family: var(--f-num); font-size: 11px; font-weight: 600; color: var(--gold); }
 .feat b { font-family: var(--f-head); font-size: 13.5px; font-weight: 600; }
-.feat small { color: var(--muted); font-size: 12px; line-height: 1.5; }
-#intro-go { width: 100%; justify-content: center; padding: 12px 20px; font-size: 16px; }
-.intro-card .fine { font-size: 11.5px; color: var(--muted); margin: 12px 0 0; text-align: center; }
+.feat small { color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+@media (max-width: 720px) { .feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+#intro-go { width: min(380px, 100%); justify-content: center; padding: 13px 20px; font-size: 16.5px; color: #1d1404;
+  background: linear-gradient(135deg, var(--gold), color-mix(in srgb, var(--gold) 70%, #a8741c)); box-shadow: 0 10px 26px -12px color-mix(in srgb, var(--gold) 70%, transparent); }
+:root[data-theme="light"] #intro-go { color: #fff; }
+.intro-card .fine { font-size: 11.5px; color: var(--muted); margin: 12px 0 0; }
+@media (max-width: 480px) { .feat li { padding: 9px 6px 8px; } .feat small { display: none; } .intro-card .logo { width: 72px; height: 72px; } }
 .lang-seg button { font-family: var(--f-body); }
 :root[dir="ltr"] .readout b, :root[dir="ltr"] footer dd.mono { text-align: left; }
 
@@ -317,22 +357,27 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 </style>
 
 <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div id="intro-3d" class="intro-3d" aria-hidden="true"></div>
+  <div class="finder" aria-hidden="true" data-no-i18n>
+    <span class="corner"></span><span class="corner"></span><span class="corner"></span><span class="corner"></span>
+    <div class="hud"><p class="hud-head"><i></i>TS · LIVE</p><p><b>HZ</b><span id="hud-hz">—</span></p><p><b>V</b><span id="hud-v">—</span></p><p><b>SD</b><span id="hud-sd">—</span></p></div>
+  </div>
+  <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
   <div class="intro-card">
     <div class="intro-top">
-      <div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="#04131b" stroke-linecap="round" stroke-linejoin="round"><path d="M7 31 A 19 19 0 0 0 41 31" stroke-width="1.6" stroke-dasharray="2.2 2.6" opacity=".75"/><path d="M24 3.5v4" stroke-width="2.4"/><path d="M22.2 11.5 12.5 39M25.8 11.5 34.6 36.5" stroke-width="2.8"/><path d="M33.4 35.6 36.6 42.6 36.3 35" fill="#04131b" stroke-width="1.2"/><circle cx="24" cy="10" r="3.4" fill="#04131b" stroke="none"/><circle cx="24" cy="10" r="1.2" fill="#e8f7ff" stroke="none"/><path d="M15.8 25.5h16.4" stroke-width="1.8"/><circle cx="12" cy="40.6" r="3.1" stroke-width="1.4"/><path d="M12 35.6v10M7 40.6h10" stroke-width="1.1"/></svg></div>
-      <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
+      <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
     </div>
-    <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
-    <h2 id="intro-title">أهلاً بيك في <span class="brand-name">المهندس</span></h2>
-    <p class="sub">أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.</p>
+    <h2 id="intro-title"><span class="brand-name">المهندس</span></h2>
+    <p class="sub">شغل المساحة كله في صفحة واحدة. افتح واشتغل على طول، من غير تسجيل ولا تثبيت.</p>
+    <span class="scale" aria-hidden="true"></span>
     <ul class="feat">
-      <li><span class="code">LV</span><b>دفتر الميزانية</b><small>حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح</small></li>
-      <li><span class="code">PR</span><b>القطاع الطولي</b><small>المناسيب التصميمية والمنحنيات الرأسية والحفر والردم</small></li>
-      <li><span class="code">QT</span><b>القطاعات والكميات</b><small>مساحات الحفر والردم والكميات والـ Mass haul</small></li>
-      <li><span class="code">QC</span><b>مراجعة ملفات الرفع</b><small>Excel و CSV و GSI و LandXML و DXF و DWG، والنقاط مجسّمة 3D</small></li>
+      <li><span class="code">LV</span><b>الميزانية</b><small>HI و Rise/Fall وخطأ القفل</small></li>
+      <li><span class="code">PR</span><b>البروفيل</b><small>المناسيب والمنحنيات الرأسية</small></li>
+      <li><span class="code">QT</span><b>الكميات</b><small>الحفر والردم والـ Mass haul</small></li>
+      <li><span class="code">QC</span><b>مراجعة الرفع</b><small>Excel و CSV و DXF و DWG وغيرهم</small></li>
     </ul>
-    <button class="primary" type="button" id="intro-go">ابدأ</button>
-    <p class="fine">الملفات بتتقري جوه المتصفح بتاعك ومش بتترفع لأي سيرفر.</p>
+    <button class="primary" type="button" id="intro-go">يلا نشتغل</button>
+    <p class="fine">ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
   </div>
 </div>
 
@@ -340,8 +385,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="wrap">
     <div class="bar">
       <div class="brand">
-        <div class="logo" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="#04131b" stroke-linecap="round" stroke-linejoin="round"><path d="M7 31 A 19 19 0 0 0 41 31" stroke-width="1.6" stroke-dasharray="2.2 2.6" opacity=".75"/><path d="M24 3.5v4" stroke-width="2.4"/><path d="M22.2 11.5 12.5 39M25.8 11.5 34.6 36.5" stroke-width="2.8"/><path d="M33.4 35.6 36.6 42.6 36.3 35" fill="#04131b" stroke-width="1.2"/><circle cx="24" cy="10" r="3.4" fill="#04131b" stroke="none"/><circle cx="24" cy="10" r="1.2" fill="#e8f7ff" stroke="none"/><path d="M15.8 25.5h16.4" stroke-width="1.8"/><circle cx="12" cy="40.6" r="3.1" stroke-width="1.4"/><path d="M12 35.6v10M7 40.6h10" stroke-width="1.1"/></svg></div>
-        <div class="wordmark"><h1>المهندس</h1><span class="ruler" aria-hidden="true"></span><small>أدوات مهندس المساحة في الموقع</small></div>
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
+        <div class="wordmark"><h1>المهندس</h1><small>المهندس كيو اس</small></div>
       </div>
       <span class="grow"></span>
       <div class="meta">
@@ -367,9 +412,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <section id="welcome" class="panel hero" aria-labelledby="greet">
     <div id="hero-3d" class="hero-3d" role="img" aria-label="موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي"></div>
     <div class="hero-body">
-      <p class="eyebrow">SITE ENGINEER · SURVEY ASSISTANT</p>
       <h2 class="greet" id="greet">أهلاً يا هندسة</h2>
-      <p class="lead">المهندس جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع<span data-ai> واللوحات</span>. وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.</p>
+      <p class="lead">من دفتر الميزانية لحد الكميات، كل رقم هنا بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين. وكل رسمة تلفّها 3D براحتك، والرسمة الـ 2D المظبوطة على بُعد ضغطة.</p>
       <div class="quick">
         <button type="button" data-go="chat" data-ai><span class="code">AI</span>اسأل المساعد</button>
         <button type="button" data-go="level"><span class="code">LV</span>احسب ميزانية</button>
@@ -379,8 +423,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       </div>
       <div class="safety">
         <span class="tape" aria-hidden="true"></span>
-        <span class="grow">السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.</span>
-        <button id="welcome-close" class="link" type="button">ابدأ الشغل وإخفي الترحيب</button>
+        <span class="grow">السلامة أولًا: الخوذة قبل الجهاز، وأي رقم هتنفّذ عليه راجعه في الموقع.</span>
+        <button id="welcome-close" class="link" type="button">إخفاء الترحيب</button>
       </div>
     </div>
   </section>
@@ -538,7 +582,7 @@ BM2,,,0.900</textarea>
   </section>
 
   <footer>
-    <div class="sign-title">المهندس · أدوات مهندس المساحة في الموقع</div>
+    <div class="sign-title">المهندس كيو اس</div>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
@@ -2434,7 +2478,7 @@ const V3 = (() => {
    * Mount a scene into `host`. build(scene, api) adds objects and may return
    * { view: [x,y,z] direction to look from, fit: 0..1 tighter/looser }.
    */
-  function mount(host, build, { autoRotate = false, height, interactive = true } = {}) {
+  function mount(host, build, { autoRotate = false, height, interactive = true, flyIn = false } = {}) {
     unmount(host);
     if (!supported()) return false;
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -2467,7 +2511,8 @@ const V3 = (() => {
     controls.screenSpacePanning = true;
     controls.autoRotate = autoRotate && !reduced();
     controls.autoRotateSpeed = opts.rotateSpeed ?? 0.6;
-    controls.addEventListener("start", () => { controls.autoRotate = false; host.classList.add("touched"); });
+    let fly = null;
+    controls.addEventListener("start", () => { controls.autoRotate = false; fly = null; host.classList.add("touched"); });
     if (!interactive) { controls.enabled = false; canvas.style.touchAction = "pan-y"; }
 
     const box = new THREE.Box3();
@@ -2510,6 +2555,15 @@ const V3 = (() => {
     };
     size();
     home();
+    if (flyIn && opts.camera && !reduced()) {
+      // Swoop down into the composed shot from high up and off to one side.
+      const target = controls.target.clone();
+      const to = camera.position.clone();
+      const from = to.clone().sub(target).applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.7).multiplyScalar(1.6).add(target);
+      from.y += 90;
+      fly = { from, to, t0: performance.now(), ms: 3200 };
+      camera.position.copy(from);
+    }
 
     let raf = 0;
     let visible = true;
@@ -2519,6 +2573,11 @@ const V3 = (() => {
       if (!visible || !host.isConnected) return;
       const t = (performance.now() - t0) / 1000;
       for (const f of frames) f(t);
+      if (fly) {
+        const k = Math.min((performance.now() - fly.t0) / fly.ms, 1);
+        camera.position.lerpVectors(fly.from, fly.to, 1 - (1 - k) ** 3);
+        if (k === 1) fly = null;
+      }
       controls.update();
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
@@ -2531,7 +2590,7 @@ const V3 = (() => {
     start();
 
     host._v3 = {
-      build, opts: { autoRotate, height, interactive }, home,
+      build, opts: { autoRotate, height, interactive }, home, camera, target: controls.target,
       wake() { visible = true; start(); },
       dispose() {
         cancelAnimationFrame(raf);
@@ -3470,7 +3529,7 @@ const I18N = (() => {
   const EXACT = {
     // header, tabs, welcome
     "المهندس": "Al-Mohandes",
-    "أدوات مهندس المساحة في الموقع": "Site survey engineer's toolkit",
+    "المهندس كيو اس": "Al-Mohandes QS",
     "المساعد:": "Assistant:",
     "بيتصل…": "connecting…",
     "متصل": "online",
@@ -3486,33 +3545,27 @@ const I18N = (() => {
     "صباح الخير يا هندسة": "Good morning, engineer",
     "نهارك سعيد يا هندسة": "Good afternoon, engineer",
     "مساء الخير يا هندسة": "Good evening, engineer",
-    "المهندس جاهز معاك في الموقع. بيحل الميزانية، ويحسب المناسيب التصميمية والمنحنيات الرأسية، والحفر والردم والكميات، ويراجع ملفات الرفع":
-      "Your survey assistant on site. It reduces level books, computes design levels and vertical curves, cut, fill and quantities, and checks survey files",
-    "واللوحات": " and drawings",
-    ". وكل رسمة بتشوفها مجسّمة 3D تلفّها براحتك، وكل رقم بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين.":
-      ". Every drawing is a 3D model you can turn around, and every number comes from fixed, tested calculation tools, never from guesswork.",
+    "من دفتر الميزانية لحد الكميات، كل رقم هنا بيطلع من أدوات حساب ثابتة ومتختبرة، مش بالتخمين. وكل رسمة تلفّها 3D براحتك، والرسمة الـ 2D المظبوطة على بُعد ضغطة.":
+      "From the level book to quantities, every number here comes from fixed, tested calculation tools, never from guesswork. Turn any drawing around in 3D, with the exact 2D sheet one click away.",
     "اسأل المساعد": "Ask the assistant",
     "احسب ميزانية": "Reduce levels",
     "ارسم بروفيل": "Draw a profile",
     "احسب كميات": "Compute quantities",
     "راجع ملف رفع": "Check a survey file",
-    "السلامة أولًا: الخوذة قبل الجهاز، والتحقق في الموقع قبل التنفيذ.": "Safety first: helmet before the instrument, and check on site before you build.",
-    "ابدأ الشغل وإخفي الترحيب": "Start working and hide the welcome",
+    "السلامة أولًا: الخوذة قبل الجهاز، وأي رقم هتنفّذ عليه راجعه في الموقع.": "Safety first: helmet before the instrument, and check any number on site before you build on it.",
+    "إخفاء الترحيب": "Hide welcome",
     "رسالة الترحيب": "Welcome message",
     // intro screen
-    "أهلاً بيك في": "Welcome to",
-    "أدوات مهندس المساحة في الموقع، في صفحة واحدة. من غير تسجيل ولا تثبيت.": "A site survey engineer's tools on one page. No sign-up, nothing to install.",
-    "دفتر الميزانية": "Level book",
-    "حل HI و Rise/Fall، وخطأ القفل، وتوزيع التصحيح": "HI and Rise/Fall, misclosure and adjustment",
+    "شغل المساحة كله في صفحة واحدة. افتح واشتغل على طول، من غير تسجيل ولا تثبيت.": "All your survey work on one page. Open it and get going: no sign-up, nothing to install.",
+    "HI و Rise/Fall وخطأ القفل": "HI, Rise/Fall and misclosure",
+    "المناسيب والمنحنيات الرأسية": "Design levels and vertical curves",
+    "الحفر والردم والـ Mass haul": "Cut, fill and mass haul",
+    "مراجعة الرفع": "Survey QC",
+    "Excel و CSV و DXF و DWG وغيرهم": "Excel, CSV, DXF, DWG and more",
+    "يلا نشتغل": "Let's get to work",
     "القطاع الطولي": "Longitudinal profile",
-    "المناسيب التصميمية والمنحنيات الرأسية والحفر والردم": "Design levels, vertical curves, cut and fill",
-    "القطاعات والكميات": "Sections and quantities",
-    "مساحات الحفر والردم والكميات والـ Mass haul": "Cut/fill areas, volumes and mass haul",
-    "مراجعة ملفات الرفع": "Survey file QC",
-    "Excel و CSV و GSI و LandXML و DXF و DWG، والنقاط مجسّمة 3D": "Excel, CSV, GSI, LandXML, DXF and DWG, with points in 3D",
-    "ابدأ": "Start",
     "اللغة": "Language",
-    "الملفات بتتقري جوه المتصفح بتاعك ومش بتترفع لأي سيرفر.": "Files are read inside your browser and never uploaded to a server.",
+    "ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.": "Your files are read inside your browser and never uploaded to a server.",
     // assistant
     "سجل الاستفسارات": "Request log",
     "المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.": "The AI assistant isn't available in this view. The calculators in the other tabs work as usual.",
@@ -3691,7 +3744,6 @@ const I18N = (() => {
     "موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي": "3D construction site: a total station sighting a prism on a road embankment, a building under construction and a tower crane",
     "مثال: راجع اللوحة دي واتأكد من المناسيب التصميمية والميول": "e.g. check this drawing's design levels and grades",
     // footer
-    "المهندس · أدوات مهندس المساحة في الموقع": "Al-Mohandes · site survey engineer's toolkit",
     "الإحداثيات": "Coordinates",
     "UTM أو محلي حسب المشروع": "UTM or local, per project",
     "المناسيب": "Levels",
@@ -3900,11 +3952,33 @@ $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
   const close = () => {
     document.documentElement.classList.remove("show-intro");
     try { sessionStorage.setItem("intro-seen", "1"); } catch { /* storage blocked */ }
+    V3.unmount($("#intro-3d"));
     V3.remountAll();
   };
   $("#intro-go").onclick = close;
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.documentElement.classList.contains("show-intro")) close(); });
-  if (document.documentElement.classList.contains("show-intro")) $("#intro-go").focus();
+  if (document.documentElement.classList.contains("show-intro")) {
+    // The same 3D site as the page's welcome, full screen behind the title.
+    const coarse = window.matchMedia?.("(pointer: coarse)").matches;
+    if (!V3.mount($("#intro-3d"), siteScene(), { autoRotate: true, interactive: !coarse, flyIn: true })) $(".finder").hidden = true;
+    $("#intro-go").focus();
+    // Eyepiece readout: the virtual camera's bearing, zenith angle and slope distance to its target.
+    const dms = (deg) => {
+      const s = Math.round(deg * 3600);
+      return `${Math.floor(s / 3600)}°${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}′${String(s % 60).padStart(2, "0")}″`;
+    };
+    const hud = () => {
+      const v = $("#intro-3d")._v3;
+      if (!v || !document.documentElement.classList.contains("show-intro")) return;
+      const dx = v.target.x - v.camera.position.x, dy = v.target.y - v.camera.position.y, dz = v.target.z - v.camera.position.z;
+      const flat = Math.hypot(dx, dz);
+      $("#hud-hz").textContent = dms(((Math.atan2(dx, -dz) * 180) / Math.PI + 360) % 360);
+      $("#hud-v").textContent = dms(90 - (Math.atan2(dy, flat) * 180) / Math.PI);
+      $("#hud-sd").textContent = `${Math.hypot(flat, dy).toFixed(3)} m`;
+      requestAnimationFrame(hud);
+    };
+    hud();
+  }
 }
 
 // ---------- theme (dark by default) ----------
