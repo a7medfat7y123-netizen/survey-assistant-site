@@ -5219,7 +5219,7 @@ let openSci = () => {};
 // ---------- optional sign-in (Clerk) ----------
 // The page works the same signed out. With no key, or if Clerk can't load (offline, blocked by
 // the host), the sign-in button simply stays hidden.
-const CLERK_PUBLISHABLE_KEY = "";
+const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb3VudHMuZGV2JA";
 {
   let host = "";
   try { host = CLERK_PUBLISHABLE_KEY ? atob(CLERK_PUBLISHABLE_KEY.split("_")[2]).slice(0, -1) : ""; } catch { /* malformed key */ }
