@@ -2253,9 +2253,13 @@ function checkTolerances(input) {
 // ---- src/engine/geodesy.js
 // Latitude/longitude <-> map grid for the coordinate converter: UTM on WGS 84, and the Egyptian
 // belts (ETM) on Egypt 1907. Transverse Mercator by Krüger's series to sixth order (Karney 2011,
-// as in GeographicLib), well under a millimetre inside a zone. The datum shift is the EPSG
-// 7-parameter Helmert transformation, applied as PROJ applies its "towgs84" parameters.
-// test/geodesy.test.js checks it against proj4js.
+// as in GeographicLib), well under a millimetre inside a zone. The datum shift is EPSG:7697, the
+// unified Egypt 1907 -> WGS 84 transformation (Molodensky-Badekas about a point in Egypt, about 1 m).
+// test/geodesy.test.js checks both against PROJ with its EPSG database (GDAL 3 / gdal3.js).
+//
+// Do not use the "+towgs84=-127.535,113.495,-12.7,1.603747,-0.153612,-5.364408,5.33745" that
+// PROJ.4 strings and proj4js carry for Egypt 1907: those are EPSG:7697's numbers without its
+// evaluation point, and applied about the earth's centre they put points about 165 m off.
 
 
 const GEO_D2R = Math.PI / 180;
@@ -2263,8 +2267,12 @@ const GEO_ELLIPSOIDS = {
   wgs84: { a: 6378137, f: 1 / 298.257223563 },
   helmert1906: { a: 6378200, f: 1 / 298.3 }, // Egypt 1907
 };
-// Egypt 1907 -> WGS 84 (EPSG:4229 "towgs84"): metres, arc-seconds, ppm; position-vector rotations.
-const GEO_EGYPT_1907 = [-127.535, 113.495, -12.7, 1.603747, -0.153612, -5.364408, 5.33745];
+// EPSG:7697 Egypt 1907 -> WGS 84 (4), Molodensky-Badekas (CF geog2D domain, EPSG method 9636):
+// translations (m), coordinate-frame rotations (arc-seconds), scale (ppm), evaluation point (m).
+const GEO_EGYPT_1907 = {
+  t: [-127.535, 113.495, -12.7], r: [1.603747, -0.153612, -5.364408], ppm: 5.33745,
+  p: [4854969.728, 2945552.013, 2868447.61],
+};
 
 /** The Egyptian Transverse Mercator belts (EPSG:22991-22994), with the longitudes each one is for. */
 const ETM_BELTS = {
@@ -2368,26 +2376,37 @@ function ecefToGeo([X, Y, Z], ell) {
   }
   return { phi, lam: Math.atan2(Y, X) };
 }
-const geoHelmert = (params) => {
-  const [tx, ty, tz, rx, ry, rz, ds] = params;
-  const sec = GEO_D2R / 3600;
-  return { tx, ty, tz, rx: rx * sec, ry: ry * sec, rz: rz * sec, m: 1 + ds * 1e-6 };
-};
-// To WGS 84, and back (the same small-angle inverse PROJ uses).
-function geoShiftToWgs([x, y, z], params) {
-  const { tx, ty, tz, rx, ry, rz, m } = geoHelmert(params);
-  return [m * (x - rz * y + ry * z) + tx, m * (rz * x + y - rx * z) + ty, m * (-ry * x + rx * y + z) + tz];
+// Molodensky-Badekas: X_wgs = M R (X - P) + P + T, with the coordinate-frame rotation matrix R
+// (EPSG Guidance Note 7-2). The reverse solves the same equation exactly rather than flipping signs.
+function geoMbMatrix({ r, ppm }) {
+  const [rx, ry, rz] = r.map((v) => (v * GEO_D2R) / 3600);
+  const m = 1 + ppm * 1e-6;
+  return [[m, m * rz, -m * ry], [-m * rz, m, m * rx], [m * ry, -m * rx, m]];
 }
-function geoShiftFromWgs([x, y, z], params) {
-  const { tx, ty, tz, rx, ry, rz, m } = geoHelmert(params);
-  const a = (x - tx) / m, b = (y - ty) / m, c = (z - tz) / m;
-  return [a + rz * b - ry * c, -rz * a + b + rx * c, ry * a - rx * b + c];
+function geoShiftToWgs(x, op) {
+  const R = geoMbMatrix(op);
+  const d = x.map((v, i) => v - op.p[i]);
+  return R.map((row, i) => row[0] * d[0] + row[1] * d[1] + row[2] * d[2] + op.p[i] + op.t[i]);
+}
+function geoShiftFromWgs(x, op) {
+  const [[a, b, c], [d, e, f], [g, h, k]] = geoMbMatrix(op);
+  const det = a * (e * k - f * h) - b * (d * k - f * g) + c * (d * h - e * g);
+  const inv = [[e * k - f * h, c * h - b * k, b * f - c * e], [f * g - d * k, a * k - c * g, c * d - a * f], [d * h - e * g, b * g - a * h, a * e - b * d]];
+  const y = x.map((v, i) => v - op.p[i] - op.t[i]);
+  return inv.map((row, i) => (row[0] * y[0] + row[1] * y[1] + row[2] * y[2]) / det + op.p[i]);
 }
 
 // ---------- grids ----------
 /** The UTM zone for a longitude (degrees). */
 function utmZoneOf(lon) {
   return Math.min(60, Math.floor((((lon + 180) % 360) + 360) % 360 / 6) + 1);
+}
+
+/** The Egyptian belt a point belongs to, by the EPSG areas of use: Purple west of 29°E (Extended
+ * Purple south of about 28°11'N), Red from 29°E to 33°E, Blue east of 33°E. */
+function etmBeltFor(lat, lon) {
+  if (lon < 29) return lat >= 28 + 11 / 60 ? "purple" : "xpurple";
+  return lon < 33 ? "red" : "blue";
 }
 
 function gridDef(grid, lat) {
@@ -2405,12 +2424,14 @@ const originNorthing = (d) => (d.lat0 ? tmForward(d.lat0 * GEO_D2R, 0, d.ell).y 
 
 /**
  * WGS 84 latitude/longitude (degrees) -> grid easting/northing (metres).
- * grid: { kind: "utm", zone?, south? } (zone from the longitude when left out) or { kind: "etm", belt }.
- * Returns E, N, the zone used (UTM), meridian convergence (degrees) and point scale factor.
+ * grid: { kind: "utm", zone?, south? } (zone from the longitude when left out) or
+ * { kind: "etm", belt } (belt "auto" picks it by etmBeltFor).
+ * Returns E, N, the zone (UTM) or belt (ETM) used, meridian convergence (degrees) and point scale.
  */
 function geoToGrid(lat, lon, grid) {
   if (!(Math.abs(lat) <= 90) || !(Math.abs(lon) <= 180)) fail("خط العرض لازم بين -90 و 90 وخط الطول بين -180 و 180.");
-  const g = grid.kind === "utm" ? { ...grid, zone: grid.zone ?? utmZoneOf(lon) } : grid;
+  const g = grid.kind === "utm" ? { ...grid, zone: grid.zone ?? utmZoneOf(lon) }
+    : grid.belt === "auto" ? { ...grid, belt: etmBeltFor(lat, lon) } : grid;
   const d = gridDef(g, lat);
   let phi = lat * GEO_D2R, lam = lon * GEO_D2R;
   if (d.datum) ({ phi, lam } = ecefToGeo(geoShiftFromWgs(geoToEcef(phi, lam, 0, "wgs84"), d.datum), d.ell));
@@ -2421,7 +2442,7 @@ function geoToGrid(lat, lon, grid) {
   return {
     E: d.fe + d.k0 * t.x,
     N: d.fn + d.k0 * (t.y - originNorthing(d)),
-    zone: d.zone, south: d.south,
+    zone: d.zone, south: d.south, belt: g.belt,
     convergence: t.gamma / GEO_D2R,
     scale: d.k0 * t.k,
   };
@@ -2531,17 +2552,28 @@ const engSelect = (key, label, options) => ({ key, label, type: "select", option
 const engField = (key, label, unit = "", extra = {}) => ({ key, label, unit, type: "number", ...extra });
 
 // ---------- coordinate conversion helpers (the maths is in geodesy.js) ----------
-const ENG_GRIDS = [
-  ["utm", engL("UTM على WGS 84", "UTM on WGS 84")],
+// Belts named, for the result line that says which one was used.
+const ENG_BELT_NAMES = {
+  purple: engL("البنفسجي", "Purple"), xpurple: engL("البنفسجي الممتد", "Extended Purple"),
+  red: engL("الأحمر", "Red"), blue: engL("الأزرق", "Blue"),
+};
+// The belts by hand, for going from the grid (a grid point does not say which belt it is in).
+const ENG_BELTS_FIXED = [
   ["red", engL("الشبكة المصرية: الحزام الأحمر", "Egyptian grid: Red Belt")],
   ["purple", engL("الشبكة المصرية: الحزام البنفسجي", "Egyptian grid: Purple Belt")],
   ["xpurple", engL("الشبكة المصرية: البنفسجي الممتد", "Egyptian grid: Extended Purple Belt")],
   ["blue", engL("الشبكة المصرية: الحزام الأزرق", "Egyptian grid: Blue Belt")],
 ];
+const ENG_GRIDS_TO_GEO = [["utm", engL("UTM على WGS 84", "UTM on WGS 84")], ...ENG_BELTS_FIXED];
+const ENG_GRIDS = [
+  ["utm", engL("UTM على WGS 84", "UTM on WGS 84")],
+  ["etm", engL("الشبكة المصرية: الحزام المناسب تلقائي", "Egyptian grid: the right belt, automatically")],
+  ...ENG_BELTS_FIXED,
+];
 const ENG_HEMIS = [["N", engL("شمال", "North")], ["S", engL("جنوب", "South")]];
 const ENG_NOTE_UTM = engL("على WGS 84، زي إحداثيات الـ GPS.", "On WGS 84, like GPS coordinates.");
-const ENG_NOTE_ETM = engL("على داتم Egypt 1907 (هيلمرت 1906) بتحويل EPSG الرسمي من WGS 84. التحويل بين الداتمين نفسه تقريبي ومش مليمتري، فللشغل الدقيق اربط على نقط تحكم معروفة في المنطقة.",
-  "On the Egypt 1907 datum (Helmert 1906) by the official EPSG transformation from WGS 84. The shift between the two datums is approximate, not millimetric, so tie precise work to known control points nearby.");
+const ENG_NOTE_ETM = engL("على داتم Egypt 1907 (هيلمرت 1906)، بالتحويل الموحد لمصر كلها من WGS 84 (EPSG:7697)، ودقته حوالي متر. للشغل اللي محتاج دقة أعلى من كده اربط على نقط تحكم معروفة في المنطقة.",
+  "On the Egypt 1907 datum (Helmert 1906), by the unified transformation for the whole of Egypt from WGS 84 (EPSG:7697), good to about a metre. For work that needs better, tie to known control points nearby.");
 // Which belt a longitude belongs to, for the "outside this belt" warning.
 const ENG_BELT_HINT = {
   purple: engL("النقطة برا مدى الحزام ده، والأنسب ليها الحزام البنفسجي (غرب خط طول 29°).", "The point is outside this belt; the Purple Belt (west of 29°E) suits it better."),
@@ -2564,7 +2596,8 @@ function engLatLon(value, kind) {
 }
 /** The grid picked in the form. toGeo: going from the grid, so UTM needs its zone and hemisphere. */
 function engGrid(v, toGeo) {
-  if (v.grid !== "utm") return { kind: "etm", belt: v.grid };
+  if (v.grid === "etm" && toGeo) fail("لتحويل من الشبكة المصرية اختار الحزام نفسه (الأحمر أو البنفسجي أو الأزرق).");
+  if (v.grid !== "utm") return { kind: "etm", belt: v.grid === "etm" ? "auto" : v.grid };
   const zone = engNum(v, "zone", "الزون", { optional: true });
   if (zone === null) {
     if (toGeo) fail("لـ UTM اكتب رقم الزون (في مصر: 35 أو 36 أو 37).");
@@ -2575,6 +2608,7 @@ function engGrid(v, toGeo) {
 }
 function engGridNote(grid, lon) {
   if (grid.kind === "utm") return ENG_NOTE_UTM;
+  if (grid.belt === "auto") return ENG_NOTE_ETM;
   const b = ETM_BELTS[grid.belt];
   if (lon >= b.west && lon <= b.east) return ENG_NOTE_ETM;
   return `${ENG_BELT_HINT[lon < 29 ? "purple" : lon <= 33 ? "red" : "blue"]} ${ENG_NOTE_ETM}`;
@@ -3023,6 +3057,7 @@ const CALCULATORS = [
       const r = geoToGrid(lat, lon, grid);
       const out = [engRow("E", engCoord(r.E, 3), "m"), engRow("N", engCoord(r.N, 3), "m")];
       if (grid.kind === "utm") out.push(engRow(engL("الزون", "Zone"), engZone(r)));
+      else out.push(engRow(engL("الحزام", "Belt"), ENG_BELT_NAMES[r.belt]));
       out.push(engRow(engL("تقارب الشبكة", "Grid convergence"), toDmsPrecise(r.convergence, 2)), engRow(engL("معامل المقياس", "Scale factor"), engCoord(r.scale, 8)));
       return { results: out, note: engGridNote(grid, lon) };
     },
@@ -3030,7 +3065,7 @@ const CALCULATORS = [
   {
     id: "grid-to-geo", group: "survey", code: "GL", title: engL("من UTM أو الشبكة المصرية إلى خطوط الطول والعرض", "UTM or the Egyptian grid to lat/long"),
     fields: [
-      engSelect("grid", engL("الشبكة", "Grid"), ENG_GRIDS),
+      engSelect("grid", engL("الشبكة", "Grid"), ENG_GRIDS_TO_GEO),
       engField("e", "E", "m", { value: "329899.643" }),
       engField("n", "N", "m", { value: "3325016.736" }),
       engField("zone", engL("زون UTM", "UTM zone"), "", { value: "36", optional: true }),
@@ -3081,7 +3116,8 @@ const CALCULATORS = [
           const lon = engLatLon(cols[1], "lon");
           const r = geoToGrid(engLatLon(cols[0], "lat"), lon, grid);
           lastLon = lon;
-          out.push(engRow(id, `${engCoord(r.E, 3)}, ${engCoord(r.N, 3)}${grid.kind === "utm" ? ` (${engZone(r)})` : ""}`));
+          const where = grid.kind === "utm" ? ` (${engZone(r)})` : grid.belt === "auto" ? ` (${ENG_BELT_NAMES[r.belt]})` : "";
+          out.push(engRow(id, `${engCoord(r.E, 3)}, ${engCoord(r.N, 3)}${where}`));
         }
       });
       return { results: out, note: engGridNote(grid, lastLon) };
