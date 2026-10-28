@@ -392,6 +392,27 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .tr-plan .legend i.raw { border-top: 2px dashed var(--muted); }
 .tr-plan .legend i.gap { border-top-color: var(--cut); }
 .tr-plan .legend i.known { width: 10px; height: 10px; border: 0; border-radius: 2px; background: var(--accent); }
+/* Project notes: the project bar, the new note, and the notes newest first. */
+.pj-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 10px; }
+.pj-pick { flex: 1 1 240px; min-width: 0; }
+.pj-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+#pj-delete { color: var(--cut); }
+.pj-name { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-top: 12px; }
+.pj-name label { flex: 1 1 240px; min-width: 0; }
+.pj-bad { color: var(--cut); }
+.pj-none { color: var(--muted); margin: 14px 0 4px; }
+.pj-text { min-height: 100px; resize: vertical; line-height: 1.7; unicode-bidi: plaintext; }
+.pj-q { flex: 1 1 200px; width: auto; min-width: 0; }
+.pj-notes { list-style: none; margin: 14px 0 4px; padding: 0; display: grid; gap: 10px; }
+.pj-note { border: 1px solid var(--line); background: var(--sheet-2); border-radius: 12px; padding: 10px 14px; min-width: 0; }
+.pj-note-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: var(--muted); font-size: 12px; }
+.pj-note-head time { font-family: var(--f-num); }
+.pj-note-tools { margin-inline-start: auto; display: flex; gap: 2px; }
+.pj-act { font: inherit; font-size: 12.5px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 5px 9px; border-radius: 8px; }
+.pj-act:hover { background: var(--accent-soft); }
+.pj-act.bad { color: var(--cut); }
+.pj-note-text { margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; unicode-bidi: plaintext; }
+.pj-edit { margin-top: 8px; }
 /* GeoX wordmark (see the inline SVG): the dark "cut" strokes are drawn in the page colour. */
 .geox { display: block; height: 1em; width: auto; overflow: visible; }
 .geox .cut { stroke: var(--paper); }
@@ -629,6 +650,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <button role="tab" data-tab="profile" aria-selected="false"><span class="code">PR</span>البروفيل</button>
         <button role="tab" data-tab="qty" aria-selected="false"><span class="code">QT</span>الكميات</button>
         <button role="tab" data-tab="review" aria-selected="false"><span class="code">QC</span>مراجعة الداتا</button>
+        <button role="tab" data-tab="proj" aria-selected="false"><span class="code">PJ</span>المشاريع</button>
       </nav>
       <div class="specs">
         <span class="pill opt" dir="ltr">m · mm · m² · m³</span>
@@ -804,6 +826,7 @@ BM2,,,0.900</textarea>
         <button id="tr-run" class="primary" type="button">احسب وصحّح</button>
         <label class="file-btn secondary" for="tr-file">تحميل من ملف</label><input type="file" id="tr-file" accept=".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.txt,.prn,.dat" hidden>
         <button id="tr-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <button id="tr-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
         <span class="hint">مثال محلول جاهز بأخطاء صغيرة؛ امسحه وحط قراءاتك، أو حمّل الشيت وهو يقراه ويحله لوحده.</span>
       </div>
       <details class="tr-formats">
@@ -929,6 +952,48 @@ BM2,,,0.900</textarea>
     <div id="rv-out" class="out"></div>
   </section>
 
+  <section id="tab-proj" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">PJ</span>ملاحظات المشاريع</h2>
+      <p class="hint">لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.</p>
+      <div class="pj-bar">
+        <label for="pj-select" class="pj-pick" data-needs-project>المشروع
+          <select id="pj-select" data-no-i18n></select>
+        </label>
+        <div class="pj-tools">
+          <button id="pj-new" class="primary" type="button">مشروع جديد</button>
+          <button id="pj-rename" class="secondary primary" type="button" data-needs-project>تغيير الاسم</button>
+          <button id="pj-delete" class="secondary primary" type="button" data-needs-project data-label="حذف المشروع" data-confirm="اضغط تاني للحذف">حذف المشروع</button>
+        </div>
+      </div>
+      <form id="pj-name-form" class="pj-name" hidden>
+        <label for="pj-name">اسم المشروع<input id="pj-name" maxlength="80" autocomplete="off" dir="auto" placeholder="مثلًا: طريق الواحات – كم 12"></label>
+        <button class="primary" type="submit">حفظ</button>
+        <button id="pj-name-cancel" class="secondary primary" type="button">إلغاء</button>
+      </form>
+      <p id="pj-msg" class="hint pj-bad" hidden></p>
+      <p id="pj-empty" class="pj-none" hidden>لسه مفيش مشاريع. اضغط «مشروع جديد» واكتب اسمه، وبعدين اكتب ملاحظاته.</p>
+      <div data-needs-project>
+        <label class="block" for="pj-text">ملاحظة جديدة
+          <textarea id="pj-text" class="pj-text" rows="4" dir="auto" placeholder="اللي اتعمل النهارده، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، المطلوب بكرة…"></textarea>
+        </label>
+        <div class="actions">
+          <button id="pj-add" class="primary" type="button">إضافة ملاحظة</button>
+          <input id="pj-q" class="pj-q" type="search" autocomplete="off" dir="auto" placeholder="ابحث في ملاحظات المشروع" aria-label="ابحث في ملاحظات المشروع">
+        </div>
+        <ol id="pj-notes" class="pj-notes"></ol>
+      </div>
+      <div id="pj-warn" class="notice" hidden></div>
+      <div class="actions">
+        <button id="pj-export" class="secondary primary" type="button" data-needs-project>تصدير ملاحظات المشروع (TXT)</button>
+        <button id="pj-backup" class="secondary primary" type="button" data-needs-project>نسخة احتياطية لكل المشاريع</button>
+        <label class="file-btn secondary" for="pj-restore">استرجاع نسخة احتياطية</label><input type="file" id="pj-restore" accept=".json,application/json" hidden>
+      </div>
+      <p id="pj-status" class="hint" hidden></p>
+      <p class="hint">الملاحظات بتتحفظ على الجهاز ده بس، والموقع والأبليكيشن كل واحد بيحفظ لوحده. خد نسخة احتياطية عشان تنقلها لجهاز تاني أو تحتفظ بيها.</p>
+    </div>
+  </section>
+
   <footer>
     <div class="sign-title">GeoX</div>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
@@ -952,6 +1017,39 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
+    "المشاريع": "Projects",
+    "ملاحظات المشاريع": "Project notes",
+    "لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.": "Each project keeps its own notes, each with its date and time: what was done, benchmarks and approved coordinates, site problems, and what comes next.",
+    "المشروع": "Project",
+    "مشروع جديد": "New project",
+    "تغيير الاسم": "Rename",
+    "حذف المشروع": "Delete project",
+    "اضغط تاني للحذف": "Press again to delete",
+    "اسم المشروع": "Project name",
+    "مثلًا: طريق الواحات – كم 12": "e.g. Oasis road – km 12",
+    "حفظ": "Save",
+    "إلغاء": "Cancel",
+    "لسه مفيش مشاريع. اضغط «مشروع جديد» واكتب اسمه، وبعدين اكتب ملاحظاته.": "No projects yet. Press “New project”, name it, then write its notes.",
+    "ملاحظة جديدة": "New note",
+    "اللي اتعمل النهارده، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، المطلوب بكرة…": "What was done today, benchmarks and approved coordinates, site problems, what is needed tomorrow…",
+    "إضافة ملاحظة": "Add note",
+    "ابحث في ملاحظات المشروع": "Search this project's notes",
+    "تعديل": "Edit",
+    "حذف": "Delete",
+    "أكيد؟ احذف": "Sure? Delete",
+    "مفيش ملاحظات فيها الكلام ده.": "No notes contain that.",
+    "مفيش ملاحظات في المشروع ده لسه.": "No notes in this project yet.",
+    "تصدير ملاحظات المشروع (TXT)": "Export project notes (TXT)",
+    "نسخة احتياطية لكل المشاريع": "Back up all projects",
+    "استرجاع نسخة احتياطية": "Restore a backup",
+    "الملاحظات بتتحفظ على الجهاز ده بس، والموقع والأبليكيشن كل واحد بيحفظ لوحده. خد نسخة احتياطية عشان تنقلها لجهاز تاني أو تحتفظ بيها.": "Notes are saved on this device only, and the website and the app each keep their own. Take a backup to move them to another device or to keep them.",
+    "المتصفح ده مش سامح بالحفظ، فالملاحظات هتضيع لما تقفل الصفحة. خد نسخة احتياطية قبل ما تقفل.": "This browser does not allow saving, so the notes will be lost when the page closes. Take a backup before closing.",
+    "مساحة الحفظ على الجهاز خلصت، فآخر تعديل ما اتحفظش. خد نسخة احتياطية وامسح ملاحظات قديمة.": "The device storage is full, so the last change was not saved. Take a backup and delete old notes.",
+    "اكتب اسم المشروع.": "Enter the project name.",
+    "فيه مشروع بنفس الاسم.": "A project with that name already exists.",
+    "الملف ده مش نسخة احتياطية من ملاحظات GeoX.": "This file is not a GeoX notes backup.",
+    "حفظ في ملاحظات المشروع": "Save to project notes",
+    "المحطات": "Stations",
     "الترافيرس": "Traverse",
     "الترافيرس (Traverse)": "Traverse",
     "نوع الترافيرس": "Traverse type",
@@ -1364,6 +1462,9 @@ const I18N = (() => {
     [/^علامة مش مفهومة: (.*)$/, "Unrecognised character: $1"],
     [/^الدالة (.*) مش معروفة\.$/, "Unknown function: $1."],
     [/^(.*) محتاجة (\d+) قيمة\.$/, "$1 needs $2 value(s)."],
+    // Project notes.
+    [/^\(اتعدلت (.*)\)$/, "(edited $1)"],
+    [/^اتسترجعت النسخة: مشاريع جديدة (\d+)، ملاحظات جديدة أو أحدث (\d+)\.$/, "Backup restored: $1 new projects, $2 new or newer notes."],
     // Traverse.
     [/^المحطة (.*): المسافة "(.*)" مش رقم\.$/, 'Station $1: the distance "$2" is not a number.'],
     [/^زاوية المحطة (.*): "(.*)" مش مفهوم\. اكتبه ⁦123 45 30⁩ أو ⁦123\.4530⁩\.$/, 'Angle at station $1: "$2" is not understood. Write it as 123 45 30 or 123.4530.'],
@@ -7614,6 +7715,204 @@ $("#lv-file").onchange = async (e) => {
   } catch (err) { showError($("#lv-out"), err); }
 };
 
+// ---------- project notes ----------
+// Each project keeps its own dated notes on this device (localStorage), with a backup file to move
+// or keep them. The notes are the engineer's own words and are never translated.
+const PJ_KEY = "geox-projects";
+let pj = { current: null, projects: [] };
+let pjNaming = null; // "new" or "rename" while the name box is open
+const pjId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pjCurrent = () => pj.projects.find((p) => p.id === pj.current) ?? null;
+const pjPlain = (s) => String(s ?? "").toLowerCase().replace(/[ًٌٍَُِّْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const pjDate = (t) => {
+  const d = new Date(t), z = (n) => String(n).padStart(2, "0");
+  return `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}`;
+};
+const PJ_NO_STORAGE = "المتصفح ده مش سامح بالحفظ، فالملاحظات هتضيع لما تقفل الصفحة. خد نسخة احتياطية قبل ما تقفل.";
+// A project as stored here or in a backup file; anything that is not one is dropped.
+function pjClean(p) {
+  if (!p || typeof p !== "object" || typeof p.name !== "string" || !p.name.trim()) return null;
+  const now = Date.now();
+  const time = (v, d) => (Number.isFinite(v) ? v : d);
+  const notes = (Array.isArray(p.notes) ? p.notes : []).filter((n) => n && typeof n.text === "string" && n.text.trim())
+    .map((n) => ({ id: String(n.id || pjId()), text: n.text.slice(0, 20000), created: time(n.created, now), updated: time(n.updated, time(n.created, now)) }));
+  return { id: String(p.id || pjId()), name: p.name.trim().slice(0, 80), created: time(p.created, now), updated: time(p.updated, now), notes };
+}
+const pjShow = (sel, text) => { const el = $(sel); el.textContent = text ?? ""; el.hidden = !text; };
+function pjLoad() {
+  let raw = null;
+  try { raw = localStorage.getItem(PJ_KEY); } catch { pjShow("#pj-warn", PJ_NO_STORAGE); return; }
+  pj = { current: null, projects: [] };
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    pj = { current: typeof d?.current === "string" ? d.current : null, projects: (Array.isArray(d?.projects) ? d.projects : []).map(pjClean).filter(Boolean) };
+  } catch {
+    // Unreadable: keep it aside rather than write over it.
+    try { localStorage.setItem(`${PJ_KEY}-unreadable-${Date.now()}`, raw); } catch { /* storage blocked */ }
+  }
+}
+function pjSave() {
+  try {
+    localStorage.setItem(PJ_KEY, JSON.stringify(pj));
+    pjShow("#pj-warn", "");
+  } catch (err) {
+    pjShow("#pj-warn", err?.name === "QuotaExceededError" ? "مساحة الحفظ على الجهاز خلصت، فآخر تعديل ما اتحفظش. خد نسخة احتياطية وامسح ملاحظات قديمة." : PJ_NO_STORAGE);
+  }
+}
+function pjRender() {
+  const list = [...pj.projects].sort((a, b) => b.updated - a.updated);
+  if (!list.some((p) => p.id === pj.current)) pj.current = list[0]?.id ?? null;
+  const sel = $("#pj-select");
+  // The name isolated, so an Arabic name keeps its order next to the count in either language.
+  sel.innerHTML = list.map((p) => `<option value="${esc(p.id)}">⁨${esc(p.name)}⁩ (${p.notes.length})</option>`).join("");
+  sel.value = pj.current ?? "";
+  for (const el of document.querySelectorAll("#tab-proj [data-needs-project]")) el.hidden = !list.length;
+  $("#pj-empty").hidden = list.length > 0 || !$("#pj-name-form").hidden;
+  pjRenderNotes();
+}
+function pjRenderNotes() {
+  const p = pjCurrent();
+  const q = pjPlain($("#pj-q").value.trim());
+  const notes = (p?.notes ?? []).filter((n) => !q || pjPlain(n.text).includes(q)).sort((a, b) => b.created - a.created);
+  $("#pj-notes").innerHTML = !p ? "" : notes.length ? notes.map((n) => `<li class="pj-note" data-id="${esc(n.id)}">
+    <div class="pj-note-head"><time dir="ltr">${pjDate(n.created)}</time>${n.updated - n.created > 60000 ? `<small>(اتعدلت ${pjDate(n.updated)})</small>` : ""}<span class="pj-note-tools"><button type="button" class="pj-act" data-act="edit">تعديل</button><button type="button" class="pj-act bad" data-act="del" data-label="حذف" data-confirm="أكيد؟ احذف">حذف</button></span></div>
+    <div class="pj-note-text" dir="auto" data-no-i18n>${esc(n.text)}</div></li>`).join("")
+    : `<li class="pj-none">${q ? "مفيش ملاحظات فيها الكلام ده." : "مفيش ملاحظات في المشروع ده لسه."}</li>`;
+}
+// Deleting asks for a second press within a few seconds.
+function pjArm(button, run) {
+  if (button.dataset.armed) { clearTimeout(Number(button.dataset.armed)); delete button.dataset.armed; button.textContent = button.dataset.label; run(); return; }
+  button.textContent = button.dataset.confirm;
+  button.dataset.armed = String(setTimeout(() => { delete button.dataset.armed; button.textContent = button.dataset.label; }, 4000));
+}
+function pjAskName(mode) {
+  pjNaming = mode;
+  $("#pj-name-form").hidden = false;
+  $("#pj-empty").hidden = true;
+  pjShow("#pj-msg", "");
+  $("#pj-name").value = mode === "rename" ? pjCurrent()?.name ?? "" : "";
+  $("#pj-name").focus();
+}
+function pjAdd() {
+  const box = $("#pj-text");
+  const text = box.value.trim();
+  if (!pjCurrent()) return pjAskName("new");
+  if (!text) return box.focus();
+  const p = pjCurrent(), now = Date.now();
+  p.notes.push({ id: pjId(), text: text.slice(0, 20000), created: now, updated: now });
+  p.updated = now;
+  box.value = "";
+  $("#pj-q").value = "";
+  pjSave();
+  pjRender();
+}
+// Text from another tab (a traverse result) goes into the new note, to be filed under a project.
+function pjCompose(text) {
+  showTab("proj");
+  const box = $("#pj-text");
+  box.value = box.value.trim() ? `${box.value.trim()}\n\n${text}` : text;
+  if (!pjCurrent()) { pjAskName("new"); return; }
+  box.focus();
+  box.scrollIntoView({ block: "center" });
+}
+async function pjDownload(filename, data) {
+  if (!downloads) return;
+  try { await downloads.save({ filename, data }); }
+  catch (err) { if (err?.code !== "declined") pjShow("#pj-status", err?.message || "ما قدرتش أحفظ الملف."); }
+}
+const pjFileName = (s) => s.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, "-").replace(/\s+/g, " ").trim().slice(0, 60) || "project";
+
+$("#pj-new").onclick = () => pjAskName("new");
+$("#pj-rename").onclick = () => pjAskName("rename");
+$("#pj-name-cancel").onclick = () => { $("#pj-name-form").hidden = true; pjShow("#pj-msg", ""); pjRender(); };
+$("#pj-name-form").onsubmit = (e) => {
+  e.preventDefault();
+  const name = $("#pj-name").value.trim().replace(/\s+/g, " ").slice(0, 80);
+  if (!name) return pjShow("#pj-msg", "اكتب اسم المشروع.");
+  const same = pj.projects.find((p) => p.name === name);
+  if (same && !(pjNaming === "rename" && same.id === pj.current)) return pjShow("#pj-msg", "فيه مشروع بنفس الاسم.");
+  const now = Date.now();
+  if (pjNaming === "rename" && pjCurrent()) Object.assign(pjCurrent(), { name, updated: now });
+  else {
+    const p = { id: pjId(), name, created: now, updated: now, notes: [] };
+    pj.projects.push(p);
+    pj.current = p.id;
+  }
+  $("#pj-name-form").hidden = true;
+  pjShow("#pj-msg", "");
+  pjSave();
+  pjRender();
+  $("#pj-text").focus();
+};
+$("#pj-select").onchange = (e) => { pj.current = e.target.value; $("#pj-q").value = ""; pjSave(); pjRenderNotes(); };
+$("#pj-delete").onclick = (e) => pjArm(e.currentTarget, () => {
+  pj.projects = pj.projects.filter((p) => p.id !== pj.current);
+  pj.current = null;
+  pjSave();
+  pjRender();
+});
+$("#pj-add").onclick = pjAdd;
+$("#pj-text").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); pjAdd(); } });
+$("#pj-q").addEventListener("input", pjRenderNotes);
+$("#pj-notes").onclick = (e) => {
+  const b = e.target.closest("button[data-act]"), li = e.target.closest(".pj-note"), p = pjCurrent();
+  const note = p?.notes.find((n) => n.id === li?.dataset.id);
+  if (!b || !note) return;
+  const act = b.dataset.act;
+  if (act === "del") pjArm(b, () => { p.notes = p.notes.filter((n) => n !== note); p.updated = Date.now(); pjSave(); pjRender(); });
+  else if (act === "edit") {
+    li.querySelector(".pj-note-tools").hidden = true;
+    li.querySelector(".pj-note-text").outerHTML = `<div class="pj-edit"><textarea class="pj-text" dir="auto" rows="5">${esc(note.text)}</textarea><div class="actions"><button type="button" class="primary" data-act="save">حفظ</button><button type="button" class="secondary primary" data-act="cancel">إلغاء</button></div></div>`;
+    li.querySelector("textarea").focus();
+  } else if (act === "save") {
+    const text = li.querySelector("textarea").value.trim();
+    if (!text) return;
+    note.text = text.slice(0, 20000);
+    note.updated = p.updated = Date.now();
+    pjSave();
+    pjRender();
+  } else if (act === "cancel") pjRenderNotes();
+};
+$("#pj-export").onclick = () => {
+  const p = pjCurrent();
+  if (!p) return;
+  const notes = [...p.notes].sort((a, b) => a.created - b.created);
+  pjDownload(`${pjFileName(p.name)}.txt`, "﻿" + [p.name, "", ...notes.flatMap((n) => [`— ${pjDate(n.created)}`, n.text, ""])].join("\r\n"));
+};
+$("#pj-backup").onclick = () => {
+  const stamp = new Date().toISOString().slice(0, 10);
+  pjDownload(`geox-notes-${stamp}.json`, JSON.stringify({ app: "GeoX", kind: "project-notes", version: 1, exported: new Date().toISOString(), projects: pj.projects }, null, 1));
+};
+// A backup is merged in: a project by its id or its name, a note by its id, the newer copy winning.
+$("#pj-restore").onchange = async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  let data = null;
+  try { data = JSON.parse(await file.text()); } catch { /* not JSON */ }
+  const list = data?.kind === "project-notes" && Array.isArray(data.projects) ? data.projects.map(pjClean).filter(Boolean) : null;
+  if (!list) return pjShow("#pj-status", "الملف ده مش نسخة احتياطية من ملاحظات GeoX.");
+  let projects = 0, notes = 0;
+  for (const q of list) {
+    const p = pj.projects.find((x) => x.id === q.id) ?? pj.projects.find((x) => x.name === q.name);
+    if (!p) { pj.projects.push(q); projects++; notes += q.notes.length; continue; }
+    for (const n of q.notes) {
+      const m = p.notes.find((x) => x.id === n.id);
+      if (!m) { p.notes.push(n); notes++; }
+      else if (n.updated > m.updated) { Object.assign(m, n); notes++; }
+    }
+    p.updated = Math.max(p.updated, q.updated);
+  }
+  pjSave();
+  pjRender();
+  pjShow("#pj-status", `اتسترجعت النسخة: مشاريع جديدة ${projects}، ملاحظات جديدة أو أحدث ${notes}.`);
+};
+// Another window of the site changed the notes.
+window.addEventListener("storage", (e) => { if (e.key === PJ_KEY) { pjLoad(); pjRender(); } });
+pjLoad();
+pjRender();
+
 // ---------- traverse ----------
 // Worked examples from true coordinates, with small field errors so the adjustment shows.
 const TR_EXAMPLES = {
@@ -7624,6 +7923,22 @@ const TR_EXAMPLES = {
 const TR_FIELDS = ["e", "n", "az", "back", "be", "bn", "ee", "en", "fore", "fe", "fn"];
 const FEDDAN = 4200.83;
 let trLast = null;
+let trSummary = null; // the last result, for a project note
+const TR_KINDS = { loop: "مقفول على نفسه (Closed loop)", link: "مقفول بين نقطتين معلومتين (Link)", open: "مفتوح (Open)" };
+// The last result as a project note, in the language on screen.
+function trNoteText() {
+  const s = trSummary, en = I18N.lang === "en", comma = en ? ", " : "، ";
+  const t = (x) => (en ? I18N.tr(x) ?? x : x);
+  // In an Arabic note, numbers and angles keep the order they are written in.
+  const ltr = (x) => (en || /[؀-ۿ]/.test(x) ? x : `⁦${x}⁩`);
+  const method = s.kind === "open" ? "" : comma + t(s.method === "transit" ? "ترانزيت (Transit)" : "بوديتش (Bowditch / Compass)");
+  return [
+    `${t("الترافيرس")}: ${t(TR_KINDS[s.kind])}${method}`,
+    `${t("المحطات")}: ${s.stations.join(comma)}`,
+    ...s.items.map(([label, value]) => `${t(label)}: ${ltr(t(value))}`),
+    ...s.verdicts.map(t),
+  ].join("\n");
+}
 let trExample = true; // the boxes hold a worked example, not the engineer's own data
 const trKind = () => $("#tr-kind").value;
 const trVal = (k) => $(`#tr-${k}`).value.trim();
@@ -7776,6 +8091,11 @@ function trRender(r, extra) {
   $("#tr-out").innerHTML = panel("TR", "نتيجة الترافيرس", `${stamps ? `<div>${stamps}</div>` : ""}${readouts(items)}${method}${noteHtml}${table(cols, lines)}`);
   $("#tr-plot").innerHTML = trPlan(r);
   $("#tr-csv").disabled = false;
+  trSummary = {
+    kind: r.kind, method: r.method, stations: r.stations.map((s) => s.id), items,
+    verdicts: [a && (a.accepted ? "القفل الزاوي مقبول" : "القفل الزاوي مرفوض"), L && (L.accepted ? "الدقة الخطية مقبولة" : "الدقة الخطية أقل من المطلوب")].filter(Boolean),
+  };
+  $("#tr-note").disabled = false;
 }
 // What reading a file found, shown with every result until the rows are edited.
 let trFileNotes = null;
@@ -7790,6 +8110,8 @@ function runTraverse() {
     trLast = null;
     $("#tr-plot").innerHTML = "";
     $("#tr-csv").disabled = true;
+    trSummary = null;
+    $("#tr-note").disabled = true;
     if (trFileNotes && parsed) out.innerHTML = `<div class="notice">${trFileNotes.map((x, i) => (i ? esc(x) : `<b>${esc(x)}</b>`)).join("<br>")}<br>${esc(err?.message || err)}<br>${esc("كمّل أو صحّح البيانات فوق واضغط «احسب وصحّح».")}</div>`;
     else showError(out, err);
   }
@@ -7847,6 +8169,7 @@ $("#tr-kind").onchange = () => {
 for (const k of TR_FIELDS) $(`#tr-${k}`).addEventListener("input", () => (trExample = false));
 $("#tr-rows").addEventListener("input", () => { trExample = false; trFileNotes = null; });
 bindCsv($("#tr-csv"), "traverse.csv", () => trLast);
+$("#tr-note").onclick = () => { if (trSummary) pjCompose(trNoteText()); };
 $("#tr-file").onchange = async (e) => {
   const file = e.target.files[0];
   e.target.value = "";
