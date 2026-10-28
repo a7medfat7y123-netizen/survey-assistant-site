@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%85%93%F0%93%82%8B%F0%93%82%93%F0%93%8F%8F%F0%93%80%8B&display=swap">
 <script>
   // Before first paint: saved theme and language, and the welcome screen once per visit.
   (function (h) {
@@ -308,6 +309,12 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
+/* «المهندس» in ancient Egyptian: imy-r kꜣt, "overseer of works", read left to right as the signs face. */
+.brand-egy { margin: 0 0 22px; font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: clamp(38px, 9vw, 54px); line-height: 1.15; color: var(--gold);
+  direction: ltr; unicode-bidi: isolate; letter-spacing: .06em; filter: drop-shadow(0 4px 22px var(--paper)); }
+.brand-egy-head { font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: .9em; font-weight: 400; color: var(--gold); direction: ltr; unicode-bidi: isolate;
+  margin-inline-start: 10px; vertical-align: middle; letter-spacing: .04em; }
+@media (max-width: 699px) { .brand-egy-head { display: none; } }
 .install-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .install-btn[hidden] { display: none; }
 .install-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -444,7 +451,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .intro-card .logo { width: 88px; height: 88px; animation: seal .7s .2s ease-out both; }
 @keyframes seal { from { opacity: 0; transform: rotate(-25deg) scale(.85); } to { opacity: 1; transform: none; } }
 .intro-card .hello { margin: 6px 0 0; font-family: var(--f-head); font-weight: 700; font-size: clamp(20px, 4.2vw, 28px); color: var(--ink); text-shadow: 0 1px 14px var(--paper); }
-.intro-card h2 { display: block; margin: 0 0 26px; line-height: 1.2; }
+.intro-card h2 { display: block; margin: 0 0 4px; line-height: 1.2; }
 /* The name catches a gold glint once it lands. */
 .intro-card .brand-name { font-size: clamp(52px, 10vw, 76px); filter: drop-shadow(0 4px 22px var(--paper));
   background: linear-gradient(100deg, var(--gold) 42%, color-mix(in srgb, var(--gold) 30%, white) 50%, var(--gold) 58%) 120% 0 / 300% 100%;
@@ -497,6 +504,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     </div>
     <p class="hello">أهلاً يا هندسة</p>
     <h2 id="intro-title"><span class="brand-name">المهندس</span></h2>
+    <p class="brand-egy" role="img" aria-label="المهندس بالمصري القديم: imy-r kꜣt، يعني المشرف على الأعمال" data-no-i18n>𓅓𓂋𓂓𓏏𓀋</p>
     <button class="primary" type="button" id="intro-go">دخول</button>
     <p class="fine">ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
   </div>
@@ -509,7 +517,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <button id="find-btn" class="menu-btn" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>بحث</button>
       <div class="brand">
         <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
-        <div class="wordmark"><h1>المهندس</h1><small>المهندس كيو اس</small></div>
+        <div class="wordmark"><h1>المهندس <span class="brand-egy-head" role="img" aria-label="المهندس بالمصري القديم: imy-r kꜣt، يعني المشرف على الأعمال" data-no-i18n>𓅓𓂋𓂓𓏏𓀋</span></h1><small>المهندس كيو اس</small></div>
       </div>
       <span class="grow"></span>
       <div class="meta">
