@@ -300,6 +300,38 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
+/* Scientific calculator: a tab on the page edge opens a side panel; wide screens make room for it. */
+.sc-tab { position: fixed; top: 50%; inset-inline-end: 0; z-index: 39; transform: translateY(-50%); width: 42px; height: 58px; display: grid; place-items: center; cursor: pointer;
+  color: var(--gold); background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); border-inline-end: 0; border-start-start-radius: 14px; border-end-start-radius: 14px; box-shadow: 0 6px 24px -10px var(--shadow); }
+.sc-tab:hover { background: color-mix(in srgb, var(--gold) 14%, var(--sheet)); }
+.sc-tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.sci-open .sc-tab { display: none; }
+.sci { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; z-index: 43; width: min(380px, 100vw); display: flex; flex-direction: column; gap: 10px; padding: 12px; overflow-y: auto;
+  background: var(--sheet); border-inline-start: 1px solid color-mix(in srgb, var(--gold) 25%, var(--line)); box-shadow: 0 0 60px -10px var(--shadow); }
+.sci[hidden] { display: none; }
+@media (min-width: 1100px) { :root.sci-open body { padding-inline-end: 380px; } }
+.sc-head { display: flex; align-items: center; gap: 8px; }
+.sc-head b { flex: 1; font-family: var(--f-head); font-size: 16px; color: var(--gold); }
+.sc-mode button { font-family: var(--f-num); font-size: 11.5px; }
+.sc-screen { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.sc-in { display: block; width: 100%; background: transparent; border: 0; outline: 0; padding: 0; font-family: var(--f-num); font-size: 21px; color: var(--ink); text-align: right; }
+.sc-out { display: block; min-height: 22px; margin-top: 4px; text-align: right; font-family: var(--f-num); font-size: 16px; color: var(--muted); overflow-wrap: anywhere; }
+.sc-out.err { color: var(--cut); font-family: var(--f-body); font-size: 13px; }
+.sc-keys { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.sc-keys button { font-family: var(--f-num); font-size: 15px; min-height: 44px; padding: 0 2px; border-radius: 10px; cursor: pointer; color: var(--ink); background: var(--sheet-2); border: 1px solid var(--hair); }
+.sc-keys button:hover { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+.sc-keys button:active { transform: translateY(1px); }
+.sc-keys .fn { font-size: 13px; color: var(--muted); }
+.sc-keys .op { color: var(--gold); font-size: 17px; }
+.sc-keys .num { background: color-mix(in srgb, var(--ink) 7%, var(--sheet-2)); }
+.sc-keys [aria-pressed="true"] { border-color: var(--gold); color: var(--gold); }
+.sc-keys .eq { grid-column: span 2; background: var(--gold); border-color: var(--gold); color: #1d1404; font-size: 18px; font-weight: 600; }
+.sc-hist-h { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); }
+.sc-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-family: var(--f-num); font-size: 13px; }
+.sc-hist li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.sc-hist li:hover { background: var(--sheet-2); }
+.sc-hist li span { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-hist li b { font-weight: 500; color: var(--ink); white-space: nowrap; }
 /* Site search: a palette over the page. */
 .find-ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 @media (max-width: 640px) { #find-btn .find-ic { width: 18px; height: 18px; } }
@@ -489,6 +521,21 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <ul id="find-list" class="find-list" role="listbox"></ul>
   </div>
 </div>
+<button id="sc-tab" class="sc-tab" type="button" aria-controls="sci" aria-expanded="false" aria-label="حاسبة علمية" title="حاسبة علمية"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5v2.5"/></svg></button>
+<aside id="sci" class="sci" aria-label="حاسبة علمية" hidden>
+  <div class="sc-head">
+    <b>حاسبة علمية</b>
+    <div class="seg sc-mode" role="group" aria-label="وحدة الزوايا" data-no-i18n><button type="button" data-angle="deg">DEG</button><button type="button" data-angle="rad">RAD</button></div>
+    <button id="sc-close" class="dr-icon" type="button" aria-label="قفل">✕</button>
+  </div>
+  <div class="sc-screen" dir="ltr">
+    <input id="sc-in" class="sc-in" autocomplete="off" spellcheck="false" aria-label="العملية">
+    <output id="sc-out" class="sc-out" aria-live="polite"></output>
+  </div>
+  <div id="sc-keys" class="sc-keys" dir="ltr" data-no-i18n></div>
+  <div class="sc-hist-h"><span>السجل</span><button id="sc-clear" class="link" type="button">مسح السجل</button></div>
+  <ol id="sc-hist" class="sc-hist" dir="ltr"></ol>
+</aside>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" aria-label="أدوات وحسابات وتعريفات" inert>
   <div class="dr-head">
@@ -975,6 +1022,9 @@ const I18N = (() => {
     [/^(.*) → (.*) · مبالغة رأسية ≈ ×(.*)$/, "$1 → $2 · vertical exaggeration ≈ ×$3"],
     [/^CUT (.*) m² · FILL (.*) m² · الإزاحة بالمتر، الشمال سالب$/, "CUT $1 m² · FILL $2 m² · offsets in metres, left negative"],
     [/^حصلت مشكلة: (.*)$/, "Something went wrong: $1"],
+    [/^علامة مش مفهومة: (.*)$/, "Unrecognised character: $1"],
+    [/^الدالة (.*) مش معروفة\.$/, "Unknown function: $1."],
+    [/^(.*) محتاجة (\d+) قيمة\.$/, "$1 needs $2 value(s)."],
     // File summary under the QC report: name: table "x": N rows. Columns: a | b. Recognised: a→x، b→y.
     [/^(.*): جدول "(.*)": (\d+) صف\. الأعمدة: (.*?)\.(?: اتعرفت: (.*)\.)?$/, (m, f, t, n, cols, rec) =>
       `${f}: table "${t}": ${n} rows. Columns: ${cols}.${rec ? ` Recognised: ${rec.replace(/، /g, ", ")}.` : ""}`],
@@ -2814,6 +2864,192 @@ function runEngineering(id, values) {
   return calc.run(values ?? {});
 }
 
+// ---- src/engine/scicalc.js
+// Scientific calculator for the side panel: a small expression parser (no eval).
+// Precedence, low to high: + −, × ÷ and implied multiplication (2π, 3(4)), unary minus, ^ (right to left),
+// then postfix ! and %. So -2^2 = -4 and 2^3^2 = 512, as on a scientific calculator.
+
+
+const scDeg = (x, angle) => (angle === "deg" ? (x * Math.PI) / 180 : x);
+const scFromRad = (x, angle) => (angle === "deg" ? (x * 180) / Math.PI : x);
+// Snap float noise so sin(180°) is 0 and cos(60°) is 0.5.
+const scSnap = (x) => {
+  if (Math.abs(x) < 1e-12) return 0;
+  const r = Math.round(x * 1e12) / 1e12;
+  return Math.abs(r - x) < 1e-14 ? r : x;
+};
+
+/** Gamma by the Lanczos approximation (g = 7), for factorials of non-integers. */
+function scGamma(z) {
+  if (z < 0.5) return Math.PI / (Math.sin(Math.PI * z) * scGamma(1 - z));
+  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  z -= 1;
+  let x = c[0];
+  for (let i = 1; i < 9; i++) x += c[i] / (z + i);
+  const t = z + 7.5;
+  return Math.sqrt(2 * Math.PI) * t ** (z + 0.5) * Math.exp(-t) * x;
+}
+
+function scFactorial(n) {
+  if (Number.isInteger(n)) {
+    if (n < 0) fail("المضروب مش معرّف للأعداد السالبة الصحيحة.");
+    if (n > 170) fail("النتيجة كبيرة جدًا.");
+    let r = 1;
+    for (let i = 2; i <= n; i++) r *= i;
+    return r;
+  }
+  return scGamma(n + 1);
+}
+
+const scCombo = (n, r, perm) => {
+  if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) fail("nCr و nPr محتاجين أعداد صحيحة و r ≤ n.");
+  let out = 1;
+  for (let i = 0; i < r; i++) out *= (n - i) / (perm ? 1 : i + 1);
+  return Math.round(out);
+};
+
+const SC_CONST = { pi: Math.PI, e: Math.E };
+// [argument count, fn(args, angle)]
+const SC_FUNCS = {
+  sin: [1, ([x], a) => scSnap(Math.sin(scDeg(x, a)))],
+  cos: [1, ([x], a) => scSnap(Math.cos(scDeg(x, a)))],
+  tan: [1, ([x], a) => {
+    if (Math.abs(Math.cos(scDeg(x, a))) < 1e-12) fail("ظا الزاوية دي مش معرّف.");
+    return scSnap(Math.tan(scDeg(x, a)));
+  }],
+  asin: [1, ([x], a) => { if (x < -1 || x > 1) fail("sin⁻¹ محتاج قيمة بين -1 و 1."); return scSnap(scFromRad(Math.asin(x), a)); }],
+  acos: [1, ([x], a) => { if (x < -1 || x > 1) fail("cos⁻¹ محتاج قيمة بين -1 و 1."); return scSnap(scFromRad(Math.acos(x), a)); }],
+  atan: [1, ([x], a) => scSnap(scFromRad(Math.atan(x), a))],
+  sinh: [1, ([x]) => Math.sinh(x)],
+  cosh: [1, ([x]) => Math.cosh(x)],
+  tanh: [1, ([x]) => Math.tanh(x)],
+  ln: [1, ([x]) => { if (x <= 0) fail("اللوغاريتم محتاج رقم أكبر من صفر."); return Math.log(x); }],
+  log: [1, ([x]) => { if (x <= 0) fail("اللوغاريتم محتاج رقم أكبر من صفر."); return scSnap(Math.log10(x)); }],
+  sqrt: [1, ([x]) => { if (x < 0) fail("الجذر التربيعي مش معرّف للسالب."); return Math.sqrt(x); }],
+  cbrt: [1, ([x]) => Math.cbrt(x)],
+  exp: [1, ([x]) => Math.exp(x)],
+  abs: [1, ([x]) => Math.abs(x)],
+  round: [1, ([x]) => Math.round(x)],
+  floor: [1, ([x]) => Math.floor(x)],
+  ceil: [1, ([x]) => Math.ceil(x)],
+  ncr: [2, ([n, r]) => scCombo(n, r, false)],
+  npr: [2, ([n, r]) => scCombo(n, r, true)],
+};
+
+function scTokens(src) {
+  const s = String(src ?? "")
+    .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/٫/g, ".").replace(/،/g, ",")
+    .replace(/[×·]/g, "*").replace(/÷/g, "/").replace(/[−–]/g, "-")
+    .replace(/π/g, " pi ").replace(/√/g, " sqrt ").replace(/∛/g, " cbrt ");
+  const out = [];
+  let i = 0;
+  while (i < s.length) {
+    const rest = s.slice(i);
+    let m;
+    if (/^\s/.test(rest)) { i++; continue; }
+    if ((m = rest.match(/^(\d+\.?\d*|\.\d+)(E[+-]?\d+)?/))) out.push({ t: "num", v: Number(m[0]) });
+    else if ((m = rest.match(/^[A-Za-z]+/))) out.push({ t: "id", v: m[0].toLowerCase() });
+    else if ((m = rest.match(/^[-+*/^!%(),]/))) out.push({ t: m[0] });
+    else fail(`علامة مش مفهومة: ${rest[0]}`);
+    i += m[0].length;
+  }
+  return out;
+}
+
+/** Evaluate an expression. angle: "deg" | "rad"; ans: the last answer, for "ans". */
+function scEvaluate(expr, { angle = "deg", ans = 0 } = {}) {
+  const tk = scTokens(expr);
+  if (!tk.length) fail("اكتب عملية.");
+  let p = 0;
+  const peek = () => tk[p];
+  const take = (t) => (tk[p]?.t === t ? tk[p++] : null);
+  const startsValue = (x) => x && (x.t === "num" || x.t === "id" || x.t === "(");
+
+  function expr0() {
+    let v = term();
+    for (;;) {
+      if (take("+")) v += term();
+      else if (take("-")) v -= term();
+      else return v;
+    }
+  }
+  function term() {
+    let v = unary();
+    for (;;) {
+      if (take("*")) v *= unary();
+      else if (take("/")) {
+        const d = unary();
+        if (d === 0) fail("القسمة على صفر.");
+        v /= d;
+      } else if (startsValue(peek())) v *= power(); // implied: 2π, 3(4), 2sin30
+      else return v;
+    }
+  }
+  function unary() {
+    if (take("-")) return -unary();
+    if (take("+")) return unary();
+    return power();
+  }
+  function power() {
+    const base = postfix();
+    if (take("^")) {
+      const v = base ** unary();
+      if (Number.isNaN(v)) fail("الأس ده مش معرّف للأساس السالب.");
+      return v;
+    }
+    return base;
+  }
+  function postfix() {
+    let v = primary();
+    for (;;) {
+      if (take("!")) v = scFactorial(v);
+      else if (take("%")) v /= 100;
+      else return v;
+    }
+  }
+  function group() {
+    const v = expr0();
+    if (!take(")") && p < tk.length) fail("في قوس ناقص أو زيادة.");
+    return v; // a missing ")" at the very end closes itself, as on a calculator
+  }
+  function primary() {
+    const x = tk[p++];
+    if (!x) fail("العملية ناقصة.");
+    if (x.t === "num") return x.v;
+    if (x.t === "(") return group();
+    if (x.t === "id") {
+      if (x.v === "ans") return ans;
+      if (x.v in SC_CONST) return SC_CONST[x.v];
+      const f = SC_FUNCS[x.v] ?? fail(`الدالة ${x.v} مش معروفة.`);
+      const args = [];
+      if (take("(")) {
+        if (!take(")")) {
+          args.push(expr0());
+          while (take(",")) args.push(expr0());
+          if (!take(")") && p < tk.length) fail("في قوس ناقص أو زيادة.");
+        }
+      } else args.push(power()); // sin30, √2
+      if (args.length !== f[0]) fail(`${x.v} محتاجة ${f[0]} قيمة.`);
+      return f[1](args, angle);
+    }
+    fail("العملية مش مكتملة.");
+  }
+
+  const v = expr0();
+  if (p < tk.length) fail("في حاجة زيادة في العملية.");
+  if (!Number.isFinite(v)) fail("النتيجة كبيرة جدًا أو مش معرّفة.");
+  return v;
+}
+
+/** Up to 12 significant digits; scientific notation for very large or small values. */
+function scFormat(x) {
+  if (x === 0 || Object.is(x, -0)) return "0";
+  const a = Math.abs(x);
+  if (a >= 1e15 || a < 1e-9) return x.toExponential(10).replace(/\.?0+e/, "e").replace("e+", "E").replace("e-", "E-");
+  return String(Number(x.toPrecision(12)));
+}
+
 // ---- src/engine/registry.js
 // One registry of calculation tools, shared by the REST API (the calculator tabs)
 // and the AI assistant (as Claude tool definitions), so both use the same math.
@@ -3590,7 +3826,7 @@ ${parts.join("\n")}
   return svg;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN };
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat };
 })();
 </script>
 <script>
@@ -4942,8 +5178,9 @@ $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
   paint();
 }
 
-// Set by the tools drawer below; the site search uses it to open the drawer on a given view.
+// Set by the tools drawer and the side calculator below; the site search uses them.
 let openDrawerAt = () => {};
+let openSci = () => {};
 
 // ---------- optional sign-in (Clerk) ----------
 // The page works the same signed out. With no key, or if Clerk can't load (offline, blocked by
@@ -6134,6 +6371,141 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
   };
 }
 
+// ---------- scientific calculator (side panel) ----------
+{
+  const { scEvaluate, scFormat } = Engine;
+  I18N.add({
+    "حاسبة علمية": "Scientific calculator", "وحدة الزوايا": "Angle unit", "العملية": "Expression", "السجل": "History", "مسح السجل": "Clear history",
+    "اكتب عملية.": "Type an expression.", "القسمة على صفر.": "Division by zero.", "العملية ناقصة.": "The expression is incomplete.", "العملية مش مكتملة.": "The expression is incomplete.",
+    "في قوس ناقص أو زيادة.": "A bracket is missing or extra.", "في حاجة زيادة في العملية.": "There is something extra in the expression.",
+    "النتيجة كبيرة جدًا أو مش معرّفة.": "The result is too large or undefined.", "النتيجة كبيرة جدًا.": "The result is too large.",
+    "ظا الزاوية دي مش معرّف.": "The tangent of this angle is undefined.", "sin⁻¹ محتاج قيمة بين -1 و 1.": "sin⁻¹ needs a value between -1 and 1.", "cos⁻¹ محتاج قيمة بين -1 و 1.": "cos⁻¹ needs a value between -1 and 1.",
+    "اللوغاريتم محتاج رقم أكبر من صفر.": "A logarithm needs a number above zero.", "الجذر التربيعي مش معرّف للسالب.": "The square root of a negative number is undefined.",
+    "المضروب مش معرّف للأعداد السالبة الصحيحة.": "Factorial is undefined for negative integers.", "الأس ده مش معرّف للأساس السالب.": "This power is undefined for a negative base.",
+    "nCr و nPr محتاجين أعداد صحيحة و r ≤ n.": "nCr and nPr need whole numbers with r ≤ n.",
+  });
+  const panel = $("#sci");
+  const input = $("#sc-in");
+  const out = $("#sc-out");
+  const keysBox = $("#sc-keys");
+  const histBox = $("#sc-hist");
+  const touch = window.matchMedia?.("(pointer: coarse)").matches;
+  if (touch) input.inputMode = "none"; // the keypad is the keyboard on phones
+  const store = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } };
+  const read = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  let angle = read("sc-angle") === "rad" ? "rad" : "deg";
+  let hist = [];
+  try { hist = JSON.parse(read("sc-hist") || "[]").slice(0, 30); } catch { hist = []; }
+  let ans = 0;
+  let second = false;
+  let fresh = false; // the input shows a result: a digit starts over, an operator continues
+
+  // [label, what it types, 2nd label, 2nd types, class]. A function value is an action.
+  const wrapAll = (pre, post) => () => { input.value = input.value ? `${pre}(${input.value})${post}` : `${pre}(`; fresh = false; preview(); };
+  const KEYS = [
+    ["2nd", () => { second = !second; paintKeys(); }, null, null, "fn"], ["(", "(", null, null, "op"], [")", ")", null, null, "op"], ["⌫", () => back(), null, null, "op"], ["AC", () => clearAll(), null, null, "op"],
+    ["sin", "sin(", "sin⁻¹", "asin(", "fn"], ["cos", "cos(", "cos⁻¹", "acos(", "fn"], ["tan", "tan(", "tan⁻¹", "atan(", "fn"], ["π", "π", null, null, "fn"], ["e", "e", null, null, "fn"],
+    ["ln", "ln(", "eˣ", "e^(", "fn"], ["log", "log(", "10ˣ", "10^(", "fn"], ["√", "√(", "∛", "∛(", "fn"], ["x²", "^2", "x³", "^3", "fn"], ["xʸ", "^", null, null, "fn"],
+    ["n!", "!", null, null, "fn"], ["7", "7", null, null, "num"], ["8", "8", null, null, "num"], ["9", "9", null, null, "num"], ["÷", "÷", null, null, "op"],
+    ["1/x", wrapAll("1/", ""), null, null, "fn"], ["4", "4", null, null, "num"], ["5", "5", null, null, "num"], ["6", "6", null, null, "num"], ["×", "×", null, null, "op"],
+    ["%", "%", null, null, "fn"], ["1", "1", null, null, "num"], ["2", "2", null, null, "num"], ["3", "3", null, null, "num"], ["−", "−", null, null, "op"],
+    ["Ans", "ans", null, null, "fn"], ["0", "0", null, null, "num"], [".", ".", null, null, "num"], ["EXP", "E", null, null, "fn"], ["+", "+", null, null, "op"],
+    ["nCr", "nCr(", "nPr", "nPr(", "fn"], [",", ",", null, null, "fn"], ["|x|", "abs(", null, null, "fn"], ["=", () => equals(), null, null, "eq"],
+  ];
+  keysBox.innerHTML = KEYS.map(([l, , , , cls], i) => `<button type="button" class="${cls}" data-i="${i}">${l}</button>`).join("");
+  function paintKeys() {
+    keysBox.querySelectorAll("button").forEach((b) => {
+      const k = KEYS[b.dataset.i];
+      b.textContent = second && k[2] ? k[2] : k[0];
+      if (k[0] === "2nd") b.setAttribute("aria-pressed", String(second));
+    });
+    document.querySelectorAll("[data-angle]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.angle === angle)));
+  }
+
+  function type(text) {
+    if (fresh) { if (/^[\d.(πe√∛]|^(sin|cos|tan|asin|acos|atan|ln|log|abs|ncr|npr|ans)/i.test(text)) input.value = ""; fresh = false; }
+    const s = input.selectionStart ?? input.value.length;
+    const e = input.selectionEnd ?? input.value.length;
+    input.value = input.value.slice(0, s) + text + input.value.slice(e);
+    const at = s + text.length;
+    if (!touch) input.focus();
+    input.setSelectionRange(at, at);
+    preview();
+  }
+  function back() {
+    fresh = false;
+    const s = input.selectionStart ?? input.value.length;
+    const e = input.selectionEnd ?? input.value.length;
+    if (s !== e) input.value = input.value.slice(0, s) + input.value.slice(e);
+    else if (s > 0) {
+      // A whole function name goes in one press ("sin(").
+      const m = input.value.slice(0, s).match(/(asin|acos|atan|sin|cos|tan|ln|log|abs|nCr|nPr|ans|√|∛)\($|ans$|.$/u);
+      input.value = input.value.slice(0, s - m[0].length) + input.value.slice(s);
+      input.setSelectionRange(s - m[0].length, s - m[0].length);
+    }
+    preview();
+  }
+  function clearAll() { input.value = ""; out.textContent = ""; out.classList.remove("err"); fresh = false; }
+  const msg = (e) => e?.message ?? String(e);
+  function preview() {
+    out.classList.remove("err");
+    if (!input.value.trim()) { out.textContent = ""; return; }
+    try { out.textContent = `= ${scFormat(scEvaluate(input.value, { angle, ans }))}`; } catch { out.textContent = ""; }
+  }
+  function equals() {
+    const expr = input.value.trim();
+    if (!expr) return;
+    try {
+      const v = scEvaluate(expr, { angle, ans });
+      const r = scFormat(v);
+      ans = v;
+      hist.unshift({ e: expr, r });
+      hist = hist.slice(0, 30);
+      store("sc-hist", JSON.stringify(hist));
+      paintHist();
+      input.value = r;
+      out.textContent = "";
+      fresh = true;
+    } catch (e) {
+      out.textContent = msg(e);
+      out.classList.add("err");
+    }
+  }
+  function paintHist() {
+    histBox.innerHTML = hist.map((h, i) => `<li data-h="${i}"><span>${esc(h.e)}</span><b>= ${esc(h.r)}</b></li>`).join("");
+    $("#sc-clear").hidden = !hist.length;
+  }
+
+  keysBox.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    const k = KEYS[b.dataset.i];
+    const act = second && k[3] ? k[3] : k[1];
+    if (typeof act === "function") act();
+    else type(act);
+    if (second && k[0] !== "2nd") { second = false; paintKeys(); }
+  });
+  input.addEventListener("input", () => { fresh = false; preview(); });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); equals(); } });
+  histBox.addEventListener("click", (e) => { const li = e.target.closest("[data-h]"); if (li) type(hist[li.dataset.h].r); });
+  $("#sc-clear").onclick = () => { hist = []; store("sc-hist", "[]"); paintHist(); };
+  document.querySelectorAll("[data-angle]").forEach((b) => (b.onclick = () => { angle = b.dataset.angle; store("sc-angle", angle); paintKeys(); preview(); }));
+
+  const setSci = (open) => {
+    panel.hidden = !open;
+    document.documentElement.classList.toggle("sci-open", open);
+    $("#sc-tab").setAttribute("aria-expanded", String(open));
+    if (open && !touch) input.focus();
+    if (!open) $("#sc-tab").focus();
+  };
+  openSci = () => setSci(true);
+  $("#sc-tab").onclick = () => setSci(true);
+  $("#sc-close").onclick = () => setSci(false);
+  panel.addEventListener("keydown", (e) => { if (e.key === "Escape") setSci(false); });
+  paintKeys();
+  paintHist();
+}
+
 // ---------- site search: pages, their sections, menu sections, calculators, definitions ----------
 {
   const { CALCULATORS, GROUPS, ENGINEERING_EN } = Engine;
@@ -6162,6 +6534,7 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     for (const g of GROUPS) out.push({ kind: "قسم في القايمة", code: g.code, title: g.title, en: ENGINEERING_EN[g.title], go: () => openDrawerAt({ type: "home" }, { group: g.id }) });
     for (const c of CALCULATORS) out.push({ kind: "حاسبة", code: c.code, title: c.title, en: ENGINEERING_EN[c.title], go: () => openDrawerAt({ type: "calc", id: c.id }) });
     out.push({ kind: "قسم في القايمة", code: "DF", title: "التعريفات الهندسية", en: "Engineering definitions", go: () => openDrawerAt({ type: "glossary", field: "all" }) });
+    out.push({ kind: "حاسبة", code: "SCI", title: "حاسبة علمية", en: "Scientific calculator sin cos tan log", go: () => openSci() });
     for (const [field] of GLOSSARY_FIELDS) for (const [ar, en, dAr, dEn] of GLOSSARY[field]) out.push({ kind: "تعريف", code: field.slice(0, 2).toUpperCase(), title: ar, en, more: `${dAr} ${dEn}`, go: () => openDrawerAt({ type: "glossary", field: "all" }, { q: I18N.lang === "en" ? en : ar }) });
     for (const it of out) { it.key = plain(`${it.title} ${it.en ?? ""} ${I18N.tr(it.title) ?? ""}`); it.extra = plain(it.more ?? ""); }
     return out;
