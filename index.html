@@ -2250,6 +2250,207 @@ function checkTolerances(input) {
   return { toleranceMm: tol, total: rows.length, passed: pass, failed: out.filter((r) => r.status !== "مقبول").length, rows: out };
 }
 
+// ---- src/engine/geodesy.js
+// Latitude/longitude <-> map grid for the coordinate converter: UTM on WGS 84, and the Egyptian
+// belts (ETM) on Egypt 1907. Transverse Mercator by Krüger's series to sixth order (Karney 2011,
+// as in GeographicLib), well under a millimetre inside a zone. The datum shift is the EPSG
+// 7-parameter Helmert transformation, applied as PROJ applies its "towgs84" parameters.
+// test/geodesy.test.js checks it against proj4js.
+
+
+const GEO_D2R = Math.PI / 180;
+const GEO_ELLIPSOIDS = {
+  wgs84: { a: 6378137, f: 1 / 298.257223563 },
+  helmert1906: { a: 6378200, f: 1 / 298.3 }, // Egypt 1907
+};
+// Egypt 1907 -> WGS 84 (EPSG:4229 "towgs84"): metres, arc-seconds, ppm; position-vector rotations.
+const GEO_EGYPT_1907 = [-127.535, 113.495, -12.7, 1.603747, -0.153612, -5.364408, 5.33745];
+
+/** The Egyptian Transverse Mercator belts (EPSG:22991-22994), with the longitudes each one is for. */
+const ETM_BELTS = {
+  purple: { epsg: 22993, lon0: 27, fe: 700000, fn: 200000, west: -Infinity, east: 29 },
+  xpurple: { epsg: 22994, lon0: 27, fe: 700000, fn: 1200000, west: -Infinity, east: 29 },
+  red: { epsg: 22992, lon0: 31, fe: 615000, fn: 810000, west: 29, east: 33 },
+  blue: { epsg: 22991, lon0: 35, fe: 300000, fn: 1100000, west: 33, east: Infinity },
+};
+
+// ---------- Transverse Mercator (Krüger n-series, sixth order) ----------
+const tmCache = new Map();
+function tmSeries(ell) {
+  if (tmCache.has(ell)) return tmCache.get(ell);
+  const { a, f } = GEO_ELLIPSOIDS[ell];
+  const e = Math.sqrt(f * (2 - f));
+  const n = f / (2 - f), n2 = n * n, n3 = n2 * n, n4 = n3 * n, n5 = n4 * n, n6 = n5 * n;
+  const A = (a / (1 + n)) * (1 + n2 / 4 + n4 / 64 + n6 / 256);
+  const alpha = [0,
+    n / 2 - (2 / 3) * n2 + (5 / 16) * n3 + (41 / 180) * n4 - (127 / 288) * n5 + (7891 / 37800) * n6,
+    (13 / 48) * n2 - (3 / 5) * n3 + (557 / 1440) * n4 + (281 / 630) * n5 - (1983433 / 1935360) * n6,
+    (61 / 240) * n3 - (103 / 140) * n4 + (15061 / 26880) * n5 + (167603 / 181440) * n6,
+    (49561 / 161280) * n4 - (179 / 168) * n5 + (6601661 / 7257600) * n6,
+    (34729 / 80640) * n5 - (3418889 / 1995840) * n6,
+    (212378941 / 319334400) * n6];
+  const beta = [0,
+    n / 2 - (2 / 3) * n2 + (37 / 96) * n3 - (1 / 360) * n4 - (81 / 512) * n5 + (96199 / 604800) * n6,
+    (1 / 48) * n2 + (1 / 15) * n3 - (437 / 1440) * n4 + (46 / 105) * n5 - (1118711 / 3870720) * n6,
+    (17 / 480) * n3 - (37 / 840) * n4 - (209 / 4480) * n5 + (5569 / 90720) * n6,
+    (4397 / 161280) * n4 - (11 / 504) * n5 - (830251 / 7257600) * n6,
+    (4583 / 161280) * n5 - (108847 / 3991680) * n6,
+    (20648693 / 638668800) * n6];
+  const s = { a, e, A, alpha, beta };
+  tmCache.set(ell, s);
+  return s;
+}
+// tan of the conformal latitude, from tan(latitude).
+const tmConformal = (tau, e) => {
+  const sigma = Math.sinh(e * Math.atanh((e * tau) / Math.hypot(1, tau)));
+  return tau * Math.hypot(1, sigma) - sigma * Math.hypot(1, tau);
+};
+
+/** Ellipsoidal (lat, dlon from the central meridian, radians) -> x, y from the equator, with
+ * meridian convergence (radians) and point scale, for k0 = 1. */
+function tmForward(phi, lam, ell) {
+  const { a, e, A, alpha } = tmSeries(ell);
+  const tau = Math.tan(phi);
+  const tauP = tmConformal(tau, e);
+  const xiP = Math.atan2(tauP, Math.cos(lam));
+  const etaP = Math.asinh(Math.sin(lam) / Math.hypot(tauP, Math.cos(lam)));
+  let xi = xiP, eta = etaP, p = 1, q = 0;
+  for (let j = 1; j <= 6; j++) {
+    xi += alpha[j] * Math.sin(2 * j * xiP) * Math.cosh(2 * j * etaP);
+    eta += alpha[j] * Math.cos(2 * j * xiP) * Math.sinh(2 * j * etaP);
+    p += 2 * j * alpha[j] * Math.cos(2 * j * xiP) * Math.cosh(2 * j * etaP);
+    q += 2 * j * alpha[j] * Math.sin(2 * j * xiP) * Math.sinh(2 * j * etaP);
+  }
+  const gamma = Math.atan((tauP / Math.hypot(1, tauP)) * Math.tan(lam)) + Math.atan2(q, p);
+  const sinPhi = Math.sin(phi);
+  const k = ((Math.sqrt(1 - e * e * sinPhi * sinPhi) * Math.hypot(1, tau)) / Math.hypot(tauP, Math.cos(lam))) * (A / a) * Math.hypot(p, q);
+  return { x: A * eta, y: A * xi, gamma, k };
+}
+
+/** Inverse of tmForward: x, y (k0 = 1, from the equator) -> lat, dlon (radians). */
+function tmInverse(x, y, ell) {
+  const { e, A, beta } = tmSeries(ell);
+  const eta = x / A, xi = y / A;
+  let xiP = xi, etaP = eta;
+  for (let j = 1; j <= 6; j++) {
+    xiP -= beta[j] * Math.sin(2 * j * xi) * Math.cosh(2 * j * eta);
+    etaP -= beta[j] * Math.cos(2 * j * xi) * Math.sinh(2 * j * eta);
+  }
+  const sinhEtaP = Math.sinh(etaP), sinXiP = Math.sin(xiP), cosXiP = Math.cos(xiP);
+  const tauP = sinXiP / Math.hypot(sinhEtaP, cosXiP);
+  let tau = tauP;
+  for (let i = 0; i < 20; i++) { // Newton on the conformal latitude
+    const t = tmConformal(tau, e);
+    const d = ((tauP - t) / Math.hypot(1, t)) * ((1 + (1 - e * e) * tau * tau) / ((1 - e * e) * Math.hypot(1, tau)));
+    tau += d;
+    if (Math.abs(d) < 1e-14) break;
+  }
+  return { phi: Math.atan(tau), lam: Math.atan2(sinhEtaP, cosXiP) };
+}
+
+// ---------- datum shift via earth-centred coordinates ----------
+function geoToEcef(phi, lam, h, ell) {
+  const { a, f } = GEO_ELLIPSOIDS[ell];
+  const es = f * (2 - f);
+  const N = a / Math.sqrt(1 - es * Math.sin(phi) ** 2);
+  return [(N + h) * Math.cos(phi) * Math.cos(lam), (N + h) * Math.cos(phi) * Math.sin(lam), (N * (1 - es) + h) * Math.sin(phi)];
+}
+function ecefToGeo([X, Y, Z], ell) {
+  const { a, f } = GEO_ELLIPSOIDS[ell];
+  const es = f * (2 - f);
+  const p = Math.hypot(X, Y);
+  let phi = Math.atan2(Z, p * (1 - es));
+  for (let i = 0; i < 10; i++) {
+    const N = a / Math.sqrt(1 - es * Math.sin(phi) ** 2);
+    const next = Math.atan2(Z + es * N * Math.sin(phi), p);
+    if (Math.abs(next - phi) < 1e-15) { phi = next; break; }
+    phi = next;
+  }
+  return { phi, lam: Math.atan2(Y, X) };
+}
+const geoHelmert = (params) => {
+  const [tx, ty, tz, rx, ry, rz, ds] = params;
+  const sec = GEO_D2R / 3600;
+  return { tx, ty, tz, rx: rx * sec, ry: ry * sec, rz: rz * sec, m: 1 + ds * 1e-6 };
+};
+// To WGS 84, and back (the same small-angle inverse PROJ uses).
+function geoShiftToWgs([x, y, z], params) {
+  const { tx, ty, tz, rx, ry, rz, m } = geoHelmert(params);
+  return [m * (x - rz * y + ry * z) + tx, m * (rz * x + y - rx * z) + ty, m * (-ry * x + rx * y + z) + tz];
+}
+function geoShiftFromWgs([x, y, z], params) {
+  const { tx, ty, tz, rx, ry, rz, m } = geoHelmert(params);
+  const a = (x - tx) / m, b = (y - ty) / m, c = (z - tz) / m;
+  return [a + rz * b - ry * c, -rz * a + b + rx * c, ry * a - rx * b + c];
+}
+
+// ---------- grids ----------
+/** The UTM zone for a longitude (degrees). */
+function utmZoneOf(lon) {
+  return Math.min(60, Math.floor((((lon + 180) % 360) + 360) % 360 / 6) + 1);
+}
+
+function gridDef(grid, lat) {
+  if (grid.kind === "utm") {
+    const zone = grid.zone;
+    if (!Number.isInteger(zone) || zone < 1 || zone > 60) fail("رقم الزون لازم من 1 لـ 60.");
+    const south = grid.south ?? lat < 0;
+    return { ell: "wgs84", lat0: 0, lon0: zone * 6 - 183, k0: 0.9996, fe: 500000, fn: south ? 10000000 : 0, zone, south };
+  }
+  const belt = ETM_BELTS[grid.belt] ?? fail("الحزام المصري مش معروف.");
+  return { ell: "helmert1906", datum: GEO_EGYPT_1907, lat0: 30, lon0: belt.lon0, k0: 1, fe: belt.fe, fn: belt.fn };
+}
+// Northing of the latitude of origin on the central meridian (0 for UTM).
+const originNorthing = (d) => (d.lat0 ? tmForward(d.lat0 * GEO_D2R, 0, d.ell).y : 0);
+
+/**
+ * WGS 84 latitude/longitude (degrees) -> grid easting/northing (metres).
+ * grid: { kind: "utm", zone?, south? } (zone from the longitude when left out) or { kind: "etm", belt }.
+ * Returns E, N, the zone used (UTM), meridian convergence (degrees) and point scale factor.
+ */
+function geoToGrid(lat, lon, grid) {
+  if (!(Math.abs(lat) <= 90) || !(Math.abs(lon) <= 180)) fail("خط العرض لازم بين -90 و 90 وخط الطول بين -180 و 180.");
+  const g = grid.kind === "utm" ? { ...grid, zone: grid.zone ?? utmZoneOf(lon) } : grid;
+  const d = gridDef(g, lat);
+  let phi = lat * GEO_D2R, lam = lon * GEO_D2R;
+  if (d.datum) ({ phi, lam } = ecefToGeo(geoShiftFromWgs(geoToEcef(phi, lam, 0, "wgs84"), d.datum), d.ell));
+  let dl = lam - d.lon0 * GEO_D2R;
+  dl = Math.atan2(Math.sin(dl), Math.cos(dl));
+  if (Math.abs(dl) > Math.PI / 2) fail("النقطة بعيدة جدًا عن خط الطول الأوسط للشبكة دي.");
+  const t = tmForward(phi, dl, d.ell);
+  return {
+    E: d.fe + d.k0 * t.x,
+    N: d.fn + d.k0 * (t.y - originNorthing(d)),
+    zone: d.zone, south: d.south,
+    convergence: t.gamma / GEO_D2R,
+    scale: d.k0 * t.k,
+  };
+}
+
+/** Grid easting/northing (metres) -> WGS 84 latitude/longitude (degrees). UTM needs zone (and south). */
+function gridToGeo(E, N, grid) {
+  if (!Number.isFinite(E) || !Number.isFinite(N)) fail("الإحداثيات لازم أرقام.");
+  if (grid.kind === "utm" && grid.zone === undefined) fail("لـ UTM لازم رقم الزون.");
+  const d = gridDef(grid, grid.south ? -1 : 1);
+  const r = tmInverse((E - d.fe) / d.k0, (N - d.fn) / d.k0 + originNorthing(d), d.ell);
+  let phi = r.phi, lam = r.lam + d.lon0 * GEO_D2R;
+  if (d.datum) ({ phi, lam } = ecefToGeo(geoShiftToWgs(geoToEcef(phi, lam, 0, d.ell), d.datum), "wgs84"));
+  return { lat: phi / GEO_D2R, lon: Math.atan2(Math.sin(lam), Math.cos(lam)) / GEO_D2R };
+}
+
+/** Degrees as d°mm′ss.ssss″ (to a few millimetres on the ground). */
+function toDmsPrecise(deg, places = 4) {
+  const sign = deg < 0 ? "-" : "";
+  const scale = 10 ** places;
+  let s = Math.round(Math.abs(deg) * 3600 * scale);
+  const d = Math.floor(s / (3600 * scale));
+  s -= d * 3600 * scale;
+  const m = Math.floor(s / (60 * scale));
+  s -= m * 60 * scale;
+  const sec = (s / scale).toFixed(places).padStart(places + 3, "0");
+  return `${sign}${d}°${String(m).padStart(2, "0")}′${sec}″`;
+}
+
 // ---- src/engine/engineering.js
 // Everyday engineering calculators for the side menu: general tools, surveying, civil, costs, mechanical, plumbing and electrical.
 // Each calculator describes its own inputs, so the page builds the form from the description,
@@ -2328,6 +2529,61 @@ const UNITS = {
 
 const engSelect = (key, label, options) => ({ key, label, type: "select", options });
 const engField = (key, label, unit = "", extra = {}) => ({ key, label, unit, type: "number", ...extra });
+
+// ---------- coordinate conversion helpers (the maths is in geodesy.js) ----------
+const ENG_GRIDS = [
+  ["utm", engL("UTM على WGS 84", "UTM on WGS 84")],
+  ["red", engL("الشبكة المصرية: الحزام الأحمر", "Egyptian grid: Red Belt")],
+  ["purple", engL("الشبكة المصرية: الحزام البنفسجي", "Egyptian grid: Purple Belt")],
+  ["xpurple", engL("الشبكة المصرية: البنفسجي الممتد", "Egyptian grid: Extended Purple Belt")],
+  ["blue", engL("الشبكة المصرية: الحزام الأزرق", "Egyptian grid: Blue Belt")],
+];
+const ENG_HEMIS = [["N", engL("شمال", "North")], ["S", engL("جنوب", "South")]];
+const ENG_NOTE_UTM = engL("على WGS 84، زي إحداثيات الـ GPS.", "On WGS 84, like GPS coordinates.");
+const ENG_NOTE_ETM = engL("على داتم Egypt 1907 (هيلمرت 1906) بتحويل EPSG الرسمي من WGS 84. التحويل بين الداتمين نفسه تقريبي ومش مليمتري، فللشغل الدقيق اربط على نقط تحكم معروفة في المنطقة.",
+  "On the Egypt 1907 datum (Helmert 1906) by the official EPSG transformation from WGS 84. The shift between the two datums is approximate, not millimetric, so tie precise work to known control points nearby.");
+// Which belt a longitude belongs to, for the "outside this belt" warning.
+const ENG_BELT_HINT = {
+  purple: engL("النقطة برا مدى الحزام ده، والأنسب ليها الحزام البنفسجي (غرب خط طول 29°).", "The point is outside this belt; the Purple Belt (west of 29°E) suits it better."),
+  red: engL("النقطة برا مدى الحزام ده، والأنسب ليها الحزام الأحمر (من 29° لـ 33°).", "The point is outside this belt; the Red Belt (29°E to 33°E) suits it better."),
+  blue: engL("النقطة برا مدى الحزام ده، والأنسب ليها الحزام الأزرق (شرق خط طول 33°).", "The point is outside this belt; the Blue Belt (east of 33°E) suits it better."),
+};
+
+/** A latitude or longitude typed as degrees or d m s, with N/S/E/W (or ج/غ for south/west). */
+function engLatLon(value, kind) {
+  const label = kind === "lat" ? "خط العرض" : "خط الطول";
+  const raw = String(value ?? "").trim();
+  if (!raw) fail(`${label}: اكتب قيمة.`);
+  const negative = (kind === "lat" ? /[Ssج]/ : /[Wwغ]/).test(raw);
+  const deg = parseAngle(raw.replace(/[A-Za-z\u0621-\u064A]/g, " ").trim());
+  if (deg === null) fail(`${label} مش مفهوم: اكتبه 30.0444 أو 30 02 39.84.`);
+  const out = negative ? -Math.abs(deg) : deg;
+  const max = kind === "lat" ? 90 : 180;
+  if (Math.abs(out) > max) fail(`${label} لازم بين -${max} و ${max}.`);
+  return out;
+}
+/** The grid picked in the form. toGeo: going from the grid, so UTM needs its zone and hemisphere. */
+function engGrid(v, toGeo) {
+  if (v.grid !== "utm") return { kind: "etm", belt: v.grid };
+  const zone = engNum(v, "zone", "الزون", { optional: true });
+  if (zone === null) {
+    if (toGeo) fail("لـ UTM اكتب رقم الزون (في مصر: 35 أو 36 أو 37).");
+    return { kind: "utm" };
+  }
+  if (!Number.isInteger(zone) || zone < 1 || zone > 60) fail("الزون لازم رقم صحيح من 1 لـ 60.");
+  return toGeo ? { kind: "utm", zone, south: v.hemi === "S" } : { kind: "utm", zone };
+}
+function engGridNote(grid, lon) {
+  if (grid.kind === "utm") return ENG_NOTE_UTM;
+  const b = ETM_BELTS[grid.belt];
+  if (lon >= b.west && lon <= b.east) return ENG_NOTE_ETM;
+  return `${ENG_BELT_HINT[lon < 29 ? "purple" : lon <= 33 ? "red" : "blue"]} ${ENG_NOTE_ETM}`;
+}
+// A number, or an angle in d m s, with an optional hemisphere letter: anything else is a point ID.
+const engIsCoord = (c) => /^[-+]?[\d٠-٩][\d٠-٩\s.,٫°'′"″:]*[NSEWnsewجغ]?$/.test(c.trim());
+// Coordinates go out as plain text: no thousands separators, so they paste straight into CAD or Excel.
+const engCoord = (x, places) => x.toFixed(places);
+const engZone = (r) => `${r.zone}${r.south ? "S" : "N"}`;
 
 const CALCULATORS = [
   // ===================== general tools =====================
@@ -2749,6 +3005,86 @@ const CALCULATORS = [
       if ((map === null) === (ground === null)) fail("اكتب مسافة واحدة بس: على الخريطة أو على الطبيعة.");
       const g = ground ?? (map * n) / 100;
       return { results: [engRow(engL("على الخريطة", "On the map"), (g * 100) / n, "cm", 3), engRow(engL("على الطبيعة", "On the ground"), g, "m", 3)] };
+    },
+  },
+
+  {
+    id: "geo-to-grid", group: "survey", code: "GT", title: engL("من خطوط الطول والعرض إلى UTM أو الشبكة المصرية", "Lat/long to UTM or the Egyptian grid"),
+    fields: [
+      engSelect("grid", engL("الشبكة", "Grid"), ENG_GRIDS),
+      { key: "lat", label: engL("خط العرض (درجات أو د د ث)", "Latitude (degrees or d m s)"), type: "text", value: "30 02 39.84" },
+      { key: "lon", label: engL("خط الطول (درجات أو د د ث)", "Longitude (degrees or d m s)"), type: "text", value: "31 14 08.52" },
+      engField("zone", engL("زون UTM (فاضي = يتحسب من خط الطول)", "UTM zone (blank = from the longitude)"), "", { optional: true }),
+    ],
+    run(v) {
+      const lat = engLatLon(v.lat, "lat");
+      const lon = engLatLon(v.lon, "lon");
+      const grid = engGrid(v, false);
+      const r = geoToGrid(lat, lon, grid);
+      const out = [engRow("E", engCoord(r.E, 3), "m"), engRow("N", engCoord(r.N, 3), "m")];
+      if (grid.kind === "utm") out.push(engRow(engL("الزون", "Zone"), engZone(r)));
+      out.push(engRow(engL("تقارب الشبكة", "Grid convergence"), toDmsPrecise(r.convergence, 2)), engRow(engL("معامل المقياس", "Scale factor"), engCoord(r.scale, 8)));
+      return { results: out, note: engGridNote(grid, lon) };
+    },
+  },
+  {
+    id: "grid-to-geo", group: "survey", code: "GL", title: engL("من UTM أو الشبكة المصرية إلى خطوط الطول والعرض", "UTM or the Egyptian grid to lat/long"),
+    fields: [
+      engSelect("grid", engL("الشبكة", "Grid"), ENG_GRIDS),
+      engField("e", "E", "m", { value: "329899.643" }),
+      engField("n", "N", "m", { value: "3325016.736" }),
+      engField("zone", engL("زون UTM", "UTM zone"), "", { value: "36", optional: true }),
+      engSelect("hemi", engL("نصف الكرة (لـ UTM)", "Hemisphere (UTM)"), ENG_HEMIS),
+    ],
+    run(v) {
+      const grid = engGrid(v, true);
+      const r = gridToGeo(engNum(v, "e", "E"), engNum(v, "n", "N"), grid);
+      return {
+        results: [
+          engRow(engL("خط العرض", "Latitude"), engCoord(r.lat, 8), "°"),
+          engRow(engL("خط الطول", "Longitude"), engCoord(r.lon, 8), "°"),
+          engRow(engL("خط العرض (د د ث)", "Latitude (d m s)"), `${toDmsPrecise(Math.abs(r.lat))} ${r.lat < 0 ? "S" : "N"}`),
+          engRow(engL("خط الطول (د د ث)", "Longitude (d m s)"), `${toDmsPrecise(Math.abs(r.lon))} ${r.lon < 0 ? "W" : "E"}`),
+        ],
+        note: engGridNote(grid, r.lon),
+      };
+    },
+  },
+  {
+    id: "coords-batch", group: "survey", code: "GB", title: engL("تحويل إحداثيات مجموعة نقط", "Convert the coordinates of many points"),
+    fields: [
+      engSelect("dir", engL("الاتجاه", "Direction"), [["to-grid", engL("من طول وعرض إلى الشبكة", "Lat/long to the grid")], ["to-geo", engL("من الشبكة إلى طول وعرض", "The grid to lat/long")]]),
+      engSelect("grid", engL("الشبكة", "Grid"), ENG_GRIDS),
+      engField("zone", engL("زون UTM (فاضي = يتحسب من خط الطول)", "UTM zone (blank = from the longitude)"), "", { optional: true }),
+      engSelect("hemi", engL("نصف الكرة (لـ UTM)", "Hemisphere (UTM)"), ENG_HEMIS),
+      { key: "points", label: engL("كل سطر: رقم النقطة، وبعده خط العرض وخط الطول أو E و N", "Each line: point ID, then latitude and longitude, or E and N"), type: "textarea", value: "P1 30.0444 31.2357\nP2 31.2001 29.9187\nP3 24.0889 32.8998" },
+    ],
+    run(v) {
+      const toGeo = v.dir === "to-geo";
+      const grid = engGrid(v, toGeo);
+      const lines = String(v.points ?? "").split(/\n+/).map((l) => l.trim()).filter(Boolean);
+      if (!lines.length) fail("اكتب نقطة واحدة على الأقل.");
+      if (lines.length > 500) fail("500 نقطة بالكتير في المرة.");
+      const out = [];
+      let lastLon = null;
+      lines.forEach((line, i) => {
+        // Columns split on tabs, commas or semicolons when there are any (so d m s may keep its spaces),
+        // otherwise on spaces. A first column that is not a coordinate (P1, BM-3) is the point ID.
+        const cols = (/[\t,;]/.test(line) ? line.split(/[\t,;]+/) : line.split(/\s+/)).map((c) => c.trim()).filter(Boolean);
+        const id = cols.length && !engIsCoord(cols[0]) ? cols.shift() : `${i + 1}`;
+        if (cols.length < 2) fail(`السطر ${i + 1}: لازم فيه قيمتين بعد رقم النقطة.`);
+        if (toGeo) {
+          const r = gridToGeo(engNum({ e: cols[0] }, "e", `السطر ${i + 1}: E`), engNum({ n: cols[1] }, "n", `السطر ${i + 1}: N`), grid);
+          lastLon = r.lon;
+          out.push(engRow(id, `${engCoord(r.lat, 8)}, ${engCoord(r.lon, 8)}`));
+        } else {
+          const lon = engLatLon(cols[1], "lon");
+          const r = geoToGrid(engLatLon(cols[0], "lat"), lon, grid);
+          lastLon = lon;
+          out.push(engRow(id, `${engCoord(r.E, 3)}, ${engCoord(r.N, 3)}${grid.kind === "utm" ? ` (${engZone(r)})` : ""}`));
+        }
+      });
+      return { results: out, note: engGridNote(grid, lastLon) };
     },
   },
 
