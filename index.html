@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="المهندس: أدوات مهندس المساحة في الموقع. حل الميزانية، البروفيل والمنحنيات الرأسية، الحفر والردم والكميات، ومراجعة ملفات الرفع.">
-<title>المهندس</title>
+<meta name="description" content="GeoX: أدوات مهندس المساحة في الموقع. حل الميزانية، البروفيل والمنحنيات الرأسية، الحفر والردم والكميات، ومراجعة ملفات الرفع.">
+<title>GeoX</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%85%93%F0%93%82%8B%F0%93%82%93%F0%93%8F%8F%F0%93%80%8B&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%84%BF%F0%93%8E%9B%F0%93%85%93%F0%93%82%A7%F0%93%86%91%F0%93%8F%8F%F0%93%8E%9B%F0%93%87%8C%F0%93%80%80&display=swap">
 <script>
   // Before first paint: saved theme and language, and the welcome screen once per visit.
   (function (h) {
@@ -357,10 +357,17 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
-/* «المهندس» in ancient Egyptian: imy-r kꜣt, "overseer of works", read left to right as the signs face. */
-.brand-egy { margin: 0 0 22px; font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: clamp(38px, 9vw, 54px); line-height: 1.15; color: var(--gold);
+/* "Ahmed Fathy" in hieroglyphs, sign by sign (a ḥ m d f t ḥ y, then the seated man that ends a man's
+   name), read left to right as the signs face. */
+/* GeoX wordmark (see the inline SVG): the dark "cut" strokes are drawn in the page colour. */
+.geox { display: block; height: 1em; width: auto; overflow: visible; }
+.geox .cut { stroke: var(--paper); }
+.wordmark h1 { display: flex; align-items: center; gap: 12px; }
+.wordmark h1 .geox { height: 1.3em; }
+.intro-card .geox-title .geox { height: clamp(72px, 17vw, 116px); margin: 0 auto; filter: drop-shadow(0 4px 22px var(--paper)); }
+.brand-egy { margin: 0 0 22px; font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: clamp(24px, 7.4vw, 44px); line-height: 1.15; color: var(--gold);
   direction: ltr; unicode-bidi: isolate; letter-spacing: .06em; filter: drop-shadow(0 4px 22px var(--paper)); }
-.brand-egy-head { font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: .9em; font-weight: 400; color: var(--gold); direction: ltr; unicode-bidi: isolate;
+.brand-egy-head { font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: .62em; font-weight: 400; color: var(--gold); direction: ltr; unicode-bidi: isolate;
   margin-inline-start: 10px; vertical-align: middle; letter-spacing: .04em; }
 @media (max-width: 1099px) { .brand-egy-head { display: none; } }
 .install-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
@@ -551,15 +558,15 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <div class="hud"><p class="hud-head"><i></i>TS · LIVE</p><p><b>HZ</b><span id="hud-hz">—</span></p><p><b>V</b><span id="hud-v">—</span></p><p><b>SD</b><span id="hud-sd">—</span></p></div>
   </div>
   <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
-  <a id="get-app" class="get-app" href="app/al-mohandes.apk" download="Al-Mohandes.apk" type="application/vnd.android.package-archive" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7v7M9.2 11.5 12 14.2l2.8-2.7M10.5 18.5h3"/></svg><span>حمّل التطبيق</span></a>
+  <a id="get-app" class="get-app" href="app/al-mohandes.apk" download="GeoX.apk" type="application/vnd.android.package-archive" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7v7M9.2 11.5 12 14.2l2.8-2.7M10.5 18.5h3"/></svg><span>حمّل التطبيق</span></a>
   <p id="get-app-done" class="get-app-done" role="status" hidden>افتح الملف اللي اتحمل علشان تثبّت التطبيق.</p>
   <div class="intro-card">
     <div class="intro-top">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
     </div>
     <p class="hello">أهلاً يا هندسة</p>
-    <h2 id="intro-title"><span class="brand-name">المهندس</span></h2>
-    <p class="brand-egy" role="img" aria-label="المهندس بالمصري القديم: imy-r kꜣt، يعني المشرف على الأعمال" data-no-i18n>𓅓𓂋𓂓𓏏𓀋</p>
+    <h2 id="intro-title" class="geox-title"><svg class="geox" viewBox="0 0 236 104" role="img" aria-label="GeoX"><defs><linearGradient id="gx-intro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d690"/><stop offset=".55" stop-color="#e7b75a"/><stop offset="1" stop-color="#b9852b"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M76.6 27.4A38 38 0 1 0 84 52H60" stroke="url(#gx-intro)" stroke-width="12"/><path d="M96 66H114A9 9 0 1 0 111.4 72.4" stroke="url(#gx-intro)" stroke-width="6"/><circle cx="134" cy="66" r="9" stroke="url(#gx-intro)" stroke-width="6"/><path class="cut" d="M222 14 160 90C140 112 70 104 46 90" stroke-width="20"/><path d="M222 14 160 90C140 112 70 104 46 90" stroke="url(#gx-intro)" stroke-width="10"/><path class="cut" d="M160 14 222 90" stroke-width="22"/><path d="M160 14 222 90" stroke="url(#gx-intro)" stroke-width="12"/></g></svg></h2>
+    <p class="brand-egy" role="img" aria-label="أحمد فتحي بالهيروغليفي" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</p>
     <button class="primary" type="button" id="intro-go">دخول</button>
     <p class="fine">ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
   </div>
@@ -571,7 +578,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <button id="menu-btn" class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>الأدوات</button>
       <div class="brand">
         <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
-        <div class="wordmark"><h1>المهندس <span class="brand-egy-head" role="img" aria-label="المهندس بالمصري القديم: imy-r kꜣt، يعني المشرف على الأعمال" data-no-i18n>𓅓𓂋𓂓𓏏𓀋</span></h1><small>المهندس كيو اس</small></div>
+        <div class="wordmark"><h1><svg class="geox" viewBox="0 0 236 104" role="img" aria-label="GeoX"><defs><linearGradient id="gx-head" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d690"/><stop offset=".55" stop-color="#e7b75a"/><stop offset="1" stop-color="#b9852b"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M76.6 27.4A38 38 0 1 0 84 52H60" stroke="url(#gx-head)" stroke-width="12"/><path d="M96 66H114A9 9 0 1 0 111.4 72.4" stroke="url(#gx-head)" stroke-width="6"/><circle cx="134" cy="66" r="9" stroke="url(#gx-head)" stroke-width="6"/><path class="cut" d="M222 14 160 90C140 112 70 104 46 90" stroke-width="20"/><path d="M222 14 160 90C140 112 70 104 46 90" stroke="url(#gx-head)" stroke-width="10"/><path class="cut" d="M160 14 222 90" stroke-width="22"/><path d="M160 14 222 90" stroke="url(#gx-head)" stroke-width="12"/></g></svg><span class="brand-egy-head" role="img" aria-label="أحمد فتحي بالهيروغليفي" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span></h1><small>أدوات المساحة والهندسة</small></div>
       </div>
       <div class="utility">
         <button id="find-btn" class="find-bar" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="ph">ابحث في الموقع…</span><kbd dir="ltr" data-no-i18n>Ctrl K</kbd></button>
@@ -670,7 +677,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <h2><span class="callout">RFI</span>سجل الاستفسارات</h2>
       <div id="ai-off" class="notice" hidden>المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.</div>
       <div id="chat-log">
-        <div class="msg assistant"><span class="who">المهندس</span><div class="bubble">أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك.
+        <div class="msg assistant"><span class="who">GeoX</span><div class="bubble">أهلاً يا هندسة. ابعتلي سؤالك، أو ارفع لوحة (PDF / صورة / DWG / DXF) أو ملف رفع (Excel / CSV / GSI / LandXML / KML) وأنا أراجعه وأحسبلك.
         كل الأرقام بتتحسب بأدوات حساب ثابتة ومتختبرة، وتقدر تفتح «خطوات الحساب» تحت كل رد وتراجعها.</div></div>
       </div>
       <div id="attachments"></div>
@@ -818,7 +825,7 @@ BM2,,,0.900</textarea>
   </section>
 
   <footer>
-    <div class="sign-title">المهندس كيو اس</div>
+    <div class="sign-title">GeoX</div>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
@@ -836,8 +843,7 @@ BM2,,,0.900</textarea>
 const I18N = (() => {
   const EXACT = {
     // header, tabs, welcome
-    "المهندس": "Al-Mohandes",
-    "المهندس كيو اس": "Al-Mohandes QS",
+    "أدوات المساحة والهندسة": "Survey and engineering tools",
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
@@ -1213,7 +1219,7 @@ const I18N = (() => {
     const html = document.documentElement;
     html.lang = lang;
     html.dir = lang === "en" ? "ltr" : "rtl";
-    document.title = lang === "en" ? "Al-Mohandes" : "المهندس";
+    document.title = "GeoX";
     try { localStorage.setItem("lang", lang); } catch { /* storage blocked */ }
     apply(document.body);
     html.classList.remove("i18n-wait");
@@ -6161,7 +6167,7 @@ async function loadRows(input) {
 }
 
 // ---------- assistant ----------
-const SYSTEM = `أنت "المهندس": مهندس مساحة مساعد لمهندس موقع في مشاريع إنشاءات (طرق، بنية تحتية، مباني، أعمال ترابية) في مصر والمنطقة العربية. المهندس بيعتمد على إجاباتك في قرارات حقيقية في الموقع، فالدقة أهم من السرعة.
+const SYSTEM = `أنت "GeoX": مهندس مساحة مساعد لمهندس موقع في مشاريع إنشاءات (طرق، بنية تحتية، مباني، أعمال ترابية) في مصر والمنطقة العربية. المهندس بيعتمد على إجاباتك في قرارات حقيقية في الموقع، فالدقة أهم من السرعة.
 
 اللغة: رد بلغة المستخدم؛ بالعربي استخدم عربي هندسي مصري واضح، واكتب المصطلح الإنجليزي بين قوسين أول مرة (مثل منسوب (RL)، قطاع طولي (Profile)).
 
@@ -6192,7 +6198,7 @@ const log = $("#chat-log");
 function addMsg(role, html) {
   const div = document.createElement("div");
   div.className = `msg ${role}`;
-  div.innerHTML = `<span class="who">${role === "user" ? "استفسار" : "المهندس"}</span><div class="bubble">${html}</div>`;
+  div.innerHTML = `<span class="who">${role === "user" ? "استفسار" : "GeoX"}</span><div class="bubble">${html}</div>`;
   log.appendChild(div);
   div.scrollIntoView({ block: "end" });
   return div;
