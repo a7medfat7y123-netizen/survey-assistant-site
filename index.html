@@ -7153,6 +7153,9 @@ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show
     };
   });
 }
+// A #calc-<id> link opens that calculator in the tools menu once the menu is ready (the tab
+// below replaces the address, so it is read first).
+const START_CALC = /^#calc-([\w-]+)$/.exec(location.hash)?.[1] ?? null;
 {
   // A #link to a tab opens that tab; otherwise the last one used.
   let t = location.hash.slice(1);
@@ -8739,6 +8742,7 @@ runProfile();
 runSection();
 runVolumes();
 runTraverse();
+if (START_CALC && Engine.CALCULATORS.some((c) => c.id === START_CALC)) openDrawerAt({ type: "calc", id: START_CALC });
 I18N.start();
 
 </script>
