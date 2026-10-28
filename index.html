@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-shell="web">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -25,14 +25,9 @@
     if (!seen) h.classList.add("show-intro");
   })(document.documentElement);
 </script>
-<link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#090e13">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Al-Mohandes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -375,6 +370,15 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .ios-tip::backdrop { background: color-mix(in srgb, var(--paper) 70%, transparent); }
 .ios-tip h3 { margin: 0 0 8px; color: var(--gold); font-size: 16px; }
 .ios-tip ol { margin: 0 0 14px; padding-inline-start: 20px; line-height: 1.8; }
+.ios-tip-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ios-tip-actions form { margin: 0; }
+/* The page is built twice (see build-page.mjs): data-shell="web" is the website, "app" the app.
+   Each hides what belongs to the other. */
+[data-shell="app"] .web-only, :root:not([data-shell="app"]) .app-only { display: none !important; }
+/* The app behaves like one: no tap flash, no pull-to-refresh bounce, no selecting the controls. */
+[data-shell="app"] { -webkit-tap-highlight-color: transparent; }
+[data-shell="app"] body { overscroll-behavior-y: none; }
+[data-shell="app"] button, [data-shell="app"] nav, [data-shell="app"] .menu-btn, [data-shell="app"] .seg { -webkit-user-select: none; user-select: none; }
 /* Scientific calculator: a tab on the page edge opens a side panel; wide screens make room for it. */
 .sc-tab { position: fixed; top: 50%; inset-inline-end: 0; z-index: 39; transform: translateY(-50%); width: 42px; height: 58px; display: grid; place-items: center; cursor: pointer;
   color: var(--gold); background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); border-inline-end: 0; border-start-start-radius: 14px; border-end-start-radius: 14px; box-shadow: 0 6px 24px -10px var(--shadow); }
@@ -619,11 +623,15 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 <dialog id="ios-tip" class="ios-tip" aria-labelledby="ios-tip-h">
   <h3 id="ios-tip-h">تثبيت التطبيق على الآيفون</h3>
   <ol>
-    <li>افتح الموقع من Safari.</li>
+    <li class="web-only">افتح صفحة التطبيق من Safari.</li>
+    <li class="app-only">افتح الصفحة دي من Safari.</li>
     <li>دوس زرار المشاركة ⬆︎ تحت.</li>
     <li>اختار «إضافة إلى الشاشة الرئيسية».</li>
   </ol>
-  <form method="dialog"><button class="primary" type="submit">تمام</button></form>
+  <div class="ios-tip-actions">
+    <a class="file-btn web-only" href="https://al-mohandes-app.pages.dev/" target="_blank" rel="noopener">افتح صفحة التطبيق</a>
+    <form method="dialog"><button class="secondary" type="submit">تمام</button></form>
+  </div>
 </dialog>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" aria-label="أدوات وحسابات وتعريفات" inert>
@@ -838,6 +846,9 @@ const I18N = (() => {
     "حمّل التطبيق": "Get the app",
     "افتح الملف اللي اتحمل علشان تثبّت التطبيق.": "Open the downloaded file to install the app.",
     "تثبيت التطبيق على الآيفون": "Install the app on iPhone",
+    "افتح صفحة التطبيق": "Open the app page",
+    "افتح صفحة التطبيق من Safari.": "Open the app page in Safari.",
+    "افتح الصفحة دي من Safari.": "Open this page in Safari.",
     "افتح الموقع من Safari.": "Open the site in Safari.",
     "دوس زرار المشاركة ⬆︎ تحت.": "Tap the Share button ⬆︎ at the bottom.",
     "اختار «إضافة إلى الشاشة الرئيسية».": "Choose “Add to Home Screen”.",
@@ -878,6 +889,7 @@ const I18N = (() => {
     "القطاع الطولي": "Longitudinal profile",
     "اللغة": "Language",
     "ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.": "Your files are read inside your browser and never uploaded to a server.",
+    "ملفاتك بتتقري على جهازك ومش بتترفع لأي سيرفر.": "Your files are read on your device and never uploaded to a server.",
     // assistant
     "سجل الاستفسارات": "Request log",
     "المساعد الذكي مش متاح في العرض ده. الحاسبات في باقي التابات شغالة عادي.": "The AI assistant isn't available in this view. The calculators in the other tabs work as usual.",
@@ -1065,6 +1077,8 @@ const I18N = (() => {
     "الإصدار": "Version",
     "الملفات بتتقري جوه المتصفح بتاعك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.":
       "Files are read inside your browser. The 3D drawings are for illustration; exact figures are in the tables and the 2D drawings. Any result that decisions rest on (sign-off, quantities for payment, critical grades) must be checked on site.",
+    "الملفات بتتقري على جهازك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.":
+      "Files are read on your device. The 3D drawings are for illustration; exact figures are in the tables and the 2D drawings. Any result that decisions rest on (sign-off, quantities for payment, critical grades) must be checked on site.",
     // engine messages (fixed text)
     "أول سطر لازم يكون فيه قراءة خلفية (BS) على الروبير.": "The first row must have a backsight (BS) on the benchmark.",
     "أول سطر لازم يكون BS بس.": "The first row must be a BS only.",
@@ -5403,42 +5417,55 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
   }
 }
 
-// ---------- installable app (PWA) ----------
-// Only on the website build, which links the manifest; the claude.ai copy has no service worker.
+// ---------- the website and the app ----------
+// The page is built twice (build-page.mjs): the website (data-shell="web") and the app
+// (data-shell="app"), each at its own address so neither opens the other. Both work offline; the
+// website leads to the app, and the app offers to install itself when opened in a browser.
+// The claude.ai copy is neither, and has no service worker.
+const PAGE_SHELL = document.documentElement.dataset.shell || "";
+const APP_URL = "https://al-mohandes-app.pages.dev/";
 {
-  const site = /^https?:$/.test(location.protocol) && document.querySelector('link[rel="manifest"]');
-  const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone === true;
-  const btn = $("#install-btn");
-  if (site && "serviceWorker" in navigator) {
+  const hosted = Boolean(PAGE_SHELL) && /^https?:$/.test(location.protocol);
+  if (hosted && "serviceWorker" in navigator) {
     const reg = () => navigator.serviceWorker.register("sw.js").catch(() => { /* offline support is optional */ });
     if (document.readyState === "complete") reg(); else window.addEventListener("load", reg, { once: true });
   }
-  if (site && !standalone) {
-    let prompt = null;
-    // iPhone and iPad have no install prompt: show how to add it from Safari instead.
-    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const android = /android/i.test(navigator.userAgent);
-    // The welcome screen's "Get the app": the APK on Android, the install prompt or iPhone steps elsewhere.
+  const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone === true;
+  // iPhone and iPad have no install prompt: they add the app from Safari's Share menu instead.
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const android = /android/i.test(navigator.userAgent);
+
+  if (hosted && PAGE_SHELL === "web") {
+    // "Get the app" on the welcome screen: the APK on Android, the steps on iPhone, the app's own page
+    // (which offers to install) on a computer.
     const getApp = $("#get-app");
-    const paint = () => {
-      btn.hidden = !(prompt || ios);
-      getApp.hidden = !(android || prompt || ios);
-    };
-    const install = async () => {
-      if (prompt) {
-        prompt.prompt();
-        const { outcome } = await prompt.userChoice;
-        prompt = null;
-        if (outcome === "accepted") { btn.hidden = true; getApp.hidden = true; } else paint();
-      } else if (ios) $("#ios-tip").showModal();
-    };
-    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); prompt = e; paint(); });
-    window.addEventListener("appinstalled", () => { prompt = null; btn.hidden = true; getApp.hidden = true; });
-    btn.onclick = install;
+    if (!android) {
+      getApp.removeAttribute("download");
+      getApp.removeAttribute("type");
+      getApp.href = APP_URL;
+      getApp.target = "_blank";
+      getApp.rel = "noopener";
+    }
     getApp.onclick = (e) => {
       if (android) { $("#get-app-done").hidden = false; return; } // the link downloads the APK
-      e.preventDefault();
-      install();
+      if (ios) { e.preventDefault(); $("#ios-tip").showModal(); }
+    };
+    getApp.hidden = false;
+  }
+
+  if (hosted && PAGE_SHELL === "app" && !standalone) {
+    // The app's address opened in a browser: offer to install it.
+    const btn = $("#install-btn");
+    let prompt = null;
+    const paint = () => { btn.hidden = !(prompt || ios); };
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); prompt = e; paint(); });
+    window.addEventListener("appinstalled", () => { prompt = null; btn.hidden = true; });
+    btn.onclick = async () => {
+      if (!prompt) { if (ios) $("#ios-tip").showModal(); return; }
+      prompt.prompt();
+      await prompt.userChoice;
+      prompt = null; // a prompt can be shown only once
+      paint();
     };
     paint();
   }

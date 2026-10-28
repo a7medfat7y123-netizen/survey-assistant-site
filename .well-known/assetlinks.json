@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "dev.pages.survey_assistant.twa",
-        "sha256_cert_fingerprints": ["9B:3E:56:D1:00:C7:48:2E:12:A3:62:25:0C:34:2C:3F:18:12:CD:E0:94:29:66:00:7B:8A:7D:9A:5E:EC:8C:08"]
-      }
-    }]
