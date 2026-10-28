@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%84%BF%F0%93%8E%9B%F0%93%85%93%F0%93%82%A7%F0%93%86%91%F0%93%8F%8F%F0%93%8E%9B%F0%93%87%8C%F0%93%80%80&display=swap">
 <script>
   // Before first paint: saved theme and language, and the welcome screen once per visit.
   (function (h) {
@@ -308,6 +309,17 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
+/* The author's name in hieroglyphs, in a cartouche: an oval ring with a bar at the end of the reading. */
+.cartouche { display: inline-flex; align-items: center; position: relative; direction: ltr; unicode-bidi: isolate; padding: .14em .55em .14em .5em; margin-inline-end: .35em;
+  border: 2px solid currentColor; border-radius: 999px; color: var(--gold); font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: 1em; font-weight: 400; line-height: 1.1; letter-spacing: .02em; white-space: nowrap; }
+.cartouche::after { content: ""; position: absolute; right: -.4em; top: 14%; bottom: 14%; width: 2px; border-radius: 2px; background: currentColor; }
+.intro-card .sig { margin: -8px 0 22px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.intro-card .sig .cartouche { font-size: clamp(26px, 6vw, 34px); border-width: 2.5px; text-shadow: 0 1px 14px var(--paper); }
+.intro-card .sig small { color: var(--muted); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
+.sig-head { font-size: 15px; vertical-align: middle; margin-inline-start: 20px; padding: .08em .45em; border-width: 1.5px; }
+@media (max-width: 900px) { .sig-head { display: none; } }
+.sig-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sig-foot .cartouche { font-size: 18px; }
 .install-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .install-btn[hidden] { display: none; }
 .install-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -444,7 +456,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .intro-card .logo { width: 88px; height: 88px; animation: seal .7s .2s ease-out both; }
 @keyframes seal { from { opacity: 0; transform: rotate(-25deg) scale(.85); } to { opacity: 1; transform: none; } }
 .intro-card .hello { margin: 6px 0 0; font-family: var(--f-head); font-weight: 700; font-size: clamp(20px, 4.2vw, 28px); color: var(--ink); text-shadow: 0 1px 14px var(--paper); }
-.intro-card h2 { display: block; margin: 0 0 26px; line-height: 1.2; }
+.intro-card h2 { display: block; margin: 0 0 14px; line-height: 1.2; }
 /* The name catches a gold glint once it lands. */
 .intro-card .brand-name { font-size: clamp(52px, 10vw, 76px); filter: drop-shadow(0 4px 22px var(--paper));
   background: linear-gradient(100deg, var(--gold) 42%, color-mix(in srgb, var(--gold) 30%, white) 50%, var(--gold) 58%) 120% 0 / 300% 100%;
@@ -497,6 +509,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     </div>
     <p class="hello">أهلاً يا هندسة</p>
     <h2 id="intro-title"><span class="brand-name">المهندس</span></h2>
+    <p class="sig"><span class="cartouche" role="img" aria-label="Ahmed Fathy" title="Ahmed Fathy" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span><small dir="ltr">Ahmed Fathy</small></p>
     <button class="primary" type="button" id="intro-go">دخول</button>
     <p class="fine">ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
   </div>
@@ -509,7 +522,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <button id="find-btn" class="menu-btn" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>بحث</button>
       <div class="brand">
         <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
-        <div class="wordmark"><h1>المهندس</h1><small>المهندس كيو اس</small></div>
+        <div class="wordmark"><h1>المهندس <span class="cartouche sig-head" role="img" aria-label="Ahmed Fathy" title="Ahmed Fathy" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span></h1><small>المهندس كيو اس</small></div>
       </div>
       <span class="grow"></span>
       <div class="meta">
@@ -520,7 +533,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
         <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
         <button id="install-btn" class="ghost install-btn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>تثبيت التطبيق</button>
-        <span id="auth" class="auth" hidden><button id="sign-in-btn" class="ghost" type="button">تسجيل الدخول</button><span id="user-btn" data-no-i18n></span></span>
+        <span id="auth" class="auth"><button id="sign-in-btn" class="ghost" type="button">تسجيل الدخول</button><span id="user-btn" data-no-i18n></span></span>
       </div>
     </div>
     <nav id="tabs" role="tablist">
@@ -752,6 +765,7 @@ BM2,,,0.900</textarea>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
+    <dl><dt>تصميم وتطوير</dt><dd class="sig-foot"><span class="cartouche" role="img" aria-label="Ahmed Fathy" title="Ahmed Fathy" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span><span dir="ltr">Ahmed Fathy</span></dd></dl>
     <dl><dt>الإصدار</dt><dd class="mono">SURVEY-ASSIST · REV E · 3D</dd></dl>
     <div class="note"><span>الملفات بتتقري جوه المتصفح بتاعك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.</span><button id="welcome-open" class="link" type="button" hidden>رسالة الترحيب</button></div>
   </footer>
@@ -771,6 +785,7 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
+    "تصميم وتطوير": "Design and development",
     "تثبيت التطبيق": "Install app",
     "حمّل التطبيق": "Get the app",
     "افتح الملف اللي اتحمل علشان تثبّت التطبيق.": "Open the downloaded file to install the app.",
@@ -5232,12 +5247,12 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
     s.onerror = bad;
     document.head.append(s);
   });
-  const start = async () => {
-    try {
-      await load(`https://${host}/npm/@clerk/ui@1/dist/ui.browser.js`);
-      await load(`https://${host}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, { clerkPublishableKey: CLERK_PUBLISHABLE_KEY });
-      await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
-    } catch { return; }
+  // Loads once; resolves to Clerk, or null when it can't load (then the button goes away).
+  let ready = null;
+  const boot = () => (ready ??= (async () => {
+    await load(`https://${host}/npm/@clerk/ui@1/dist/ui.browser.js`);
+    await load(`https://${host}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, { clerkPublishableKey: CLERK_PUBLISHABLE_KEY });
+    await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
     const C = window.Clerk;
     const slot = $("#user-btn");
     let mounted = false;
@@ -5247,13 +5262,23 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
       if (signedIn && !mounted) { C.mountUserButton(slot); mounted = true; }
       if (!signedIn && mounted) { C.unmountUserButton(slot); mounted = false; }
     };
-    $("#sign-in-btn").onclick = () => C.openSignIn();
     C.addListener(paint);
     paint();
-    $("#auth").hidden = false;
-  };
-  // After the page has loaded, so sign-in never delays the tools.
-  if (host) { if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true }); }
+    return C;
+  })().catch(() => { $("#auth").hidden = true; return null; }));
+  // The button is in the markup from the first paint; without a key it goes away.
+  if (!host) $("#auth").hidden = true;
+  else {
+    // Clerk itself loads after the page, so sign-in never delays the tools.
+    $("#sign-in-btn").onclick = async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      const C = await boot();
+      btn.disabled = false;
+      C?.openSignIn();
+    };
+    if (document.readyState === "complete") boot(); else window.addEventListener("load", boot, { once: true });
+  }
 }
 
 // ---------- installable app (PWA) ----------
