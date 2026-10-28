@@ -115,6 +115,8 @@ h1, .brand-name {
 .user .pill { max-width: 220px; overflow: hidden; text-overflow: ellipsis; direction: ltr; }
 button.ghost { font: inherit; font-size: 12.5px; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; white-space: nowrap; }
 button.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.auth { display: inline-flex; align-items: center; min-height: 28px; }
+.auth[hidden] { display: none; }
 nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
 nav button {
   font: inherit; font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; color: var(--muted);
@@ -298,6 +300,21 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
+/* Site search: a palette over the page. */
+.find-ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+@media (max-width: 640px) { #find-btn .find-ic { width: 18px; height: 18px; } }
+.find { position: fixed; inset: 0; z-index: 45; background: color-mix(in srgb, var(--paper) 70%, transparent); padding: max(56px, 8vh) 16px 16px; }
+.find[hidden] { display: none; }
+.find-box { width: min(640px, 100%); margin: 0 auto; background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: 16px; box-shadow: 0 20px 60px -20px var(--shadow); padding: 10px; }
+.find-box input { width: 100%; font-size: 16px; }
+.find-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: min(60vh, 520px); overflow-y: auto; display: grid; gap: 4px; }
+.find-list li { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.find-list li[aria-selected="true"], .find-list li:hover { background: var(--sheet-2); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.find-list .code { font-family: var(--f-num); font-size: 10.5px; color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); border-radius: 7px; padding: 1px 6px; min-width: 34px; text-align: center; }
+.find-list .t { flex: 1; min-width: 0; }
+.find-list small { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.find-list .empty { color: var(--muted); cursor: default; }
+.find-open body { overflow: hidden; }
 /* :root keeps this above the ltr rule's specificity, or the English drawer stays off-screen. */
 :root.drawer-open .drawer { transform: none; visibility: visible; }
 .drawer-open .scrim { opacity: 1; pointer-events: auto; }
@@ -438,6 +455,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="wrap">
     <div class="bar">
       <button id="menu-btn" class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>الأدوات</button>
+      <button id="find-btn" class="menu-btn" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>بحث</button>
       <div class="brand">
         <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
         <div class="wordmark"><h1>المهندس</h1><small>المهندس كيو اس</small></div>
@@ -450,6 +468,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <span class="pill" data-ai>المساعد: <b id="ai-status">بيتصل…</b></span>
         <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
         <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
+        <span id="auth" class="auth" hidden><button id="sign-in-btn" class="ghost" type="button">دخول</button><span id="user-btn" data-no-i18n></span></span>
       </div>
     </div>
     <nav id="tabs" role="tablist">
@@ -462,6 +481,12 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   </div>
 </header>
 
+<div id="find" class="find" role="dialog" aria-modal="true" aria-label="بحث في الموقع" hidden>
+  <div class="find-box">
+    <input id="find-q" type="search" placeholder="دوّر على أي حاجة: صفحة، حاسبة، تعريف…" autocomplete="off" role="combobox" aria-controls="find-list" aria-expanded="true">
+    <ul id="find-list" class="find-list" role="listbox"></ul>
+  </div>
+</div>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" aria-label="أدوات وحسابات وتعريفات" inert>
   <div class="dr-head">
@@ -668,6 +693,7 @@ const I18N = (() => {
     "المهندس": "Al-Mohandes",
     "المهندس كيو اس": "Al-Mohandes QS",
     "الأدوات": "Tools",
+    "دخول": "Sign in",
     "المساعد:": "Assistant:",
     "بيتصل…": "connecting…",
     "متصل": "online",
@@ -4912,6 +4938,49 @@ $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
   paint();
 }
 
+// Set by the tools drawer below; the site search uses it to open the drawer on a given view.
+let openDrawerAt = () => {};
+
+// ---------- optional sign-in (Clerk) ----------
+// The page works the same signed out. With no key, or if Clerk can't load (offline, blocked by
+// the host), the sign-in button simply stays hidden.
+const CLERK_PUBLISHABLE_KEY = "";
+{
+  let host = "";
+  try { host = CLERK_PUBLISHABLE_KEY ? atob(CLERK_PUBLISHABLE_KEY.split("_")[2]).slice(0, -1) : ""; } catch { /* malformed key */ }
+  const load = (src, data = {}) => new Promise((ok, bad) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.crossOrigin = "anonymous";
+    Object.assign(s.dataset, data);
+    s.onload = ok;
+    s.onerror = bad;
+    document.head.append(s);
+  });
+  const start = async () => {
+    try {
+      await load(`https://${host}/npm/@clerk/ui@1/dist/ui.browser.js`);
+      await load(`https://${host}/npm/@clerk/clerk-js@6/dist/clerk.browser.js`, { clerkPublishableKey: CLERK_PUBLISHABLE_KEY });
+      await window.Clerk.load({ ui: { ClerkUI: window.__internal_ClerkUICtor } });
+    } catch { return; }
+    const C = window.Clerk;
+    const slot = $("#user-btn");
+    let mounted = false;
+    const paint = () => {
+      const signedIn = !!C.user;
+      $("#sign-in-btn").hidden = signedIn;
+      if (signedIn && !mounted) { C.mountUserButton(slot); mounted = true; }
+      if (!signedIn && mounted) { C.unmountUserButton(slot); mounted = false; }
+    };
+    $("#sign-in-btn").onclick = () => C.openSignIn();
+    C.addListener(paint);
+    paint();
+    $("#auth").hidden = false;
+  };
+  // After the page has loaded, so sign-in never delays the tools.
+  if (host) { if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true }); }
+}
+
 // ---------- small helpers ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const isNum = (s) => s !== undefined && s !== null && String(s).trim() !== "" && !Number.isNaN(Number(String(s).replace(/,/g, "")));
@@ -5923,7 +5992,7 @@ $("#rv-file").onchange = async (e) => {
 bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
 
 // Open in a working state: the example rows are already in the forms.
-// ---------- side menu: engineering tools, mechanical, electrical, glossary ----------
+// ---------- side menu: engineering calculators by discipline, and the glossary ----------
 {
   const { CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN } = Engine;
   const glEn = {};
@@ -5966,7 +6035,7 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
       let html = "";
       for (const g of GROUPS) {
         const calcs = CALCULATORS.filter((c) => c.group === g.id && (!q || match(q, c.title, ENGINEERING_EN[c.title] ?? "")));
-        if (calcs.length) html += `<section class="dr-group"><h3><span class="code">${g.code}</span>${esc(g.title)}</h3><div class="dr-list">${calcs.map((c) => itemBtn(c.code, c.title, `data-calc="${c.id}"`)).join("")}</div></section>`;
+        if (calcs.length) html += `<section class="dr-group" data-group="${g.id}"><h3><span class="code">${g.code}</span>${esc(g.title)}</h3><div class="dr-list">${calcs.map((c) => itemBtn(c.code, c.title, `data-calc="${c.id}"`)).join("")}</div></section>`;
       }
       if (q) html += `<section class="dr-group"><h3><span class="code">DF</span>التعريفات الهندسية</h3>${glossaryList("all", q)}</section>`;
       else html += `<section class="dr-group"><h3><span class="code">DF</span>التعريفات الهندسية</h3><div class="dr-list">${GLOSSARY_FIELDS.map(([id, ar]) => itemBtn(id.slice(0, 2).toUpperCase(), ar, `data-gl="${id}"`, `<small>${GLOSSARY[id].length}</small>`)).join("")}${itemBtn("ALL", "الكل", `data-gl="all"`, `<small>${glCount}</small>`)}</div></section>`;
@@ -6050,6 +6119,96 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
   $("#scrim").onclick = () => setOpen(false);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.documentElement.classList.contains("drawer-open")) setOpen(false); });
   render();
+  // Site search opens the drawer on a calculator, a menu section, or the definitions filtered by a term.
+  openDrawerAt = (next, { q = "", group } = {}) => {
+    view = next;
+    search.value = q;
+    render();
+    setOpen(true);
+    body.scrollTop = 0;
+    if (group) body.querySelector(`[data-group="${group}"]`)?.scrollIntoView({ block: "start" });
+  };
+}
+
+// ---------- site search: pages, their sections, menu sections, calculators, definitions ----------
+{
+  const { CALCULATORS, GROUPS, ENGINEERING_EN } = Engine;
+  I18N.add({
+    "بحث": "Search", "بحث في الموقع": "Search the site", "دوّر على أي حاجة: صفحة، حاسبة، تعريف…": "Search anything: a page, a calculator, a term…",
+    "صفحة": "Page", "جزء من صفحة": "Section", "قسم في القايمة": "Menu section", "حاسبة": "Calculator", "تعريف": "Definition",
+  });
+  const plain = (s) => String(s ?? "").toLowerCase().replace(/[ًٌٍَُِّْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, " ").trim();
+  const box = $("#find");
+  const input = $("#find-q");
+  const list = $("#find-list");
+  let items = [];
+  let shown = [];
+  let sel = 0;
+
+  // Built on each open, from the page as it is (tabs the visitor can't use are left out).
+  function index() {
+    const out = [];
+    const textOf = (el) => [...el.childNodes].filter((n) => !(n.nodeType === 1 && n.classList.contains("code") || n.nodeType === 1 && n.classList.contains("callout"))).map((n) => n.textContent).join("").trim();
+    for (const b of document.querySelectorAll("#tabs button")) {
+      if (b.hidden || b.closest("[hidden]") || getComputedStyle(b).display === "none") continue;
+      const tab = b.dataset.tab;
+      out.push({ kind: "صفحة", code: b.querySelector(".code")?.textContent ?? "", title: textOf(b), go: () => { showTab(tab); scrollTo({ top: 0 }); } });
+      for (const h of document.querySelectorAll(`#tab-${tab} h2`)) out.push({ kind: "جزء من صفحة", code: h.querySelector(".callout")?.textContent ?? "", title: textOf(h), go: () => { showTab(tab); h.scrollIntoView({ block: "start" }); } });
+    }
+    for (const g of GROUPS) out.push({ kind: "قسم في القايمة", code: g.code, title: g.title, en: ENGINEERING_EN[g.title], go: () => openDrawerAt({ type: "home" }, { group: g.id }) });
+    for (const c of CALCULATORS) out.push({ kind: "حاسبة", code: c.code, title: c.title, en: ENGINEERING_EN[c.title], go: () => openDrawerAt({ type: "calc", id: c.id }) });
+    out.push({ kind: "قسم في القايمة", code: "DF", title: "التعريفات الهندسية", en: "Engineering definitions", go: () => openDrawerAt({ type: "glossary", field: "all" }) });
+    for (const [field] of GLOSSARY_FIELDS) for (const [ar, en, dAr, dEn] of GLOSSARY[field]) out.push({ kind: "تعريف", code: field.slice(0, 2).toUpperCase(), title: ar, en, more: `${dAr} ${dEn}`, go: () => openDrawerAt({ type: "glossary", field: "all" }, { q: I18N.lang === "en" ? en : ar }) });
+    for (const it of out) { it.key = plain(`${it.title} ${it.en ?? ""} ${I18N.tr(it.title) ?? ""}`); it.extra = plain(it.more ?? ""); }
+    return out;
+  }
+
+  function paint() {
+    const q = plain(input.value);
+    if (!q) shown = items.filter((it) => it.kind === "صفحة" || it.kind === "قسم في القايمة");
+    else {
+      // Title starts with the words, then title contains them, then only the definition text does.
+      const words = q.split(" ");
+      const score = (it) => (it.key.startsWith(q) ? 0 : words.every((w) => it.key.includes(w)) ? 1 : words.every((w) => `${it.key} ${it.extra}`.includes(w)) ? 2 : -1);
+      shown = items.map((it) => [score(it), it]).filter(([s]) => s >= 0).sort((a, b) => a[0] - b[0]).slice(0, 40).map(([, it]) => it);
+    }
+    sel = 0;
+    list.innerHTML = shown.length
+      ? shown.map((it, i) => `<li role="option" id="find-${i}" data-i="${i}" aria-selected="${i === sel}"><span class="code">${esc(it.code)}</span><span class="t">${esc(it.title)}</span><small>${esc(it.kind)}</small></li>`).join("")
+      : `<li class="empty">مفيش نتايج.</li>`;
+    input.setAttribute("aria-activedescendant", shown.length ? "find-0" : "");
+  }
+  const move = (d) => {
+    if (!shown.length) return;
+    list.querySelector(`[data-i="${sel}"]`)?.setAttribute("aria-selected", "false");
+    sel = (sel + d + shown.length) % shown.length;
+    const li = list.querySelector(`[data-i="${sel}"]`);
+    li.setAttribute("aria-selected", "true");
+    li.scrollIntoView({ block: "nearest" });
+    input.setAttribute("aria-activedescendant", li.id);
+  };
+  const setFind = (open) => {
+    box.hidden = !open;
+    document.documentElement.classList.toggle("find-open", open);
+    if (open) { items = index(); input.value = ""; paint(); input.focus(); }
+    else $("#find-btn").focus();
+  };
+  const pick = (i) => { const it = shown[i]; if (!it) return; setFind(false); it.go(); };
+
+  $("#find-btn").onclick = () => setFind(true);
+  input.addEventListener("input", paint);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+    else if (e.key === "Enter") { e.preventDefault(); pick(sel); }
+  });
+  list.addEventListener("click", (e) => { const li = e.target.closest("[data-i]"); if (li) pick(Number(li.dataset.i)); });
+  box.addEventListener("click", (e) => { if (e.target === box) setFind(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !box.hidden) { setFind(false); return; }
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+    if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !typing)) { e.preventDefault(); if (box.hidden) setFind(true); }
+  });
 }
 
 runLevel();
