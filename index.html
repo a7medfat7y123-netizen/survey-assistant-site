@@ -436,7 +436,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .intro-card .logo { width: 88px; height: 88px; animation: seal .7s .2s ease-out both; }
 @keyframes seal { from { opacity: 0; transform: rotate(-25deg) scale(.85); } to { opacity: 1; transform: none; } }
 .intro-card .hello { margin: 6px 0 0; font-family: var(--f-head); font-weight: 700; font-size: clamp(20px, 4.2vw, 28px); color: var(--ink); text-shadow: 0 1px 14px var(--paper); }
-.intro-card h2 { display: block; margin: 0 0 2px; line-height: 1.2; }
+.intro-card h2 { display: block; margin: 0 0 26px; line-height: 1.2; }
 /* The name catches a gold glint once it lands. */
 .intro-card .brand-name { font-size: clamp(52px, 10vw, 76px); filter: drop-shadow(0 4px 22px var(--paper));
   background: linear-gradient(100deg, var(--gold) 42%, color-mix(in srgb, var(--gold) 30%, white) 50%, var(--gold) 58%) 120% 0 / 300% 100%;
@@ -485,16 +485,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <div class="intro-top">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
     </div>
-    <p class="hello">أهلاً وسهلاً بيك يا هندسة</p>
+    <p class="hello">أهلاً يا هندسة</p>
     <h2 id="intro-title"><span class="brand-name">المهندس</span></h2>
-    <p class="sub">شغل المساحة كله في صفحة واحدة. افتح واشتغل على طول، من غير تسجيل ولا تثبيت.</p>
-    <span class="scale" aria-hidden="true"></span>
-    <ul class="feat">
-      <li><span class="code">LV</span><b>الميزانية</b><small>HI و Rise/Fall وخطأ القفل</small></li>
-      <li><span class="code">PR</span><b>البروفيل</b><small>المناسيب والمنحنيات الرأسية</small></li>
-      <li><span class="code">QT</span><b>الكميات</b><small>الحفر والردم والـ Mass haul</small></li>
-      <li><span class="code">QC</span><b>مراجعة الرفع</b><small>Excel و CSV و DXF و DWG وغيرهم</small></li>
-    </ul>
     <button class="primary" type="button" id="intro-go">دخول</button>
     <p class="fine">ملفاتك بتتقري جوه المتصفح ومش بتترفع لأي سيرفر.</p>
   </div>
@@ -767,7 +759,6 @@ const I18N = (() => {
     "المهندس": "Al-Mohandes",
     "المهندس كيو اس": "Al-Mohandes QS",
     "الأدوات": "Tools",
-    "أهلاً وسهلاً بيك يا هندسة": "Welcome, engineer",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
     "تثبيت التطبيق": "Install app",
