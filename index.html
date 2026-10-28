@@ -295,7 +295,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   background: var(--sheet); border-inline-end: 1px solid color-mix(in srgb, var(--gold) 25%, var(--line)); box-shadow: 0 0 60px -10px var(--shadow);
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
-.drawer-open .drawer { transform: none; visibility: visible; }
+/* :root keeps this above the ltr rule's specificity, or the English drawer stays off-screen. */
+:root.drawer-open .drawer { transform: none; visibility: visible; }
 .drawer-open .scrim { opacity: 1; pointer-events: auto; }
 .drawer-open body { overflow: hidden; }
 .dr-head { display: flex; align-items: center; gap: 8px; }
@@ -1669,7 +1670,7 @@ function checkTolerances(input) {
 }
 
 // ---- src/engine/engineering.js
-// Everyday engineering calculators for the side menu: general tools, mechanical and electrical.
+// Everyday engineering calculators for the side menu: general tools, surveying, civil, costs, mechanical, plumbing and electrical.
 // Each calculator describes its own inputs, so the page builds the form from the description,
 // and run() takes the raw form values and returns labelled results in full precision.
 
@@ -1685,6 +1686,10 @@ const W_PER_HP = 745.7;
 const KW_PER_TR = 3.516853; // 1 ton of refrigeration = 12,000 BTU/h
 const BTUH_PER_KW = 3412.142;
 const FEDDAN_M2 = 4200.83; // Egyptian feddan = 24 qirat
+const EARTH_RADIUS = 6371000; // m, mean
+const CEMENT_BULK_DENSITY = 1440; // kg/m³
+const CEMENT_BAG_KG = 50;
+const WATER_CP = 4.186; // kJ/(kg·K)
 const RESISTIVITY = { cu: 0.017241, al: 0.028264 }; // Ω·mm²/m at 20 °C (IEC 60028 / 60889)
 // IEC 60076-1 preferred power ratings (R10 series), kVA.
 const TRANSFORMER_KVA = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000];
@@ -2019,11 +2024,365 @@ const CALCULATORS = [
       return { results: [engRow(engL("الحمل الأقصى المتوقع", "Maximum demand"), demand, "kW", 1), engRow(engL("القدرة المطلوبة", "Required rating"), kva, "kVA", 1), engRow(engL("أقرب مقاس محول قياسي", "Next standard transformer size"), std ? `${std} kVA` : "—")], note: engL("المقاسات القياسية من سلسلة IEC 60076 (R10). المولد بيتختار من كتالوج الشركة على نفس الـ kVA مع مراجعة تيار بدء الموتورات.", "Standard sizes from the IEC 60076 R10 series. Pick a generator from the maker's range at the same kVA, and check motor starting current.") };
     },
   },
+  {
+    id: "pfc", group: "elec", code: "PF", title: engL("مكثفات تحسين معامل القدرة", "Power factor correction capacitors"),
+    fields: [engField("p", engL("القدرة الفعالة", "Active power"), "kW", { value: "100" }), engField("pf1", engL("معامل القدرة الحالي", "Present power factor"), "", { value: "0.75" }), engField("pf2", engL("معامل القدرة المطلوب", "Target power factor"), "", { value: "0.95" })],
+    run(v) {
+      const p = engNum(v, "p", "القدرة", { positive: true });
+      const pf1 = engNum(v, "pf1", "معامل القدرة الحالي", { positive: true });
+      const pf2 = engNum(v, "pf2", "معامل القدرة المطلوب", { positive: true });
+      if (pf1 > 1 || pf2 > 1) fail("معامل القدرة لازم 1 أو أقل.");
+      if (pf2 <= pf1) fail("معامل القدرة المطلوب لازم أعلى من الحالي.");
+      const t1 = Math.tan(Math.acos(pf1));
+      const t2 = Math.tan(Math.acos(pf2));
+      return { results: [engRow(engL("قدرة المكثفات المطلوبة", "Required capacitor rating"), p * (t1 - t2), "kVAR", 2), engRow(engL("القدرة الظاهرية قبل", "Apparent power before"), p / pf1, "kVA", 2), engRow(engL("القدرة الظاهرية بعد", "Apparent power after"), p / pf2, "kVA", 2), engRow(engL("نقص التيار", "Current reduction"), (1 - pf1 / pf2) * 100, "%", 1)] };
+    },
+  },
+  {
+    id: "motor", group: "elec", code: "MT", title: engL("تيار الموتور", "Motor current"),
+    fields: [engSelect("phase", engL("النظام", "System"), [["3", engL("3 فاز", "3-phase")], ["1", engL("1 فاز", "1-phase")]]), engField("p", engL("قدرة الموتور (على العمود)", "Motor output (shaft) power"), "kW", { value: "11" }), engField("v", engL("الجهد (بين الفازات للـ 3 فاز)", "Voltage (line-to-line for 3-phase)"), "V", { value: "380" }), engField("pf", engL("معامل القدرة cos φ", "Power factor cos φ"), "", { value: "0.85" }), engField("eff", engL("كفاءة الموتور", "Motor efficiency"), "%", { value: "90" })],
+    run(v) {
+      const p = engNum(v, "p", "القدرة", { positive: true });
+      const V = engNum(v, "v", "الجهد", { positive: true });
+      const pf = engNum(v, "pf", "معامل القدرة", { positive: true });
+      const eff = engNum(v, "eff", "الكفاءة", { positive: true }) / 100;
+      if (pf > 1 || eff > 1) fail("معامل القدرة والكفاءة لازم ميزيدوش عن 1 و 100%.");
+      const input = p / eff;
+      const I = (input * 1000) / ((v.phase === "1" ? V : Math.sqrt(3) * V) * pf);
+      return { results: [engRow(engL("تيار الحمل الكامل", "Full-load current"), I, "A", 2), engRow(engL("القدرة الداخلة", "Input power"), input, "kW"), engRow(engL("القدرة بالحصان", "Output in hp"), (p * 1000) / W_PER_HP, "hp", 2)], note: engL("تيار البدء المباشر بيوصل 6 لـ 8 أضعاف، وخد القيم الفعلية من لوحة الموتور.", "Direct-on-line starting current reaches 6 to 8 times this; use the motor nameplate for actual values.") };
+    },
+  },
+  {
+    id: "energy", group: "elec", code: "KH", title: engL("استهلاك الكهربا وتكلفتها", "Energy use and cost"),
+    fields: [engField("p", engL("قدرة الحمل", "Load power"), "kW", { value: "1.5" }), engField("h", engL("ساعات التشغيل في اليوم", "Running hours per day"), "h", { value: "8" }), engField("d", engL("عدد الأيام", "Number of days"), "", { value: "30" }), engField("price", engL("سعر الكيلووات ساعة (اختياري)", "Price per kWh (optional)"), "", { optional: true })],
+    run(v) {
+      const p = engNum(v, "p", "القدرة", { positive: true });
+      const h = engNum(v, "h", "الساعات", { min: 0 });
+      if (h > 24) fail("ساعات التشغيل لازم 24 أو أقل.");
+      const d = engNum(v, "d", "الأيام", { positive: true });
+      const kwh = p * h * d;
+      const out = [engRow(engL("الاستهلاك في اليوم", "Daily use"), p * h, "kWh", 2), engRow(engL("الاستهلاك الكلي", "Total use"), kwh, "kWh", 2)];
+      const price = engNum(v, "price", "السعر", { optional: true, min: 0 });
+      if (price !== null) out.push(engRow(engL("التكلفة", "Cost"), kwh * price, "", 2));
+      return { results: out, note: engL("سعر الكيلووات ساعة خده من فاتورتك أو من شريحة التعريفة.", "Take the price per kWh from your bill or tariff band.") };
+    },
+  },
+  {
+    id: "resistors", group: "elec", code: "RS", title: engL("مقاومات توالي وتوازي", "Resistors in series and parallel"),
+    fields: [{ key: "list", label: engL("المقاومات (Ω) مفصولة بمسافة أو سطر", "Resistances (Ω), separated by spaces or lines"), type: "textarea", value: "10 20 20" }],
+    run(v) {
+      const rs = String(v.list ?? "").split(/[\s,;]+/).filter(Boolean).map((s, i) => {
+        const n = toNumber(s);
+        if (n === null || !(n > 0)) fail(`المقاومة رقم ${i + 1} لازم رقم أكبر من صفر.`);
+        return n;
+      });
+      if (rs.length < 2) fail("اكتب مقاومتين على الأقل.");
+      return { results: [engRow(engL("توالي", "Series"), rs.reduce((a, b) => a + b, 0), "Ω"), engRow(engL("توازي", "Parallel"), 1 / rs.reduce((a, b) => a + 1 / b, 0), "Ω", 4), engRow(engL("العدد", "Count"), rs.length, "", 0)] };
+    },
+  },
+  {
+    id: "earth-rod", group: "elec", code: "ER", title: engL("مقاومة شبكة الأرضي (سيخ واحد)", "Earth rod resistance (single rod)"),
+    fields: [engField("rho", engL("مقاومية التربة", "Soil resistivity"), "Ω·m", { placeholder: "100" }), engField("l", engL("طول السيخ", "Rod length"), "m", { value: "3" }), engField("d", engL("قطر السيخ", "Rod diameter"), "mm", { value: "16" })],
+    run(v) {
+      const rho = engNum(v, "rho", "مقاومية التربة", { positive: true });
+      const l = engNum(v, "l", "الطول", { positive: true });
+      const d = engNum(v, "d", "القطر", { positive: true }) / 1000;
+      const r = (rho / (2 * Math.PI * l)) * (Math.log((8 * l) / d) - 1);
+      return { results: [engRow(engL("مقاومة السيخ", "Rod resistance"), r, "Ω", 2)], note: engL("معادلة دوايت لسيخ رأسي في تربة متجانسة. مقاومية التربة من قياس الموقع، وقارن بالحد المطلوب في الكود.", "Dwight's formula for one vertical rod in uniform soil. Measure soil resistivity on site and compare with the limit in your code.") };
+    },
+  },
+
+  // ===================== surveying =====================
+  {
+    id: "h-curve", group: "survey", code: "HC", title: engL("عناصر المنحنى الأفقي", "Horizontal curve elements"),
+    fields: [engField("r", engL("نصف القطر R", "Radius R"), "m", { value: "300" }), { key: "delta", label: engL("زاوية الانحراف Δ (درجات أو د د ث)", "Deflection angle Δ (degrees or d m s)"), type: "text", value: "30 00 00" }, engField("pi", engL("محطة نقطة التقاطع PI (اختياري)", "PI chainage (optional)"), "m", { optional: true })],
+    run(v) {
+      const r = engNum(v, "r", "نصف القطر", { positive: true });
+      const delta = parseAngle(v.delta);
+      if (delta === null || !(delta > 0 && delta < 180)) fail("زاوية الانحراف لازم بين 0 و 180 درجة.");
+      const half = (delta * Math.PI) / 360;
+      const t = r * Math.tan(half);
+      const len = (Math.PI * r * delta) / 180;
+      const out = [engRow(engL("طول المماس T", "Tangent length T"), t, "m"), engRow(engL("طول المنحنى L", "Curve length L"), len, "m"), engRow(engL("الوتر الطويل LC", "Long chord LC"), 2 * r * Math.sin(half), "m"), engRow(engL("المسافة الخارجية E", "External distance E"), r * (1 / Math.cos(half) - 1), "m"), engRow(engL("السهم M", "Middle ordinate M"), r * (1 - Math.cos(half)), "m")];
+      const pi = engNum(v, "pi", "محطة PI", { optional: true });
+      if (pi !== null) out.push(engRow(engL("محطة بداية المنحنى BC", "BC chainage"), pi - t, "m"), engRow(engL("محطة نهاية المنحنى EC", "EC chainage"), pi - t + len, "m"));
+      return { results: out };
+    },
+  },
+  {
+    id: "trig-level", group: "survey", code: "TG", title: engL("الميزانية المثلثية", "Trigonometric levelling"),
+    fields: [engField("sd", engL("المسافة المائلة", "Slope distance"), "m", { value: "100" }), { key: "z", label: engL("الزاوية الرأسية من السمت (درجات أو د د ث)", "Zenith angle (degrees or d m s)"), type: "text", value: "88 30 00" }, engField("hi", engL("ارتفاع الجهاز", "Instrument height"), "m", { value: "1.5" }), engField("ht", engL("ارتفاع العاكس", "Target height"), "m", { value: "1.5" }), engField("level", engL("منسوب نقطة الوقوف (اختياري)", "Station level (optional)"), "m", { optional: true })],
+    run(v) {
+      const sd = engNum(v, "sd", "المسافة المائلة", { positive: true });
+      const z = parseAngle(v.z);
+      if (z === null || !(z > 0 && z < 180)) fail("الزاوية الرأسية لازم بين 0 و 180 درجة.");
+      const zr = (z * Math.PI) / 180;
+      const dv = sd * Math.cos(zr);
+      const dh = dv + engNum(v, "hi", "ارتفاع الجهاز") - engNum(v, "ht", "ارتفاع العاكس");
+      const out = [engRow(engL("المسافة الأفقية", "Horizontal distance"), sd * Math.sin(zr), "m"), engRow(engL("الفرق الرأسي على الخط", "Vertical component"), dv, "m"), engRow(engL("فرق المنسوب بين النقطتين", "Level difference between points"), dh, "m")];
+      const level = engNum(v, "level", "المنسوب", { optional: true });
+      if (level !== null) out.push(engRow(engL("منسوب النقطة", "Point level"), level + dh, "m"));
+      return { results: out, note: engL("من غير تصحيح الانحناء والانكسار، وده مهم في المسافات الطويلة (شوف حاسبة الانحناء والانكسار).", "Without curvature and refraction, which matter over long sights (see the curvature and refraction calculator).") };
+    },
+  },
+  {
+    id: "curvature", group: "survey", code: "CR", title: engL("تصحيح الانحناء والانكسار", "Curvature and refraction correction"),
+    fields: [engField("d", engL("المسافة", "Distance"), "m", { value: "1000" }), engField("k", engL("معامل الانكسار k", "Refraction coefficient k"), "", { value: "0.13" })],
+    run(v) {
+      const d = engNum(v, "d", "المسافة", { positive: true });
+      const k = engNum(v, "k", "k", { min: 0 });
+      const c = (d * d) / (2 * EARTH_RADIUS);
+      return { results: [engRow(engL("تصحيح الانحناء", "Curvature correction"), c, "m", 4), engRow(engL("تصحيح الانكسار", "Refraction correction"), -k * c, "m", 4), engRow(engL("التصحيح المشترك", "Combined correction"), (1 - k) * c, "m", 4)], note: engL("نصف قطر الأرض 6371 كم. القيمة المشهورة 0.0673 D² (D بالكيلو) معناها k ≈ 0.14، وk بيتغير مع الجو.", "Earth radius 6371 km. The textbook 0.0673 D² (D in km) means k ≈ 0.14; k varies with the weather.") };
+    },
+  },
+  {
+    id: "misclose", group: "survey", code: "MC", title: engL("خطأ قفل المضلع ودقته", "Traverse misclosure and precision"),
+    fields: [engField("de", engL("خطأ القفل في E", "Misclosure in E"), "m", { value: "0.03" }), engField("dn", engL("خطأ القفل في N", "Misclosure in N"), "m", { value: "0.04" }), engField("perim", engL("طول المضلع الكلي", "Total traverse length"), "m", { value: "1000" })],
+    run(v) {
+      const e = Math.hypot(engNum(v, "de", "ΔE"), engNum(v, "dn", "ΔN"));
+      const perim = engNum(v, "perim", "الطول", { positive: true });
+      return { results: [engRow(engL("خطأ القفل الخطي", "Linear misclosure"), e, "m", 4), engRow(engL("الدقة النسبية", "Relative precision"), e === 0 ? "—" : `1 : ${Math.round(perim / e)}`)], note: engL("قارن الدقة بالمطلوب في مواصفات الشغل قبل توزيع الخطأ.", "Compare the precision with the job specification before adjusting.") };
+    },
+  },
+  {
+    id: "angle-conv", group: "survey", code: "AG", title: engL("تحويل الزوايا", "Angle conversion"),
+    fields: [engSelect("from", engL("الزاوية مكتوبة بـ", "Angle given in"), [["deg", engL("درجات (أو د د ث)", "degrees (or d m s)")], ["gon", engL("جراد (gon)", "gon (grad)")], ["rad", engL("راديان", "radians")]]), { key: "angle", label: engL("الزاوية", "Angle"), type: "text", value: "90" }],
+    run(v) {
+      let deg;
+      if (v.from === "deg") deg = parseAngle(v.angle);
+      else {
+        const n = toNumber(v.angle);
+        deg = n === null ? null : v.from === "gon" ? n * 0.9 : (n * 180) / Math.PI;
+      }
+      if (deg === null) fail("الزاوية مش مفهومة.");
+      return { results: [engRow(engL("درجات عشري", "Decimal degrees"), deg, "°", 6), engRow(engL("درجات دقايق ثواني", "Degrees minutes seconds"), toDms(deg)), engRow("gon", deg / 0.9, "gon", 6), engRow(engL("راديان", "Radians"), (deg * Math.PI) / 180, "rad", 6)] };
+    },
+  },
+  {
+    id: "map-scale", group: "survey", code: "SC", title: engL("مقياس الرسم", "Map scale"),
+    fields: [engField("n", engL("المقياس 1 :", "Scale 1 :"), "", { value: "500" }), engField("map", engL("المسافة على الخريطة", "Distance on the map"), "cm", { optional: true, value: "2" }), engField("ground", engL("المسافة على الطبيعة", "Distance on the ground"), "m", { optional: true })],
+    run(v) {
+      const n = engNum(v, "n", "المقياس", { positive: true });
+      const map = engNum(v, "map", "المسافة على الخريطة", { optional: true, min: 0 });
+      const ground = engNum(v, "ground", "المسافة على الطبيعة", { optional: true, min: 0 });
+      if ((map === null) === (ground === null)) fail("اكتب مسافة واحدة بس: على الخريطة أو على الطبيعة.");
+      const g = ground ?? (map * n) / 100;
+      return { results: [engRow(engL("على الخريطة", "On the map"), (g * 100) / n, "cm", 3), engRow(engL("على الطبيعة", "On the ground"), g, "m", 3)] };
+    },
+  },
+
+  // ===================== civil and structural =====================
+  {
+    id: "mix", group: "civil", code: "MX", title: engL("مواد الخرسانة بالنسب الحجمية", "Concrete materials by nominal mix"),
+    fields: [engField("v", engL("حجم الخرسانة", "Concrete volume"), "m³", { value: "1" }), engField("sand", engL("نسبة الرمل (للأسمنت 1)", "Sand parts (cement = 1)"), "", { value: "2" }), engField("gravel", engL("نسبة الزلط (للأسمنت 1)", "Gravel parts (cement = 1)"), "", { value: "4" }), engField("wc", engL("نسبة المية للأسمنت", "Water-cement ratio"), "", { value: "0.5" }), engField("dry", engL("معامل الحجم الجاف", "Dry volume factor"), "", { value: "1.54" })],
+    run(v) {
+      const vol = engNum(v, "v", "الحجم", { positive: true });
+      const s = engNum(v, "sand", "الرمل", { min: 0 });
+      const g = engNum(v, "gravel", "الزلط", { min: 0 });
+      const wc = engNum(v, "wc", "نسبة المية", { positive: true });
+      const dry = vol * engNum(v, "dry", "معامل الحجم الجاف", { positive: true });
+      const parts = 1 + s + g;
+      const cement = (dry / parts) * CEMENT_BULK_DENSITY;
+      return {
+        results: [engRow(engL("الأسمنت", "Cement"), cement, "kg", 1), engRow(engL("شكاير أسمنت 50 كجم", "50 kg cement bags"), cement / CEMENT_BAG_KG, "", 2), engRow(engL("الرمل", "Sand"), (dry * s) / parts, "m³"), engRow(engL("الزلط", "Gravel"), (dry * g) / parts, "m³"), engRow(engL("المية", "Water"), cement * wc, "L", 0)],
+        note: engL("خلطة حجمية تقريبية بكثافة أسمنت 1440 كجم/م³. الخرسانة الإنشائية بتتصمم بخلطة تجريبية في المعمل.", "Approximate volumetric mix with cement at 1440 kg/m³. Structural concrete should use a laboratory mix design."),
+      };
+    },
+  },
+  {
+    id: "beam", group: "civil", code: "BM", title: engL("كمرة بحمل منتظم", "Beam under uniform load"),
+    fields: [engSelect("support", engL("الارتكاز", "Support"), [["simple", engL("بسيطة الارتكاز", "Simply supported")], ["cantilever", engL("كابولي", "Cantilever")]]), engField("w", engL("الحمل المنتظم", "Uniform load"), "kN/m", { value: "20" }), engField("l", engL("البحر", "Span"), "m", { value: "5" }), engField("b", engL("عرض القطاع", "Section width"), "mm", { value: "250" }), engField("h", engL("عمق القطاع", "Section depth"), "mm", { value: "500" }), engField("e", engL("معاير المرونة E", "Elastic modulus E"), "GPa", { placeholder: "25" })],
+    run(v) {
+      const w = engNum(v, "w", "الحمل", { positive: true });
+      const l = engNum(v, "l", "البحر", { positive: true });
+      const b = engNum(v, "b", "العرض", { positive: true }) / 1000;
+      const h = engNum(v, "h", "العمق", { positive: true }) / 1000;
+      const E = engNum(v, "e", "E", { positive: true }) * 1e9;
+      const I = (b * h ** 3) / 12;
+      const cant = v.support === "cantilever";
+      const m = cant ? (w * l * l) / 2 : (w * l * l) / 8;
+      const shear = cant ? w * l : (w * l) / 2;
+      const defl = cant ? (w * 1000 * l ** 4) / (8 * E * I) : (5 * w * 1000 * l ** 4) / (384 * E * I);
+      return {
+        results: [engRow(engL("أقصى عزم", "Maximum moment"), m, "kN·m", 2), engRow(engL("أقصى قص", "Maximum shear"), shear, "kN", 2), engRow(engL("عزم القصور الذاتي", "Second moment of area"), I * 1e12, "mm⁴", 0), engRow(engL("أقصى ترخيم", "Maximum deflection"), defl * 1000, "mm", 2), engRow(engL("نسبة البحر للترخيم", "Span / deflection"), `L / ${Math.round(l / defl)}`)],
+        note: engL("تحليل مرن لقطاع غير متشرخ. ده مش تصميم، والتصميم والترخيم المسموح من الكود.", "Elastic analysis of an uncracked section. This is not a design; take design and allowable deflection from the code."),
+      };
+    },
+  },
+  {
+    id: "footing", group: "civil", code: "FT", title: engL("مساحة القاعدة من جهد التربة", "Footing area from bearing capacity"),
+    fields: [engField("p", engL("حمل العمود (تشغيلي)", "Column load (service)"), "kN", { value: "800" }), engField("q", engL("جهد التربة المسموح", "Allowable bearing pressure"), "kN/m²", { placeholder: "150" }), engField("sw", engL("وزن القاعدة والردم كنسبة", "Footing and backfill weight as a share"), "%", { value: "10" }), engField("b", engL("عرض معروف (للمستطيل، اختياري)", "Known width (rectangular, optional)"), "m", { optional: true })],
+    run(v) {
+      const p = engNum(v, "p", "الحمل", { positive: true });
+      const q = engNum(v, "q", "جهد التربة", { positive: true });
+      const sw = engNum(v, "sw", "النسبة", { min: 0 }) / 100;
+      const area = (p * (1 + sw)) / q;
+      const out = [engRow(engL("المساحة المطلوبة", "Required area"), area, "m²"), engRow(engL("ضلع القاعدة المربعة", "Square footing side"), Math.sqrt(area), "m")];
+      const b = engNum(v, "b", "العرض", { optional: true, positive: true });
+      if (b !== null) out.push(engRow(engL("الطول المطلوب للمستطيل", "Required rectangle length"), area / b, "m"));
+      return { results: out, note: engL("جهد التربة من تقرير التربة. ده تقدير للأبعاد بس من غير تصميم الخرسانة والتسليح.", "Take the bearing pressure from the soil report. This sizes the plan only, not the concrete or reinforcement.") };
+    },
+  },
+  {
+    id: "stairs", group: "civil", code: "ST", title: engL("تصميم السلم (القائمة والنايمة)", "Stair risers and treads"),
+    fields: [engField("h", engL("الارتفاع من الدور للدور", "Floor-to-floor height"), "m", { value: "3" }), engField("rmax", engL("أقصى قائمة", "Maximum riser"), "mm", { placeholder: "170" }), engField("g", engL("النايمة", "Tread (going)"), "mm", { placeholder: "280" })],
+    run(v) {
+      const h = engNum(v, "h", "الارتفاع", { positive: true }) * 1000;
+      const rmax = engNum(v, "rmax", "أقصى قائمة", { positive: true });
+      const g = engNum(v, "g", "النايمة", { positive: true });
+      const n = Math.ceil(h / rmax - 1e-9);
+      const r = h / n;
+      return { results: [engRow(engL("عدد القوائم", "Number of risers"), n, "", 0), engRow(engL("القائمة الفعلية", "Actual riser"), r, "mm", 1), engRow(engL("عدد النايمات", "Number of treads"), n - 1, "", 0), engRow(engL("الطول الأفقي للسلم", "Horizontal run"), ((n - 1) * g) / 1000, "m", 2), engRow("2R + G", 2 * r + g, "mm", 0)], note: engL("السلم المريح 2R + G بين 600 و 650 مم. الحدود بتاعة القائمة والنايمة من الكود.", "A comfortable stair has 2R + G between 600 and 650 mm. Take riser and tread limits from the code.") };
+    },
+  },
+  {
+    id: "bricks", group: "civil", code: "BR", title: engL("عدد الطوب والمونة", "Bricks and mortar"),
+    fields: [engField("l", engL("طول الحيطة", "Wall length"), "m", { value: "5" }), engField("h", engL("ارتفاع الحيطة", "Wall height"), "m", { value: "3" }), engField("open", engL("مساحة الفتحات (اختياري)", "Openings area (optional)"), "m²", { optional: true }), engSelect("thick", engL("سمك الحيطة", "Wall thickness"), [["half", engL("نص طوبة", "Half brick")], ["one", engL("طوبة", "One brick")]]), engField("bl", engL("طول الطوبة", "Brick length"), "mm", { placeholder: "250" }), engField("bw", engL("عرض الطوبة", "Brick width"), "mm", { placeholder: "120" }), engField("bh", engL("ارتفاع الطوبة", "Brick height"), "mm", { placeholder: "60" }), engField("j", engL("سمك العراميس", "Mortar joint"), "mm", { value: "10" }), engField("waste", engL("الهالك", "Waste"), "%", { value: "5" })],
+    run(v) {
+      const area = engNum(v, "l", "الطول", { positive: true }) * engNum(v, "h", "الارتفاع", { positive: true }) - (engNum(v, "open", "الفتحات", { optional: true, min: 0 }) ?? 0);
+      if (!(area > 0)) fail("مساحة الفتحات أكبر من الحيطة.");
+      const bl = engNum(v, "bl", "طول الطوبة", { positive: true }) / 1000;
+      const bw = engNum(v, "bw", "عرض الطوبة", { positive: true }) / 1000;
+      const bh = engNum(v, "bh", "ارتفاع الطوبة", { positive: true }) / 1000;
+      const j = engNum(v, "j", "العراميس", { min: 0 }) / 1000;
+      const waste = engNum(v, "waste", "الهالك", { min: 0 }) / 100;
+      const one = v.thick === "one";
+      const perM2 = (one ? 2 : 1) / ((bl + j) * (bh + j));
+      const net = perM2 * area;
+      const mortar = area * (one ? bl : bw) - net * bl * bw * bh;
+      return { results: [engRow(engL("طوب لكل م²", "Bricks per m²"), perM2, "", 1), engRow(engL("صافي المساحة", "Net area"), area, "m²", 2), engRow(engL("عدد الطوب بالهالك", "Bricks including waste"), Math.ceil(net * (1 + waste) - 1e-9), "", 0), engRow(engL("حجم المونة (من غير هالك)", "Mortar volume (no waste)"), mortar, "m³")], note: engL("حيطة الطوبة محسوبة على إن سمكها طول طوبة. اكتب مقاسات الطوب اللي هتشتريه.", "A one-brick wall is taken as one brick length thick. Enter the size of the bricks you will buy.") };
+    },
+  },
+  {
+    id: "excavation", group: "civil", code: "EX", title: engL("حفر بميول جانبية", "Excavation with side slopes"),
+    fields: [engField("l", engL("طول القاع", "Bottom length"), "m", { value: "10" }), engField("b", engL("عرض القاع", "Bottom width"), "m", { value: "8" }), engField("h", engL("العمق", "Depth"), "m", { value: "2" }), engField("n", engL("الميل الجانبي (أفقي لكل 1 رأسي)", "Side slope (horizontal per 1 vertical)"), "", { placeholder: "1" }), engField("swell", engL("نسبة الانتفاش", "Bulking (swell)"), "%", { placeholder: "25" })],
+    run(v) {
+      const l = engNum(v, "l", "الطول", { positive: true });
+      const b = engNum(v, "b", "العرض", { positive: true });
+      const h = engNum(v, "h", "العمق", { positive: true });
+      const n = engNum(v, "n", "الميل", { min: 0 });
+      const swell = engNum(v, "swell", "الانتفاش", { min: 0 }) / 100;
+      const top = (l + 2 * n * h) * (b + 2 * n * h);
+      const vol = (h / 6) * (l * b + 4 * (l + n * h) * (b + n * h) + top);
+      return { results: [engRow(engL("أبعاد الفتحة من فوق", "Top opening"), `${(l + 2 * n * h).toFixed(2)} × ${(b + 2 * n * h).toFixed(2)} m`), engRow(engL("حجم الحفر (طبيعي)", "Excavation volume (in place)"), vol, "m³", 2), engRow(engL("الحجم بعد الانتفاش", "Loose volume"), vol * (1 + swell), "m³", 2)], note: engL("معادلة المنشور (prismoidal) وهي مظبوطة للشكل ده. الميل والانتفاش حسب نوع التربة.", "Prismoidal formula, exact for this shape. Slope and bulking depend on the soil.") };
+    },
+  },
+
+  // ===================== cost and quantities =====================
+  {
+    id: "item-cost", group: "cost", code: "IC", title: engL("تكلفة بند", "Item cost"),
+    fields: [engField("q", engL("الكمية", "Quantity"), "", { value: "100" }), engField("price", engL("سعر الوحدة", "Unit price"), "", { placeholder: "0" }), engField("waste", engL("الهالك", "Waste"), "%", { value: "0" })],
+    run(v) {
+      const q = engNum(v, "q", "الكمية", { min: 0 });
+      const price = engNum(v, "price", "السعر", { min: 0 });
+      const qw = q * (1 + engNum(v, "waste", "الهالك", { min: 0 }) / 100);
+      return { results: [engRow(engL("الكمية بالهالك", "Quantity with waste"), qw, "", 3), engRow(engL("التكلفة", "Cost"), qw * price, "", 2)] };
+    },
+  },
+  {
+    id: "boq", group: "cost", code: "BQ", title: engL("مقايسة سريعة", "Quick bill of quantities"),
+    fields: [{ key: "lines", label: engL("كل سطر: البند ثم الكمية ثم سعر الوحدة", "Each line: item, then quantity, then unit price"), type: "textarea", value: "خرسانة 10 1500\nحديد 2 40000" }, engField("vat", engL("ضريبة القيمة المضافة (اختياري)", "VAT (optional)"), "%", { optional: true })],
+    run(v) {
+      const rows = String(v.lines ?? "").split(/\n+/).map((s) => s.trim()).filter(Boolean).map((line, i) => {
+        const tokens = line.split(/\s+/);
+        const price = toNumber(tokens.pop());
+        const q = toNumber(tokens.pop());
+        if (price === null || q === null) fail(`السطر ${i + 1}: لازم آخره الكمية وسعر الوحدة.`);
+        return [tokens.join(" ") || `${i + 1}`, q * price];
+      });
+      if (!rows.length) fail("اكتب بند واحد على الأقل.");
+      const sub = rows.reduce((a, [, x]) => a + x, 0);
+      const out = rows.map(([name, x]) => engRow(name, x, "", 2));
+      out.push(engRow(engL("الإجمالي", "Subtotal"), sub, "", 2));
+      const vat = engNum(v, "vat", "الضريبة", { optional: true, min: 0 });
+      if (vat !== null) out.push(engRow(engL("الضريبة", "Tax"), (sub * vat) / 100, "", 2), engRow(engL("الإجمالي بالضريبة", "Total with tax"), sub * (1 + vat / 100), "", 2));
+      return { results: out };
+    },
+  },
+  {
+    id: "paint", group: "cost", code: "PT", title: engL("محارة ودهانات غرفة", "Room plaster and paint"),
+    fields: [engField("l", engL("طول الغرفة", "Room length"), "m", { value: "5" }), engField("w", engL("عرض الغرفة", "Room width"), "m", { value: "4" }), engField("h", engL("الارتفاع", "Height"), "m", { value: "3" }), engField("open", engL("مساحة الأبواب والشبابيك", "Doors and windows area"), "m²", { value: "0" }), engSelect("ceil", engL("السقف", "Ceiling"), [["yes", engL("محسوب", "Included")], ["no", engL("مش محسوب", "Not included")]]), engField("coats", engL("عدد الأوجه", "Number of coats"), "", { value: "2" }), engField("cover", engL("تغطية اللتر", "Coverage per litre"), "m²/L", { placeholder: "10" })],
+    run(v) {
+      const l = engNum(v, "l", "الطول", { positive: true });
+      const w = engNum(v, "w", "العرض", { positive: true });
+      const walls = 2 * (l + w) * engNum(v, "h", "الارتفاع", { positive: true }) - engNum(v, "open", "الفتحات", { min: 0 });
+      if (!(walls > 0)) fail("مساحة الفتحات أكبر من الحيطان.");
+      const ceil = v.ceil === "no" ? 0 : l * w;
+      const area = walls + ceil;
+      const paint = (area * engNum(v, "coats", "الأوجه", { positive: true })) / engNum(v, "cover", "التغطية", { positive: true });
+      return { results: [engRow(engL("مساحة الحيطان", "Wall area"), walls, "m²", 2), engRow(engL("مساحة السقف", "Ceiling area"), ceil, "m²", 2), engRow(engL("المساحة الكلية", "Total area"), area, "m²", 2), engRow(engL("كمية الدهان", "Paint needed"), paint, "L", 1)], note: engL("التغطية من على علبة الدهان، وبتقل على المحارة الجديدة.", "Take the coverage from the paint tin; it drops on fresh plaster.") };
+    },
+  },
+  {
+    id: "tiles", group: "cost", code: "TI", title: engL("عدد البلاط والسيراميك", "Tiles needed"),
+    fields: [engField("area", engL("المساحة", "Area"), "m²", { value: "20" }), engField("tl", engL("طول البلاطة", "Tile length"), "cm", { value: "60" }), engField("tw", engL("عرض البلاطة", "Tile width"), "cm", { value: "60" }), engField("waste", engL("الهالك", "Waste"), "%", { value: "10" }), engField("box", engL("عدد البلاط في الكرتونة (اختياري)", "Tiles per box (optional)"), "", { optional: true })],
+    run(v) {
+      const area = engNum(v, "area", "المساحة", { positive: true });
+      const one = (engNum(v, "tl", "الطول", { positive: true }) * engNum(v, "tw", "العرض", { positive: true })) / 1e4;
+      const n = Math.ceil((area / one) * (1 + engNum(v, "waste", "الهالك", { min: 0 }) / 100) - 1e-9);
+      const out = [engRow(engL("بلاط لكل م²", "Tiles per m²"), 1 / one, "", 2), engRow(engL("عدد البلاط بالهالك", "Tiles including waste"), n, "", 0)];
+      const box = engNum(v, "box", "الكرتونة", { optional: true, positive: true });
+      if (box !== null) out.push(engRow(engL("عدد الكراتين", "Boxes"), Math.ceil(n / box), "", 0));
+      return { results: out };
+    },
+  },
+
+  // ===================== plumbing =====================
+  {
+    id: "water-demand", group: "plumb", code: "WD", title: engL("استهلاك المية وحجم الخزان", "Water demand and tank size"),
+    fields: [engField("people", engL("عدد الأشخاص", "Number of people"), "", { value: "20" }), engField("lpd", engL("الاستهلاك للفرد في اليوم", "Use per person per day"), "L", { placeholder: "150" }), engField("days", engL("أيام التخزين", "Days of storage"), "", { value: "1" })],
+    run(v) {
+      const daily = engNum(v, "people", "عدد الأشخاص", { positive: true }) * engNum(v, "lpd", "الاستهلاك", { positive: true });
+      const store = daily * engNum(v, "days", "الأيام", { positive: true });
+      return { results: [engRow(engL("الاستهلاك اليومي", "Daily demand"), daily, "L", 0), engRow(engL("حجم الخزان", "Tank volume"), store / 1000, "m³", 2)], note: engL("الاستهلاك للفرد حسب نوع المبنى من الكود.", "Take the per-person use for the building type from the code.") };
+    },
+  },
+  {
+    id: "drain", group: "plumb", code: "DR", title: engL("سعة ماسورة الصرف (مانينج)", "Drain pipe capacity (Manning)"),
+    fields: [engField("d", engL("القطر الداخلي", "Inside diameter"), "mm", { value: "110" }), engField("s", engL("الميل", "Slope"), "%", { value: "1" }), engField("n", engL("معامل مانينج n", "Manning's n"), "", { placeholder: "0.011" }), engField("len", engL("طول الخط (اختياري)", "Run length (optional)"), "m", { optional: true })],
+    run(v) {
+      const d = engNum(v, "d", "القطر", { positive: true }) / 1000;
+      const s = engNum(v, "s", "الميل", { positive: true }) / 100;
+      const n = engNum(v, "n", "n", { positive: true });
+      const vel = (1 / n) * (d / 4) ** (2 / 3) * Math.sqrt(s);
+      const q = vel * ((Math.PI * d * d) / 4);
+      const out = [engRow(engL("السرعة والماسورة مليانة", "Velocity running full"), vel, "m/s"), engRow(engL("التصرف والماسورة مليانة", "Flow running full"), q * 1000, "L/s", 2), engRow(engL("التصرف ونصها مليان", "Flow running half full"), (q * 1000) / 2, "L/s", 2)];
+      const len = engNum(v, "len", "الطول", { optional: true, positive: true });
+      if (len !== null) out.push(engRow(engL("فرق المنسوب على الطول", "Fall over the run"), len * s, "m"));
+      return { results: out, note: engL("n حوالي 0.011 للـ PVC و 0.013 للخرسانة. أقل ميل وسرعة مسموحين من الكود.", "n is about 0.011 for PVC and 0.013 for concrete. Take minimum slope and velocity from the code.") };
+    },
+  },
+  {
+    id: "heater", group: "plumb", code: "WH", title: engL("سخان المية: الطاقة والزمن", "Water heater energy and time"),
+    fields: [engField("vol", engL("حجم المية", "Water volume"), "L", { value: "100" }), engField("t1", engL("درجة المية الداخلة", "Inlet temperature"), "°C", { value: "20" }), engField("t2", engL("الدرجة المطلوبة", "Target temperature"), "°C", { value: "60" }), engField("p", engL("قدرة السخان", "Heater power"), "kW", { value: "2" }), engField("eff", engL("الكفاءة", "Efficiency"), "%", { value: "100" })],
+    run(v) {
+      const vol = engNum(v, "vol", "الحجم", { positive: true });
+      const dt = engNum(v, "t2", "الدرجة المطلوبة") - engNum(v, "t1", "الدرجة الداخلة");
+      if (!(dt > 0)) fail("الدرجة المطلوبة لازم أعلى من الداخلة.");
+      const eff = engNum(v, "eff", "الكفاءة", { positive: true }) / 100;
+      if (eff > 1) fail("الكفاءة لازم 100% أو أقل.");
+      const kwh = (vol * WATER_CP * dt) / 3600 / eff;
+      const hours = kwh / engNum(v, "p", "القدرة", { positive: true });
+      return { results: [engRow(engL("الطاقة المطلوبة", "Energy needed"), kwh, "kWh"), engRow(engL("زمن التسخين", "Heating time"), `${Math.floor(hours)}h ${String(Math.round((hours % 1) * 60)).padStart(2, "0")}min`), engRow(engL("بالدقايق", "In minutes"), hours * 60, "min", 0)], note: engL("من غير فواقد الحرارة من جسم السخان والمواسير.", "Ignores heat lost from the tank and pipes.") };
+    },
+  },
+  {
+    id: "static-head", group: "plumb", code: "SH", title: engL("الضغط من ارتفاع الخزان", "Pressure from tank height"),
+    fields: [engField("h", engL("الارتفاع من سطح المية للحنفية", "Height from water surface to tap"), "m", { value: "10" })],
+    run(v) {
+      const kpa = (RHO_WATER * GRAVITY * engNum(v, "h", "الارتفاع", { min: 0 })) / 1000;
+      return { results: [engRow(engL("الضغط", "Pressure"), kpa, "kPa", 2), engRow(engL("بالبار", "In bar"), kpa / 100, "bar", 3), engRow("psi", kpa / 6.894757293, "psi", 2)], note: engL("ضغط ساكن والمية واقفة. وهي ماشية الضغط بيقل بفواقد الاحتكاك.", "Static pressure with no flow. Friction losses lower it while water flows.") };
+    },
+  },
 ];
 
 const GROUPS = [
   { id: "tools", code: "TL", title: engL("أدوات هندسية", "Engineering tools") },
+  { id: "survey", code: "SV", title: engL("مساحة", "Surveying") },
+  { id: "civil", code: "CV", title: engL("مدني وإنشائي", "Civil and structural") },
+  { id: "cost", code: "CQ", title: engL("تكاليف وكميات", "Costs and quantities") },
   { id: "mech", code: "ME", title: engL("ميكانيكا", "Mechanical") },
+  { id: "plumb", code: "PL", title: engL("صحي (سباكة)", "Plumbing") },
   { id: "elec", code: "EL", title: engL("كهربا", "Electrical") },
 ];
 
@@ -4408,6 +4767,29 @@ const GLOSSARY = {
     ["لومن", "Lumen", "وحدة الفيض الضوئي اللي بيطلعه المصدر.", "The unit of luminous flux emitted by a source."],
     ["محول", "Transformer", "جهاز بيغير الجهد المتردد من قيمة لقيمة، زي 11 كيلوفولت لـ 380 فولت.", "A device that changes AC voltage from one level to another, such as 11 kV to 380 V."],
     ["3 فاز", "Three-phase", "نظام بتلات أسلاك تيارها متأخر عن بعض 120°، وبيستخدم للأحمال الكبيرة والموتورات.", "A system of three conductors 120° apart, used for large loads and motors."],
+    ["مكثفات تحسين القدرة", "Power factor correction capacitors", "مكثفات بتعوّض القدرة غير الفعالة فمعامل القدرة يعلى والتيار يقل.", "Capacitors that supply reactive power so the power factor rises and current falls."],
+    ["مقاومية التربة", "Soil resistivity", "قد إيه التربة بتقاوم مرور التيار، وعليها بتتوقف مقاومة الأرضي.", "How strongly soil resists current; earthing resistance depends on it."],
+  ],
+  plumb: [
+    ["مياه التغذية", "Water supply", "شبكة المواسير اللي بتوصل المية النضيفة من المصدر أو الخزان للأجهزة.", "The pipework carrying clean water from the source or tank to the fixtures."],
+    ["الصرف الصحي", "Drainage", "شبكة المواسير اللي بتشيل المية المستعملة بالجاذبية لحد المطبق أو الشبكة العامة.", "The pipework carrying used water by gravity to the manhole or public sewer."],
+    ["ميل الصرف", "Drain slope", "فرق المنسوب لكل متر في ماسورة الصرف، عشان المية تمشي بسرعة تمنع الترسيب.", "The fall per metre of a drain, so water flows fast enough to avoid deposits."],
+    ["مطبق (غرفة تفتيش)", "Manhole / inspection chamber", "غرفة على خط الصرف للتنظيف والتفتيش وعند تغيير الاتجاه أو الميل.", "A chamber on a drain for cleaning and inspection, and where direction or slope changes."],
+    ["جاليتراب", "Floor trap (gully)", "صفاية أرضية فيها مية حاجزة بتمنع الروايح ترجع من الصرف.", "A floor drain with a water seal that stops sewer smells coming back."],
+    ["عمود التهوية", "Vent stack", "ماسورة طالعة للسطح بتدخّل هوا للصرف فالسيفونات متتسحبش.", "A pipe up to the roof that lets air into the drains so traps are not siphoned."],
+    ["محبس", "Valve", "قطعة بتفتح وتقفل أو تتحكم في مرور المية في الماسورة.", "A fitting that opens, closes or regulates flow in a pipe."],
+    ["الضغط الساكن", "Static pressure", "ضغط المية والمية واقفة، وبيساوي تقريبًا 0.1 بار لكل متر ارتفاع.", "Water pressure with no flow, about 0.1 bar per metre of height."],
+    ["معامل مانينج", "Manning's n", "رقم بيعبّر عن خشونة جدار الماسورة أو القناة في حساب التصرف.", "A number for the roughness of a pipe or channel wall in flow calculations."],
+  ],
+  cost: [
+    ["المقايسة", "Bill of quantities (BOQ)", "جدول بنود الشغل بكمياتها وأسعارها، وعليه بيتعمل العطاء والمستخلصات.", "A list of work items with quantities and rates, used for tenders and payments."],
+    ["سعر الوحدة", "Unit rate", "سعر الوحدة الواحدة من البند، زي سعر المتر المكعب خرسانة.", "The price of one unit of an item, such as one cubic metre of concrete."],
+    ["المستخلص", "Interim payment certificate", "حساب الشغل اللي اتنفذ لحد تاريخ معين عشان المقاول ياخد مستحقاته.", "A statement of work done to a date so the contractor is paid for it."],
+    ["الهالك", "Waste allowance", "نسبة زيادة على الكمية الصافية بتغطي القص والكسر والفاقد في الموقع.", "An extra share on the net quantity to cover cutting, breakage and site losses."],
+    ["الحصر", "Quantity take-off", "استخراج كميات البنود من الرسومات أو من الطبيعة.", "Measuring item quantities from the drawings or on site."],
+    ["الانتفاش", "Bulking (swell)", "زيادة حجم التربة لما تتحفر وتتفكك عن حجمها الطبيعي.", "The increase in soil volume when it is dug and loosened."],
+    ["التكاليف المباشرة", "Direct costs", "تكلفة المواد والعمالة والمعدات اللي داخلة في البند نفسه.", "The cost of materials, labour and plant that go into the item itself."],
+    ["التكاليف غير المباشرة", "Indirect costs (overheads)", "مصاريف الموقع والإدارة اللي مش مربوطة ببند واحد.", "Site and management expenses not tied to a single item."],
   ],
 };
 
@@ -4416,6 +4798,8 @@ const GLOSSARY_FIELDS = [
   ["civil", "مدني وإنشائي", "Civil and structural"],
   ["mech", "ميكانيكا", "Mechanical"],
   ["elec", "كهربا", "Electrical"],
+  ["plumb", "صحي", "Plumbing"],
+  ["cost", "تكاليف وكميات", "Costs and quantities"],
 ];
 
 // Browser app for the published page. The calculation engine (global `Engine`) is the
@@ -5543,6 +5927,9 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     "رجوع": "Back", "قفل": "Close", "دوّر على حاسبة أو مصطلح…": "Search a calculator or term…",
     "التعريفات الهندسية": "Engineering definitions", "الكل": "All", "مفيش نتايج.": "No results.", "مصطلح": "terms",
     "اكتب القيم والنتيجة بتطلع على طول.": "Type the values and the result appears straight away.",
+    "اكتب القيم دي:": "Fill in:",
+    "اكتب قيمتين بس من التلاتة وسيب التالتة فاضية.": "Enter two of the three values and leave the third empty.",
+    "اكتب مسافة واحدة بس: على الخريطة أو على الطبيعة.": "Enter one distance only: on the map or on the ground.",
   });
 
   const body = $("#dr-body");
@@ -5599,11 +5986,21 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     }
   }
 
+  let enCount = 0;
   function compute() {
     const c = CALCULATORS.find((x) => x.id === view.id);
     const out = body.querySelector(".dr-out");
+    // Ask for empty required fields by name instead of failing on the first one.
+    const missing = c.fields.filter((f) => f.type === "number" && !f.optional && String(saved[c.id][f.key] ?? "").trim() === "");
+    if (missing.length) {
+      out.innerHTML = `<p class="dr-note"><span>اكتب القيم دي:</span> ${missing.map((f) => `<span>${esc(f.label)}</span>`).join(" · ")}</p>`;
+      return;
+    }
     try {
       const res = runEngineering(c.id, saved[c.id]);
+      // Result labels and notes register their English as they run; hand new ones to the translator.
+      const n = Object.keys(ENGINEERING_EN).length;
+      if (n !== enCount) { enCount = n; I18N.add(ENGINEERING_EN); }
       out.innerHTML = `<table><tbody>${res.results.map((x) => `<tr><td>${esc(x.label)}</td><td class="num">${nf(x.value, x.decimals)}${x.unit ? ` <span>${esc(x.unit)}</span>` : ""}</td></tr>`).join("")}</tbody></table>${res.note ? `<p class="dr-note">${esc(res.note)}</p>` : ""}`;
     } catch (e) {
       out.innerHTML = `<p class="dr-err">${esc(e.message)}</p>`;
