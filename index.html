@@ -289,7 +289,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .burger { display: grid; gap: 3px; width: 16px; }
 .burger i { display: block; height: 2px; border-radius: 2px; background: currentColor; }
 .burger i:nth-child(2) { width: 70%; }
-.scrim { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--paper) 55%, transparent); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+.scrim { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--paper) 70%, transparent);
   opacity: 0; pointer-events: none; transition: opacity .25s; }
 .drawer { position: fixed; top: 0; bottom: 0; inset-inline-start: 0; z-index: 41; width: min(430px, 92vw); display: flex; flex-direction: column; gap: 10px; padding: 14px;
   background: var(--sheet); border-inline-end: 1px solid color-mix(in srgb, var(--gold) 25%, var(--line)); box-shadow: 0 0 60px -10px var(--shadow);
@@ -2907,8 +2907,10 @@ const V3 = (() => {
   function mount(host, build, { autoRotate = false, height, interactive = true, flyIn = false } = {}) {
     unmount(host);
     if (!supported()) return false;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    // Phones have dense screens and weak GPUs: fewer pixels and no MSAA there.
+    const coarse = window.matchMedia?.("(pointer: coarse)").matches;
+    const renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2));
     renderer.outputEncoding = THREE.sRGBEncoding;
     const canvas = renderer.domElement;
     canvas.className = "v3-canvas";
@@ -2994,9 +2996,14 @@ const V3 = (() => {
     let raf = 0;
     let visible = true;
     const t0 = performance.now();
+    // Draw only while something moves, and never behind the open tools drawer.
+    let dirty = true;
+    let inTick = false;
+    controls.addEventListener("change", () => { dirty = true; if (!inTick) start(); });
     const tick = () => {
       raf = 0;
-      if (!visible || !host.isConnected) return;
+      if (!visible || !host.isConnected || paused()) return;
+      inTick = true;
       const t = (performance.now() - t0) / 1000;
       for (const f of frames) f(t);
       if (fly) {
@@ -3004,12 +3011,15 @@ const V3 = (() => {
         camera.position.lerpVectors(fly.from, fly.to, 1 - (1 - k) ** 3);
         if (k === 1) fly = null;
       }
-      controls.update();
+      const moving = controls.update() || dirty || fly || controls.autoRotate || frames.length;
+      dirty = false;
+      inTick = false;
+      if (!moving) return;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
     };
     const start = () => { if (!raf) raf = requestAnimationFrame(tick); };
-    const ro = new ResizeObserver(() => { size(); start(); });
+    const ro = new ResizeObserver(() => { size(); dirty = true; start(); });
     ro.observe(host);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting && !document.hidden; if (visible) start(); });
     io.observe(host);
@@ -3017,7 +3027,7 @@ const V3 = (() => {
 
     host._v3 = {
       build, opts: { autoRotate, height, interactive }, home, camera, target: controls.target,
-      wake() { visible = true; start(); },
+      wake() { visible = true; dirty = true; start(); },
       dispose() {
         cancelAnimationFrame(raf);
         ro.disconnect();
@@ -3043,9 +3053,11 @@ const V3 = (() => {
       mount(host, build, opts);
     }
   }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) for (const h of live) h._v3?.wake(); });
+  const paused = () => document.documentElement.classList.contains("drawer-open");
+  const wakeAll = () => { for (const h of live) h._v3?.wake(); };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) wakeAll(); });
 
-  return { supported, mount, unmount, remountAll, home: (host) => host?._v3?.home() };
+  return { supported, mount, unmount, remountAll, wakeAll, home: (host) => host?._v3?.home() };
 })();
 
 // ---------- shared geometry helpers ----------
@@ -4239,7 +4251,16 @@ const I18N = (() => {
   ];
 
   const AR = /[؀-ۿ]/;
+  // The drawer re-renders hundreds of glossary lines per keystroke; most miss every pattern.
+  const memo = new Map();
   function tr(text) {
+    if (memo.has(text)) return memo.get(text);
+    const out = translate(text);
+    if (memo.size > 5000) memo.clear();
+    memo.set(text, out);
+    return out;
+  }
+  function translate(text) {
     const core = text.trim().replace(/\s+/g, " ");
     if (!core || !AR.test(core)) return null;
     if (EXACT[core] !== undefined) return text.replace(text.trim(), EXACT[core]);
@@ -4317,7 +4338,7 @@ const I18N = (() => {
   }
 
   // Other modules add their own Arabic -> English pairs.
-  const add = (pairs) => Object.assign(EXACT, pairs);
+  const add = (pairs) => { Object.assign(EXACT, pairs); memo.clear(); };
   return { start, set, tr, add, get lang() { return lang; } };
 })();
 
@@ -5614,8 +5635,10 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     document.documentElement.classList.toggle("drawer-open", open);
     drawer.inert = !open;
     $("#menu-btn").setAttribute("aria-expanded", String(open));
-    if (open) (view.type === "calc" ? body.querySelector("input, select, textarea") : search)?.focus();
-    else $("#menu-btn").focus();
+    // On phones, focusing a field pops the keyboard over the drawer as it slides in.
+    const touch = window.matchMedia?.("(pointer: coarse)").matches;
+    if (open) { if (!touch) (view.type === "calc" ? body.querySelector("input, select, textarea") : search)?.focus(); }
+    else { $("#menu-btn").focus(); V3.wakeAll(); }
   };
   $("#menu-btn").onclick = () => setOpen(true);
   $("#dr-close").onclick = () => setOpen(false);
