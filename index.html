@@ -216,6 +216,7 @@ button.primary, .file-btn {
 :root[data-theme="light"] button.primary, :root[data-theme="light"] .file-btn { color: #fff; }
 button.primary:hover, .file-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
 button.secondary, .file-btn.secondary { background: var(--sheet-2); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+:root[data-theme="light"] button.secondary, :root[data-theme="light"] .file-btn.secondary { color: var(--ink); }
 button:disabled { opacity: .4; cursor: default; transform: none; }
 button.link { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; padding: 4px; }
 .hint { color: var(--muted); font-size: 12.5px; margin: 6px 0; }
@@ -359,6 +360,38 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .i18n-wait body { visibility: hidden; }
 /* "Ahmed Fathy" in hieroglyphs, sign by sign (a ḥ m d f t ḥ y, then the seated man that ends a man's
    name), read left to right as the signs face. */
+/* Traverse tab: fields for one kind of traverse only, the formats it reads, and the plan. */
+#tab-trav [data-for][hidden] { display: none; }
+/* Choices and azimuths take two columns (the whole row on a phone, where the E / N pairs sit side
+   by side), and the results sit two to a row. */
+#tab-trav .grid > .wide { grid-column: span 2; }
+@media (max-width: 480px) {
+  #tab-trav .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  #tab-trav .grid > .wide { grid-column: 1 / -1; }
+  #tr-out .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  #tr-out .readout { padding: 8px 10px; }
+  #tr-out .readout b { font-size: 16px; }
+}
+#tr-rows { font-family: var(--f-num); text-align: left; }
+.tr-formats { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+.tr-formats summary { cursor: pointer; color: var(--accent); width: fit-content; }
+.tr-formats ul { margin: 6px 0 0; padding-inline-start: 20px; display: grid; gap: 4px; }
+.tr-plan { margin: 0 0 14px; background: var(--sheet); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; }
+.tr-plan svg { display: block; width: 100%; height: auto; max-height: 560px; }
+.tr-plan .raw { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+.tr-plan .adj { fill: color-mix(in srgb, var(--gold) 9%, transparent); stroke: var(--gold); stroke-width: 2.2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.tr-plan .adj.open { fill: none; }
+.tr-plan .gap { stroke: var(--cut); stroke-width: 2.4; vector-effect: non-scaling-stroke; }
+.tr-plan .st { fill: var(--paper); stroke: var(--gold); stroke-width: 2; }
+.tr-plan .known { fill: var(--accent); stroke: var(--paper); stroke-width: 1.5; }
+.tr-plan text { fill: var(--ink); font-family: var(--f-num); font-size: 12px; paint-order: stroke; stroke: var(--sheet); stroke-width: 3px; stroke-linejoin: round; }
+.tr-plan .north line, .tr-plan .scale line { stroke: var(--ink); stroke-width: 1.6; }
+.tr-plan .north path { fill: var(--ink); }
+.tr-plan .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.tr-plan .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--gold); vertical-align: middle; margin-inline-end: 6px; }
+.tr-plan .legend i.raw { border-top: 2px dashed var(--muted); }
+.tr-plan .legend i.gap { border-top-color: var(--cut); }
+.tr-plan .legend i.known { width: 10px; height: 10px; border: 0; border-radius: 2px; background: var(--accent); }
 /* GeoX wordmark (see the inline SVG): the dark "cut" strokes are drawn in the page colour. */
 .geox { display: block; height: 1em; width: auto; overflow: visible; }
 .geox .cut { stroke: var(--paper); }
@@ -592,6 +625,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
       <nav id="tabs" role="tablist">
         <button role="tab" data-tab="chat" aria-selected="true" data-ai><span class="code">AI</span>المساعد</button>
         <button role="tab" data-tab="level" aria-selected="false"><span class="code">LV</span>الميزانية</button>
+        <button role="tab" data-tab="trav" aria-selected="false"><span class="code">TR</span>الترافيرس</button>
         <button role="tab" data-tab="profile" aria-selected="false"><span class="code">PR</span>البروفيل</button>
         <button role="tab" data-tab="qty" aria-selected="false"><span class="code">QT</span>الكميات</button>
         <button role="tab" data-tab="review" aria-selected="false"><span class="code">QC</span>مراجعة الداتا</button>
@@ -716,6 +750,77 @@ BM2,,,0.900</textarea>
     </div>
     <div id="lv-chart"></div>
     <div id="lv-out" class="out"></div>
+  </section>
+
+  <section id="tab-trav" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">TR</span>الترافيرس (Traverse)</h2>
+      <div class="grid">
+        <label for="tr-kind" class="wide">نوع الترافيرس
+          <select id="tr-kind">
+            <option value="loop">مقفول على نفسه (Closed loop)</option>
+            <option value="link">مقفول بين نقطتين معلومتين (Link)</option>
+            <option value="open">مفتوح (Open)</option>
+          </select>
+        </label>
+        <label for="tr-method" class="wide">طريقة التصحيح
+          <select id="tr-method">
+            <option value="bowditch">بوديتش (Bowditch / Compass)</option>
+            <option value="transit">ترانزيت (Transit)</option>
+          </select>
+        </label>
+        <label for="tr-e">E نقطة البداية (م)<input id="tr-e" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-n">N نقطة البداية (م)<input id="tr-n" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-az" class="wide" data-for="loop open">انحراف أول ضلع (د م ث)<input id="tr-az" dir="ltr" autocomplete="off" spellcheck="false"></label>
+        <label for="tr-back" class="wide" data-for="link open">انحراف الخط الخلفي داخل على البداية (د م ث)<input id="tr-back" dir="ltr" autocomplete="off" spellcheck="false"></label>
+        <label for="tr-be" data-for="link open">أو E النقطة الخلفية<input id="tr-be" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-bn" data-for="link open">أو N النقطة الخلفية<input id="tr-bn" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-ee" data-for="link">E نقطة النهاية (م)<input id="tr-ee" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-en" data-for="link">N نقطة النهاية (م)<input id="tr-en" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-fore" class="wide" data-for="link">انحراف الخط الأمامي خارج من النهاية (د م ث، اختياري)<input id="tr-fore" dir="ltr" autocomplete="off" spellcheck="false"></label>
+        <label for="tr-fe" data-for="link">أو E النقطة الأمامية<input id="tr-fe" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-fn" data-for="link">أو N النقطة الأمامية<input id="tr-fn" type="number" step="0.001" dir="ltr"></label>
+        <label for="tr-fmt" class="wide">الزوايا المكتوبة كرقم
+          <select id="tr-fmt">
+            <option value="ddmmss">ددد.ققثث (&#x2066;123.4530 = 123° 45′ 30″&#x2069;)</option>
+            <option value="dd">درجات عشري (123.7583)</option>
+          </select>
+        </label>
+        <label for="tr-angles" class="wide">الزوايا مقاسة
+          <select id="tr-angles">
+            <option value="auto">يمين: مع عقارب الساعة (المعتاد)</option>
+            <option value="left">شمال: عكس عقارب الساعة</option>
+          </select>
+        </label>
+        <label for="tr-c">ثابت الخطأ الزاوي c (ثانية، المسموح c√n)<input id="tr-c" type="number" step="1" min="1" value="30" dir="ltr"></label>
+        <label for="tr-ratio">الدقة المطلوبة 1 :<input id="tr-ratio" type="number" step="500" min="1" value="5000" dir="ltr"></label>
+      </div>
+      <p class="hint" data-for="open">في المفتوح: اكتب انحراف أول ضلع، أو الخط الخلفي (انحرافه أو إحداثيات نقطته) والزاوية عند أول محطة.</p>
+      <p class="hint" data-for="link">في المقفول بين نقطتين: الاتجاه عند البداية والنهاية بالانحراف أو بإحداثيات النقطة المرصودة. من غير الأمامي مفيش قفل زاوي، بس القفل الخطي.</p>
+      <label class="block" for="tr-rows">المحطات بالترتيب: اسم المحطة، الزاوية الأفقية فيها (من المحطة اللي قبلها للي بعدها)، المسافة الأفقية للمحطة اللي بعدها. الصق من Excel أو افصل بفاصلة.
+        <textarea id="tr-rows" class="data" rows="8" spellcheck="false" dir="ltr"></textarea>
+      </label>
+      <div class="actions">
+        <button id="tr-run" class="primary" type="button">احسب وصحّح</button>
+        <label class="file-btn secondary" for="tr-file">تحميل من ملف</label><input type="file" id="tr-file" accept=".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.txt,.prn,.dat" hidden>
+        <button id="tr-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <span class="hint">مثال محلول جاهز بأخطاء صغيرة؛ امسحه وحط قراءاتك، أو حمّل الشيت وهو يقراه ويحله لوحده.</span>
+      </div>
+      <details class="tr-formats">
+        <summary>الصيغ اللي بيقراها</summary>
+        <ul>
+          <li>Excel (xlsx، xls، ods) أو CSV أو TXT، بعناوين عربي أو إنجليزي أو من غير عناوين، ولو فيه عنوان فوق الجدول أو سطر مجموع تحته.</li>
+          <li>الزاوية: &#x2066;123 45 30&#x2069; أو &#x2066;123°45′30″&#x2069; أو &#x2066;123-45-30&#x2069; أو 123د 45ق 30ث أو &#x2066;123.4530&#x2069;، أو أعمدة درجات ودقائق وثواني، أو وقت Excel زي &#x2066;123:45:30&#x2069;.</li>
+          <li>زوايا انحراف (Deflection): &#x2066;12 30 R&#x2069; أو &#x2066;12 30 L&#x2069;.</li>
+          <li>المسافة أفقية، أو مائلة مع الزاوية الرأسية (Zenith)، أو مكتوبة عند المحطة اللي الضلع بيوصلها.</li>
+          <li>انحراف لكل ضلع (Azimuth / Bearing) بدل الزوايا، ومنه الانحراف المختصر N 30 15 E أو ش 30 15 ق، وعمود الضلع زي AB.</li>
+          <li>قراءات الجهاز: المحطة، النقطة المرصودة، القراءة الأفقية، المسافة، بالوضعين (Face Left / Face Right) وأكتر من رصدة؛ الزاوية = الأمامي − الخلفي.</li>
+          <li>إحداثيات E و N للنقط المعلومة في الشيت بتتحط في الخانات لوحدها، والمقفول على نفسه أو بين نقطتين بيتعرف لوحده.</li>
+        </ul>
+      </details>
+    </div>
+    <div id="tr-plot"></div>
+    <div id="tr-out" class="out"></div>
   </section>
 
   <section id="tab-profile" class="tab" hidden>
@@ -847,6 +952,123 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
+    "الترافيرس": "Traverse",
+    "الترافيرس (Traverse)": "Traverse",
+    "نوع الترافيرس": "Traverse type",
+    "مقفول على نفسه (Closed loop)": "Closed loop",
+    "مقفول بين نقطتين معلومتين (Link)": "Link between two known points",
+    "مفتوح (Open)": "Open",
+    "طريقة التصحيح": "Adjustment method",
+    "بوديتش (Bowditch / Compass)": "Bowditch (compass rule)",
+    "ترانزيت (Transit)": "Transit rule",
+    "E نقطة البداية (م)": "Start point E (m)",
+    "N نقطة البداية (م)": "Start point N (m)",
+    "انحراف أول ضلع (د م ث)": "Azimuth of the first leg (d m s)",
+    "انحراف الخط الخلفي داخل على البداية (د م ث)": "Azimuth of the known line into the start (d m s)",
+    "أو E النقطة الخلفية": "or E of the backsight point",
+    "أو N النقطة الخلفية": "or N of the backsight point",
+    "E نقطة النهاية (م)": "End point E (m)",
+    "N نقطة النهاية (م)": "End point N (m)",
+    "انحراف الخط الأمامي خارج من النهاية (د م ث، اختياري)": "Azimuth of the known line out of the end (d m s, optional)",
+    "أو E النقطة الأمامية": "or E of the foresight point",
+    "أو N النقطة الأمامية": "or N of the foresight point",
+    "الزوايا المكتوبة كرقم": "Angles written as one number",
+    "ددد.ققثث (⁦123.4530 = 123° 45′ 30″⁩)": "DDD.MMSS (123.4530 = 123° 45′ 30″)",
+    "درجات عشري (123.7583)": "Decimal degrees (123.7583)",
+    "الزوايا مقاسة": "Angles measured",
+    "يمين: مع عقارب الساعة (المعتاد)": "To the right: clockwise (usual)",
+    "شمال: عكس عقارب الساعة": "To the left: anticlockwise",
+    "ثابت الخطأ الزاوي c (ثانية، المسموح c√n)": "Angular constant c (seconds; allowable c√n)",
+    "الدقة المطلوبة 1 :": "Required precision 1 :",
+    "في المفتوح: اكتب انحراف أول ضلع، أو الخط الخلفي (انحرافه أو إحداثيات نقطته) والزاوية عند أول محطة.": "Open traverse: give the azimuth of the first leg, or the line into the start (its azimuth or its point) and the angle at the first station.",
+    "في المقفول بين نقطتين: الاتجاه عند البداية والنهاية بالانحراف أو بإحداثيات النقطة المرصودة. من غير الأمامي مفيش قفل زاوي، بس القفل الخطي.": "Link traverse: give the direction at the start and at the end as an azimuth or by the coordinates of the point sighted. Without the one at the end there is no angular check, only the linear one.",
+    "المحطات بالترتيب: اسم المحطة، الزاوية الأفقية فيها (من المحطة اللي قبلها للي بعدها)، المسافة الأفقية للمحطة اللي بعدها. الصق من Excel أو افصل بفاصلة.": "Stations in order: name, the horizontal angle there (from the previous station to the next), the horizontal distance to the next station. Paste from Excel or separate with commas.",
+    "احسب وصحّح": "Compute and adjust",
+    "مثال محلول جاهز بأخطاء صغيرة؛ امسحه وحط قراءاتك، أو حمّل الشيت وهو يقراه ويحله لوحده.": "A worked example with small errors; clear it and enter your readings, or load your sheet and it is read and solved for you.",
+    "الصيغ اللي بيقراها": "Formats it reads",
+    "Excel (xlsx، xls، ods) أو CSV أو TXT، بعناوين عربي أو إنجليزي أو من غير عناوين، ولو فيه عنوان فوق الجدول أو سطر مجموع تحته.": "Excel (xlsx, xls, ods), CSV or TXT, with Arabic, English or no headers, even with a title above the table or a total row under it.",
+    "الزاوية: ⁦123 45 30⁩ أو ⁦123°45′30″⁩ أو ⁦123-45-30⁩ أو 123د 45ق 30ث أو ⁦123.4530⁩، أو أعمدة درجات ودقائق وثواني، أو وقت Excel زي ⁦123:45:30⁩.": "Angle: 123 45 30, 123°45′30″, 123-45-30 or 123.4530, or degrees, minutes and seconds columns, or an Excel time such as 123:45:30.",
+    "زوايا انحراف (Deflection): ⁦12 30 R⁩ أو ⁦12 30 L⁩.": "Deflection angles: 12 30 R or 12 30 L.",
+    "المسافة أفقية، أو مائلة مع الزاوية الرأسية (Zenith)، أو مكتوبة عند المحطة اللي الضلع بيوصلها.": "Distance: horizontal, or slope with the zenith angle, or written on the station each leg reaches.",
+    "انحراف لكل ضلع (Azimuth / Bearing) بدل الزوايا، ومنه الانحراف المختصر N 30 15 E أو ش 30 15 ق، وعمود الضلع زي AB.": "An azimuth for each leg (azimuth or bearing) instead of angles, quadrant bearings such as N 30 15 E included, and a line column such as AB.",
+    "قراءات الجهاز: المحطة، النقطة المرصودة، القراءة الأفقية، المسافة، بالوضعين (Face Left / Face Right) وأكتر من رصدة؛ الزاوية = الأمامي − الخلفي.": "Instrument readings: station, point sighted, horizontal circle reading, distance, on both faces and in several sets; angle = fore − back.",
+    "إحداثيات E و N للنقط المعلومة في الشيت بتتحط في الخانات لوحدها، والمقفول على نفسه أو بين نقطتين بيتعرف لوحده.": "E and N of the known points in the sheet go into the boxes by themselves, and a loop or a link is recognised by itself.",
+    "مسقط الترافيرس": "Traverse plan",
+    "بعد التصحيح": "Adjusted",
+    "قبل توزيع خطأ القفل": "Before the misclosure is shared",
+    "خطأ القفل": "Misclosure",
+    "نقطة معلومة": "Known point",
+    "نتيجة الترافيرس": "Traverse result",
+    "مجموع الزوايا المقاسة": "Sum of observed angles",
+    "المفروض (n − 2) × 180": "Should be (n − 2) × 180",
+    "المفروض (n + 2) × 180": "Should be (n + 2) × 180",
+    "الانحراف المحسوب للخط الأمامي": "Computed azimuth of the closing line",
+    "الانحراف المعلوم": "Known azimuth",
+    "خطأ القفل الزاوي (″)": "Angular misclosure (″)",
+    "المسموح ± c√n (″)": "Allowable ± c√n (″)",
+    "التصحيح لكل زاوية (″)": "Correction per angle (″)",
+    "القفل الزاوي مقبول": "Angular closure accepted",
+    "القفل الزاوي مرفوض": "Angular closure rejected",
+    "طول الترافيرس (م)": "Traverse length (m)",
+    "خطأ القفل في E (م)": "Misclosure in E (m)",
+    "خطأ القفل في N (م)": "Misclosure in N (m)",
+    "خطأ القفل الخطي (م)": "Linear misclosure (m)",
+    "الدقة": "Precision",
+    "المطلوب": "Required",
+    "مقفول تمامًا": "Closes exactly",
+    "الدقة الخطية مقبولة": "Linear precision accepted",
+    "الدقة الخطية أقل من المطلوب": "Linear precision below what is required",
+    "مساحة المضلع (م²)": "Polygon area (m²)",
+    "بالفدان": "In feddan",
+    "فدان / قيراط / سهم": "Feddan / qirat / sahm",
+    "التصحيح: ترانزيت (على قدر ΔE و ΔN).": "Adjusted by the transit rule (in proportion to ΔE and ΔN).",
+    "التصحيح: بوديتش (على قدر طول الضلع).": "Adjusted by the Bowditch rule (in proportion to leg length).",
+    "الزاوية المقاسة": "Observed angle",
+    "تصحيح الزاوية (″)": "Angle correction (″)",
+    "الزاوية المصححة": "Adjusted angle",
+    "انحراف الضلع": "Leg azimuth",
+    "طول الضلع (م)": "Leg length (m)",
+    "تصحيح ΔE": "ΔE correction",
+    "تصحيح ΔN": "ΔN correction",
+    "ΔE المصحح": "Adjusted ΔE",
+    "ΔN المصحح": "Adjusted ΔN",
+    "اتقرت محطتين من الملف.": "Read two stations from the file.",
+    "كمّل أو صحّح البيانات فوق واضغط «احسب وصحّح».": "Complete or correct the data above and press “Compute and adjust”.",
+    "الملف ده مش جدول. ارفع Excel أو CSV أو TXT فيه المحطات والزوايا والمسافات.": "This file is not a table. Upload Excel, CSV or TXT with the stations, angles and distances.",
+    "الملف مفيهوش جدول ترافيرس. لازم يكون فيه أعمدة: المحطة، الزاوية، المسافة.": "The file has no traverse table. It needs columns: station, angle, distance.",
+    "نوع الترافيرس لازم مقفول على نفسه أو مقفول بين نقطتين أو مفتوح.": "The traverse type must be a closed loop, a link between two points, or open.",
+    "ثابت الخطأ الزاوي المسموح لازم أكبر من صفر.": "The angular constant must be greater than zero.",
+    "الدقة المطلوبة لازم أكبر من صفر.": "The required precision must be greater than zero.",
+    "الترافيرس المقفول محتاج 3 محطات على الأقل.": "A closed traverse needs at least 3 stations.",
+    "الترافيرس محتاج محطتين على الأقل.": "A traverse needs at least two stations.",
+    "لازم إحداثيات نقطة البداية (E و N).": "The coordinates of the start point (E and N) are needed.",
+    "الترافيرس المقفول بين نقطتين محتاج إحداثيات نقطة النهاية.": "A link traverse needs the coordinates of the end point.",
+    "لازم انحراف الخط الخلفي عند البداية (أو إحداثيات النقطة الخلفية)، أو انحراف أول ضلع.": "The azimuth of the line into the start (or the backsight point's coordinates), or the azimuth of the first leg, is needed.",
+    "لازم انحراف أول ضلع.": "The azimuth of the first leg is needed.",
+    "الترافيرس المقفول على نفسه محتاج انحراف أول ضلع.": "A closed loop needs the azimuth of the first leg.",
+    "الشيت فاضي.": "The sheet is empty.",
+    "الشيت محتاج على الأقل: المحطة، الزاوية، المسافة.": "The sheet needs at least: station, angle, distance.",
+    "مش لاقي عمود الزاوية أو الانحراف في الشيت (Angle / الزاوية، أو درجات ودقائق وثواني، أو Azimuth / الانحراف).": "No angle or azimuth column in the sheet (Angle, or degrees, minutes and seconds, or Azimuth).",
+    "مش لاقي عمود المسافة في الشيت (Distance / المسافة).": "No distance column in the sheet (Distance).",
+    "الترافيرس المفتوح مفيهوش قفل، فمفيش أي تحقق من الزوايا أو المسافات: أي خطأ في القياس بيدخل في الإحداثيات من غير ما يبان.": "An open traverse does not close, so nothing checks the angles or distances: any measuring error goes into the coordinates unseen.",
+    "مفيش انحراف عند نقطة النهاية، فالقفل الزاوي ما اتحسبش؛ اتحسب القفل الخطي بس.": "No azimuth at the end point, so the angular closure was not computed; only the linear closure was.",
+    "الزوايا اتعاملت كزوايا يمين (مع عقارب الساعة من الخلفي للأمامي)، لأنها اللي بتقفل.": "The angles were taken as angles to the right (clockwise from back to fore), since those close.",
+    "الزوايا اتعاملت كزوايا شمال (عكس عقارب الساعة من الخلفي للأمامي)، لأنها اللي بتقفل.": "The angles were taken as angles to the left (anticlockwise from back to fore), since those close.",
+    "الزوايا اتحسبت كزوايا يمين (مع عقارب الساعة من المحطة اللي قبل للي بعد)، زي ما الجهاز بيقيسها. لو قستها عكس عقارب الساعة اختار «زوايا شمال»: المضلع المقفول بيقفل بالاتنين، والغلط بيرسم صورته في المراية.": "The angles were taken as angles to the right (clockwise from the previous station to the next), as an instrument measures them. If you measured them anticlockwise, choose “to the left”: a closed traverse closes either way, and the wrong one draws its mirror image.",
+    "الشيت من غير عناوين؛ اعتبرت الأعمدة: المحطة، الزاوية، المسافة.": "The sheet has no headers; columns taken as station, angle, distance.",
+    "الشيت من غير عناوين؛ اعتبرت الأعمدة: المحطة، درجات، دقائق، ثواني، المسافة.": "The sheet has no headers; columns taken as station, degrees, minutes, seconds, distance.",
+    "المسافة الأفقية اتحسبت من المسافة المائلة والزاوية الرأسية (Zenith).": "The horizontal distance was computed from the slope distance and the zenith angle.",
+    "مفيش زاوية رأسية؛ المسافة المائلة اتاخدت على إنها أفقية.": "No vertical angle; the slope distance was taken as horizontal.",
+    "المسافات كانت مكتوبة عند المحطة اللي الضلع بيوصلها؛ اتنقلت للمحطة اللي بيبدأ منها.": "The distances were written on the station each leg reaches; they were moved to the station it starts from.",
+    "انحراف أول ضلع اتاخد من الشيت.": "The azimuth of the first leg was taken from the sheet.",
+    "الانحرافات اتاخدت من الشيت لكل ضلع ومفيش زوايا كاملة، فمفيش قفل زاوي؛ اتصحح القفل الخطي بس.": "The azimuth of each leg was taken from the sheet and the angles are incomplete, so there is no angular check; only the linear misclosure was adjusted.",
+    "الانحرافات اتاخدت من الشيت لكل ضلع.": "The azimuth of each leg was taken from the sheet.",
+    "زوايا الانحراف (R / L) اتحولت لزوايا يمين: 180° + الانحراف لليمين، 180° − الانحراف للشمال.": "Deflection angles (R / L) were turned into angles to the right: 180° + a right deflection, 180° − a left one.",
+    "الشيت قراءات جهاز (محطة / نقطة مرصودة): الزاوية عند كل محطة = القراءة على الأمامي − القراءة على الخلفي، متوسط كل الأرصاد، والمسافة متوسط القياس رايح وجاي.": "The sheet holds instrument readings (station / point sighted): the angle at each station is the reading on the fore station less the reading on the back one, averaged over every set, and each distance is the mean of its measurements both ways.",
+    "آخر محطة راصدة أول محطة، فده ترافيرس مقفول على نفسه.": "The last station sights the first, so this is a closed loop.",
+    "أول محطة متكررة في الآخر، فده ترافيرس مقفول على نفسه.": "The first station is repeated at the end, so this is a closed loop.",
+    "أول وآخر محطة ليهم إحداثيات، فده ترافيرس مقفول بين نقطتين معلومتين.": "The first and last stations have coordinates, so this is a link between two known points.",
+    "سطر المجموع اتشال.": "The total row was dropped.",
     "ابحث في الموقع…": "Search the site…",
     "تثبيت التطبيق": "Install app",
     "حمّل التطبيق": "Get the app",
@@ -1142,6 +1364,29 @@ const I18N = (() => {
     [/^علامة مش مفهومة: (.*)$/, "Unrecognised character: $1"],
     [/^الدالة (.*) مش معروفة\.$/, "Unknown function: $1."],
     [/^(.*) محتاجة (\d+) قيمة\.$/, "$1 needs $2 value(s)."],
+    // Traverse.
+    [/^المحطة (.*): المسافة "(.*)" مش رقم\.$/, 'Station $1: the distance "$2" is not a number.'],
+    [/^زاوية المحطة (.*): "(.*)" مش مفهوم\. اكتبه ⁦123 45 30⁩ أو ⁦123\.4530⁩\.$/, 'Angle at station $1: "$2" is not understood. Write it as 123 45 30 or 123.4530.'],
+    [/^زاوية المحطة (.*): "(.*)" لازم بين 0 و 360 درجة\.$/, 'Angle at station $1: "$2" must be between 0 and 360 degrees.'],
+    [/^(انحراف أول ضلع|انحراف الخط الخلفي|انحراف الخط الأمامي|انحراف الضلع من (.*)): "(.*)" مش مفهوم\. اكتبه ⁦123 45 30⁩ أو ⁦123\.4530⁩ أو N 30 15 E\.$/, (m, label, id, v) =>
+      `${({ "انحراف أول ضلع": "Azimuth of the first leg", "انحراف الخط الخلفي": "Azimuth of the line into the start", "انحراف الخط الأمامي": "Azimuth of the line out of the end" })[label] ?? `Azimuth of the leg from ${id}`}: "${v}" is not understood. Write it as 123 45 30, 123.4530 or N 30 15 E.`],
+    [/^المحطة (.*): لازم مسافة أكبر من صفر للمحطة اللي بعدها \((.*)\)\.$/, "Station $1: needs a distance greater than zero to the next station ($2)."],
+    [/^(نقطة البداية|نقطة النهاية|النقطة الخلفية|النقطة الأمامية|المحطة (.*)): الإحداثيات لازم أرقام\.$/, (m, label, id) =>
+      `${({ "نقطة البداية": "Start point", "نقطة النهاية": "End point", "النقطة الخلفية": "Backsight point", "النقطة الأمامية": "Foresight point" })[label] ?? `Station ${id}`}: the coordinates must be numbers.`],
+    [/^المحطة (.*): ناقصة الزاوية\.$/, "Station $1: the angle is missing."],
+    [/^المحطة (.*) متكررة في الآخر لقفل المضلع؛ اتحسبت مرة واحدة\.$/, "Station $1 is repeated at the end to close the loop; it was counted once."],
+    [/^إحداثيات البداية اتاخدت من الشيت \((.*)\)\.$/, "The start coordinates were taken from the sheet ($1)."],
+    [/^إحداثيات النهاية اتاخدت من الشيت \((.*)\)\.$/, "The end coordinates were taken from the sheet ($1)."],
+    [/^أكبر فرق بين الأرصاد في الزاوية: (.*)″ عند (.*)\.$/, "Largest spread between the sets of an angle: $1″ at $2."],
+    [/^الرصد الخلفي عند (.*) على (.*): اكتب انحراف الخط من (.*) لـ (.*) أو إحداثيات (.*)\.$/, "The backsight at $1 is on $2: enter the azimuth of the line from $3 to $4, or the coordinates of $5."],
+    [/^الرصد الأمامي عند (.*) على (.*): اكتب انحراف الخط من (.*) لـ (.*) أو إحداثيات (.*)\.$/, "The foresight at $1 is on $2: enter the azimuth of the line from $3 to $4, or the coordinates of $5."],
+    [/^(.*): نقطة معلومة قبل البداية من غير زاوية ولا مسافة، اتاخدت كنقطة خلفية\.$/, "$1: a known point before the start with no angle or distance, taken as the backsight point."],
+    [/^(.*): نقطة معلومة بعد النهاية من غير زاوية ولا مسافة، اتاخدت كنقطة أمامية\.$/, "$1: a known point after the end with no angle or distance, taken as the foresight point."],
+    [/^اتقرت (\d+) (?:محطات|محطة) من الملف\.$/, "Read $1 stations from the file."],
+    [/^(.*) \(القفل\)$/, "$1 (closing)"],
+    [/^قبل توزيع خطأ القفل \(مكبّر ×(.*)\)$/, "Before the misclosure is shared (exaggerated ×$1)"],
+    [/^(\d+) ف (\d+) ط ([\d.]+) س$/, "$1 feddan $2 qirat $3 sahm"],
+    [/^([\d.,]+) م$/, "$1 m"],
     // File summary under the QC report: name: table "x": N rows. Columns: a | b. Recognised: a→x، b→y.
     [/^(.*): جدول "(.*)": (\d+) صف\. الأعمدة: (.*?)\.(?: اتعرفت: (.*)\.)?$/, (m, f, t, n, cols, rec) =>
       `${f}: table "${t}": ${n} rows. Columns: ${cols}.${rec ? ` Recognised: ${rec.replace(/، /g, ", ")}.` : ""}`],
@@ -3531,6 +3776,609 @@ function scFormat(x) {
   return String(Number(x.toPrecision(12)));
 }
 
+// ---- src/engine/traverse.js
+// Traverse (ترافيرس / مضلع): closed on itself (loop), closed between two known points (link), and
+// open. The angular misclosure is shared equally between the angles, then the linear misclosure by
+// the Bowditch (compass) or the transit rule. Angles go in as text ("123 45 30", "123°45'30\"",
+// "123-45-30", "123د 45ق 30ث"), as DD.MMSS numbers (123.4530) or as decimal degrees; azimuths may
+// also be quadrant bearings ("N 30 15 E", "ش 30 15 ق"). Results keep full precision.
+
+
+const TRV_D2R = Math.PI / 180;
+const trvNorm360 = (a) => ((a % 360) + 360) % 360;
+const trvNorm180 = (a) => { const x = trvNorm360(a); return x > 180 ? x - 360 : x; };
+const trvBlank = (v) => v === undefined || v === null || String(v).trim() === "";
+const trvText = (v) => String(v ?? "").trim().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/٫/g, ".");
+const trvSame = (a, b) => !trvBlank(a) && String(a).trim() === String(b ?? "").trim();
+const TRV_NUM = /^\d*\.?\d+$|^\d+\.$/;
+// Numbers and angles inside Arabic messages, kept in the order they are typed.
+const trvLtr = (s) => `⁦${s}⁩`;
+
+/**
+ * An angle in degrees from a cell. Text is degrees, minutes and seconds with any marks between
+ * them (spaces, ° ′ ″, - :, d m s, د ق ث) or dots (123.45.30). A plain number is DD.MMSS
+ * (format "ddmmss": 123.4530 = 123°45′30″, 123.45305 = 123°45′30.5″) or decimal degrees ("dd").
+ * Returns null when it cannot be read.
+ */
+function parseTraverseAngle(value, format = "ddmmss") {
+  if (typeof value === "number" && !Number.isFinite(value)) return null;
+  let s = trvText(value);
+  if (!s) return null;
+  const negative = s.startsWith("-");
+  if (negative) s = s.slice(1).trim();
+  let parts;
+  if (/[^\d.]/.test(s)) {
+    const t = s
+      .replace(/درجات|درجة|درجه|دقائق|دقايق|دقيقة|دقيقه|ثواني|ثوان|ثانية|ثانيه|degrees?|deg|minutes?|mins?|seconds?|secs?/gi, " ")
+      .replace(/[°º˚'′’‘`"″”“:_/\-دقثdms]/gi, " ");
+    if (/[^\d.\s]/.test(t)) return null;
+    parts = t.trim().split(/\s+/).filter(Boolean);
+  } else if ((s.match(/\./g) ?? []).length >= 2) {
+    const p = s.split(".");
+    if (p.length > 4 || p.some((x) => x === "")) return null;
+    parts = [p[0], p[1], p.slice(2).join(".")];
+  } else {
+    if (!TRV_NUM.test(s)) return null;
+    if (format === "dd") return (negative ? -1 : 1) * Number(s);
+    const [whole, fracRaw = ""] = s.split(".");
+    const frac = fracRaw.padEnd(4, "0");
+    parts = [whole || "0", frac.slice(0, 2), `${frac.slice(2, 4)}.${frac.slice(4) || "0"}`];
+  }
+  if (!parts.length || parts.length > 3 || parts.some((p) => !TRV_NUM.test(p))) return null;
+  const [d, m = 0, sec = 0] = parts.map(Number);
+  if (m >= 60 || sec >= 60) return null;
+  if ((parts.length > 1 && !Number.isInteger(d)) || (parts.length > 2 && !Number.isInteger(m))) return null;
+  const deg = d + m / 60 + sec / 3600;
+  return negative ? -deg : deg;
+}
+
+/**
+ * An azimuth (0–360°, clockwise from north) from a whole-circle bearing, or from a quadrant
+ * bearing: "N 30 15 E", "S 40 W", "ش 30 15 ق" (شمال / جنوب ... شرق / غرب). Null when unreadable.
+ */
+function parseTraverseDirection(value, format = "ddmmss") {
+  const q = trvText(value).match(/^(north|south|شمال|جنوب|n|s|ش|ج)\.?\s*(.*?)\s*(east|west|شرق|غرب|e|w|ق|غ)\.?$/i);
+  if (q && q[2]) {
+    const a = parseTraverseAngle(q[2], format);
+    if (a === null || a < 0 || a > 90) return null;
+    const north = /^(north|شمال|n|ش)$/i.test(q[1]);
+    const east = /^(east|شرق|e|ق)$/i.test(q[3]);
+    return trvNorm360(north ? (east ? a : -a) : east ? 180 - a : 180 + a);
+  }
+  const a = parseTraverseAngle(value, format);
+  return a === null ? null : trvNorm360(a);
+}
+
+// An observed angle; a deflection angle ("12 30 R", "12 30 L", "12 30 يمين") becomes the angle to
+// the right (180° + a right deflection, 180° − a left one).
+function trvObserved(value, format) {
+  const m = typeof value === "string" ? trvText(value).match(/^(.*?)\s*(rt|lt|r|l|يمين|يسار)\.?$/i) : null;
+  if (!m || !m[1]) return { angle: parseTraverseAngle(value, format), deflection: false };
+  const d = parseTraverseAngle(m[1], format);
+  if (d === null || d < 0 || d >= 180) return { angle: null, deflection: true };
+  return { angle: /^(rt|r|يمين)$/i.test(m[2]) ? 180 + d : 180 - d, deflection: true };
+}
+
+/** Degrees as d°mm′ss.s″, rounded at the last place shown (with the carry). */
+function traverseDms(deg, places = 1) {
+  if (!Number.isFinite(deg)) return "";
+  const sign = deg < 0 ? "-" : "";
+  const scale = 10 ** places;
+  let t = Math.round(Math.abs(deg) * 3600 * scale);
+  const d = Math.floor(t / (3600 * scale));
+  t -= d * 3600 * scale;
+  const m = Math.floor(t / (60 * scale));
+  t -= m * 60 * scale;
+  return `${sign}${d}°${String(m).padStart(2, "0")}′${(t / scale).toFixed(places).padStart(places ? places + 3 : 2, "0")}″`;
+}
+
+// Degrees as "d m s" text to a thousandth of a second, for angles worked out from readings.
+const trvDmsText = (deg) => {
+  let t = Math.round(deg * 3600 * 1000);
+  const d = Math.floor(t / 3600000);
+  t -= d * 3600000;
+  const m = Math.floor(t / 60000);
+  return `${d} ${m} ${+((t - m * 60000) / 1000).toFixed(3)}`;
+};
+
+/** Azimuth (degrees from north, clockwise) from one point to another. */
+function traverseAzimuth(from, to) {
+  return trvNorm360(Math.atan2(to.E - from.E, to.N - from.N) / TRV_D2R);
+}
+
+const trvDirIn = (value, format, label) => {
+  if (trvBlank(value)) return null;
+  const a = parseTraverseDirection(value, format);
+  if (a === null) fail(`${label}: "${trvLtr(value)}" مش مفهوم. اكتبه ${trvLtr("123 45 30")} أو ${trvLtr("123.4530")} أو N 30 15 E.`);
+  return a;
+};
+const trvPoint = (p, label) => {
+  if (!p || trvBlank(p.E) || trvBlank(p.N)) return null;
+  const E = toNumber(p.E), N = toNumber(p.N);
+  if (E === null || N === null) fail(`${label}: الإحداثيات لازم أرقام.`);
+  return { E, N };
+};
+
+/**
+ * Solve a traverse.
+ * input: {
+ *   kind: "loop" | "link" | "open",
+ *   stations: [{ id, angle, distance, azimuth?, E?, N? }]  in order; angle = horizontal angle at the
+ *     station between the previous and the next one (or a deflection "12 30 R"); distance = horizontal
+ *     distance to the next station; azimuth = azimuth of the leg to the next station (used when the
+ *     angles are missing, or to orient the first leg); E, N = known coordinates (start, end),
+ *   start: { E, N },
+ *   startAzimuth: azimuth of the first leg (loop, open; may also orient a link),
+ *   backAzimuth | backsight {E,N}: the line into the start, from a known point (link, open),
+ *   end: { E, N }, endAzimuth | foresight {E,N}: the known end and the line out of it (link),
+ *   angleFormat: "ddmmss" | "dd" (for plain numbers), angleKind: "auto" | "right" | "left",
+ *   method: "bowditch" | "transit", angleTolSec: c in c·√n (default 30), precisionRequired: X in 1:X (default 5000)
+ * }
+ */
+function solveTraverse(input) {
+  const kind = input?.kind ?? "loop";
+  if (!["loop", "link", "open"].includes(kind)) fail("نوع الترافيرس لازم مقفول على نفسه أو مقفول بين نقطتين أو مفتوح.");
+  const format = input.angleFormat === "dd" ? "dd" : "ddmmss";
+  const method = input.method === "transit" ? "transit" : "bowditch";
+  const c = toNumber(input.angleTolSec) ?? 30;
+  const required = toNumber(input.precisionRequired) ?? 5000;
+  if (!(c > 0)) fail("ثابت الخطأ الزاوي المسموح لازم أكبر من صفر.");
+  if (!(required > 0)) fail("الدقة المطلوبة لازم أكبر من صفر.");
+  const notes = [];
+
+  let raw = (Array.isArray(input.stations) ? input.stations : []).filter((r) => r && ![r.id, r.angle, r.distance, r.azimuth].every(trvBlank));
+  // A loop written with its first station again at the end, to close it.
+  let closingDistance = null;
+  if (kind === "loop" && raw.length >= 4 && trvSame(raw[0].id, raw[raw.length - 1].id)) {
+    const last = raw[raw.length - 1];
+    raw = raw.slice(0, -1);
+    if (trvBlank(raw[0].angle) && !trvBlank(last.angle)) raw[0] = { ...raw[0], angle: last.angle };
+    closingDistance = last.distance;
+    notes.push(`المحطة ${String(last.id).trim()} متكررة في الآخر لقفل المضلع؛ اتحسبت مرة واحدة.`);
+  }
+  // Distances written on the station each leg reaches (none on the first station, one on the last
+  // or on the closing repeat): move each, with its azimuth, to the station the leg starts from.
+  if (raw.length >= 2 && trvBlank(raw[0].distance)) {
+    const tail = kind === "loop" ? closingDistance : raw[raw.length - 1].distance;
+    if (!trvBlank(tail)) {
+      const last = raw.length - 1;
+      raw = raw.map((r, i) => ({
+        ...r,
+        distance: i < last ? raw[i + 1].distance : kind === "loop" ? tail : null,
+        azimuth: i < last ? raw[i + 1].azimuth : null,
+      }));
+      notes.push("المسافات كانت مكتوبة عند المحطة اللي الضلع بيوصلها؛ اتنقلت للمحطة اللي بيبدأ منها.");
+    }
+  }
+
+  const n = raw.length;
+  if (n < (kind === "loop" ? 3 : 2)) fail(kind === "loop" ? "الترافيرس المقفول محتاج 3 محطات على الأقل." : "الترافيرس محتاج محطتين على الأقل.");
+  let deflected = false;
+  const st = raw.map((r, i) => {
+    const id = trvBlank(r.id) ? `P${i + 1}` : String(r.id).trim();
+    const distance = trvBlank(r.distance) ? null : toNumber(r.distance);
+    if (!trvBlank(r.distance) && distance === null) fail(`المحطة ${id}: المسافة "${r.distance}" مش رقم.`);
+    const obs = trvBlank(r.angle) ? { angle: null, deflection: false } : trvObserved(r.angle, format);
+    if (!trvBlank(r.angle) && obs.angle === null) fail(`زاوية المحطة ${id}: "${trvLtr(r.angle)}" مش مفهوم. اكتبه ${trvLtr("123 45 30")} أو ${trvLtr("123.4530")}.`);
+    if (obs.angle !== null && (obs.angle < 0 || obs.angle > 360)) fail(`زاوية المحطة ${id}: "${trvLtr(r.angle)}" لازم بين 0 و 360 درجة.`);
+    if (obs.deflection) deflected = true;
+    return { id, angle: obs.angle, distance, azimuth: trvBlank(r.azimuth) ? null : parseTraverseDirection(r.azimuth, format) };
+  });
+  const legCount = kind === "loop" ? n : n - 1;
+  for (let i = 0; i < legCount; i++) {
+    if (!(st[i].distance > 0)) fail(`المحطة ${st[i].id}: لازم مسافة أكبر من صفر للمحطة اللي بعدها (${st[(i + 1) % n].id}).`);
+  }
+
+  // Known points: as given, or from the coordinates in the sheet.
+  let start = trvPoint(input.start, "نقطة البداية");
+  if (!start && (start = trvPoint(raw[0], `المحطة ${st[0].id}`))) notes.push(`إحداثيات البداية اتاخدت من الشيت (${st[0].id}).`);
+  if (!start) fail("لازم إحداثيات نقطة البداية (E و N).");
+  let end = null;
+  if (kind === "link") {
+    end = trvPoint(input.end, "نقطة النهاية");
+    if (!end && (end = trvPoint(raw[n - 1], `المحطة ${st[n - 1].id}`))) notes.push(`إحداثيات النهاية اتاخدت من الشيت (${st[n - 1].id}).`);
+    if (!end) fail("الترافيرس المقفول بين نقطتين محتاج إحداثيات نقطة النهاية.");
+  }
+  let startAz = trvDirIn(input.startAzimuth, format, "انحراف أول ضلع");
+  const backsight = trvPoint(input.backsight, "النقطة الخلفية");
+  const backAz = backsight ? traverseAzimuth(backsight, start) : trvDirIn(input.backAzimuth, format, "انحراف الخط الخلفي");
+  const foresight = trvPoint(input.foresight, "النقطة الأمامية");
+  const endAz = kind !== "link" ? null : foresight ? traverseAzimuth(end, foresight) : trvDirIn(input.endAzimuth, format, "انحراف الخط الأمامي");
+  const legAz = st.map((s) => s.azimuth);
+  const startFromSheet = startAz === null && legAz[0] !== null && (kind === "loop" || backAz === null);
+  if (startFromSheet) startAz = legAz[0];
+
+  // Orientation of the first leg: given directly, or from the line into the start and the angle there.
+  const orientByBack = startAz === null;
+  // Which angles take part: every one that turns the line from the first leg on, plus the closing ones.
+  const wanted = st.map((s, i) => {
+    if (kind === "loop") return true;
+    if (i === 0) return orientByBack;
+    if (i === n - 1) return kind === "link" && endAz !== null;
+    return true;
+  });
+  // Angles missing but an azimuth for every leg (a bearing table): the legs go by those azimuths.
+  const byAzimuth = st.some((s, i) => wanted[i] && s.angle === null) && legAz.slice(0, legCount).every((a) => a !== null);
+  const used = byAzimuth ? st.map(() => false) : wanted;
+  if (byAzimuth) {
+    notes.push(kind === "open" ? "الانحرافات اتاخدت من الشيت لكل ضلع." : "الانحرافات اتاخدت من الشيت لكل ضلع ومفيش زوايا كاملة، فمفيش قفل زاوي؛ اتصحح القفل الخطي بس.");
+  } else {
+    if (startFromSheet) notes.push("انحراف أول ضلع اتاخد من الشيت.");
+    if (orientByBack && backAz === null) fail(kind === "link" ? "لازم انحراف الخط الخلفي عند البداية (أو إحداثيات النقطة الخلفية)، أو انحراف أول ضلع." : "لازم انحراف أول ضلع.");
+    if (orientByBack && kind === "loop") fail("الترافيرس المقفول على نفسه محتاج انحراف أول ضلع.");
+    st.forEach((s, i) => { if (used[i] && s.angle === null) fail(`المحطة ${s.id}: ناقصة الزاوية.`); });
+  }
+  const m = used.filter(Boolean).length;
+
+  // Azimuths for a set of angles and a sign: +1 angles to the right (clockwise from back to fore), -1 to the left.
+  const chain = (angles, sign) => {
+    const az = [];
+    az[0] = orientByBack ? trvNorm360(backAz + 180 + sign * angles[0]) : startAz;
+    for (let i = 1; i < legCount; i++) az[i] = trvNorm360(az[i - 1] + 180 + sign * angles[i]);
+    let closeAz = null;
+    if (kind === "loop") closeAz = trvNorm360(az[n - 1] + 180 + sign * angles[0]);
+    else if (kind === "link" && endAz !== null) closeAz = trvNorm360(az[n - 2] + 180 + sign * angles[n - 1]);
+    return { az, closeAz };
+  };
+  const target = kind === "loop" ? (a) => a.az[0] : () => endAz;
+
+  const solveWith = (sign) => {
+    const observed = st.map((s) => s.angle);
+    let angular = null;
+    let adjusted = observed.slice();
+    let az = legAz.slice(0, legCount);
+    if (!byAzimuth) {
+      const first = chain(observed, sign);
+      if (first.closeAz !== null) {
+        const w = trvNorm180(first.closeAz - target(first));
+        const corr = -w / m;
+        adjusted = observed.map((a, i) => (used[i] ? a + corr : a));
+        const allowable = c * Math.sqrt(m);
+        angular = { count: m, misclosureSec: w * 3600, allowableSec: allowable, correctionSec: corr * 3600, accepted: Math.abs(w * 3600) <= allowable + 1e-9 };
+        if (kind === "loop") {
+          const sum = observed.reduce((s, a) => s + a, 0);
+          const interior = (n - 2) * 180, exterior = (n + 2) * 180;
+          angular.observedSum = sum;
+          angular.theoreticalSum = Math.abs(sum - interior) <= Math.abs(sum - exterior) ? interior : exterior;
+        } else {
+          angular.closingAzimuth = first.closeAz;
+          angular.knownAzimuth = endAz;
+        }
+      }
+      az = chain(adjusted, sign).az;
+    }
+    const legs = az.map((a, i) => {
+      const d = st[i].distance;
+      return { from: st[i].id, to: st[(i + 1) % n].id, azimuth: a, distance: d, dE: d * Math.sin(a * TRV_D2R), dN: d * Math.cos(a * TRV_D2R) };
+    });
+    const total = legs.reduce((s, l) => s + l.distance, 0);
+    let fE = 0, fN = 0, linear = null;
+    const sumE = legs.reduce((s, l) => s + l.dE, 0), sumN = legs.reduce((s, l) => s + l.dN, 0);
+    if (kind === "loop") { fE = sumE; fN = sumN; }
+    else if (kind === "link") { fE = start.E + sumE - end.E; fN = start.N + sumN - end.N; }
+    if (kind !== "open") {
+      const f = Math.hypot(fE, fN);
+      const precision = f > 0 ? total / f : Infinity;
+      linear = { fE, fN, f, totalLength: total, precision, required, accepted: precision >= required };
+    }
+    // Share the linear misclosure: by length (Bowditch) or by the size of each ΔE, ΔN (transit).
+    const absE = legs.reduce((s, l) => s + Math.abs(l.dE), 0), absN = legs.reduce((s, l) => s + Math.abs(l.dN), 0);
+    let E = start.E, N = start.N;
+    const coords = [{ E, N }];
+    for (const l of legs) {
+      if (linear) {
+        l.corrE = method === "bowditch" ? (-fE * l.distance) / total : absE > 0 ? (-fE * Math.abs(l.dE)) / absE : 0;
+        l.corrN = method === "bowditch" ? (-fN * l.distance) / total : absN > 0 ? (-fN * Math.abs(l.dN)) / absN : 0;
+      } else { l.corrE = 0; l.corrN = 0; }
+      l.dEAdj = l.dE + l.corrE;
+      l.dNAdj = l.dN + l.corrN;
+      l.adjDistance = Math.hypot(l.dEAdj, l.dNAdj);
+      l.adjAzimuth = trvNorm360(Math.atan2(l.dEAdj, l.dNAdj) / TRV_D2R);
+      E += l.dEAdj;
+      N += l.dNAdj;
+      coords.push({ E, N });
+    }
+    const stations = st.map((s, i) => ({
+      id: s.id, observed: s.angle, used: used[i],
+      correctionSec: used[i] && angular ? angular.correctionSec : 0,
+      adjusted: used[i] ? adjusted[i] : s.angle,
+      E: coords[i].E, N: coords[i].N,
+    }));
+    return { sign, angular, linear, legs, stations, coords };
+  };
+
+  // Right or left angles. A loop closes either way (the wrong one is its mirror image), so a loop or
+  // an open traverse takes angles to the right, as a total station measures them, unless told
+  // otherwise; a link between known points tries both and keeps the one that reaches the end point.
+  // Deflections are always turned into angles to the right.
+  const choice = byAzimuth || deflected || input.angleKind === "right" ? [1] : input.angleKind === "left" ? [-1] : kind !== "link" ? [1] : [1, -1];
+  const tries = choice.map(solveWith);
+  const best = tries.length === 1 || !tries[0].linear ? tries[0]
+    : tries.reduce((a, b) => (b.linear.f < a.linear.f - 1e-9 ? b : a));
+
+  if (deflected) notes.push("زوايا الانحراف (R / L) اتحولت لزوايا يمين: 180° + الانحراف لليمين، 180° − الانحراف للشمال.");
+  if (kind === "open") notes.push("الترافيرس المفتوح مفيهوش قفل، فمفيش أي تحقق من الزوايا أو المسافات: أي خطأ في القياس بيدخل في الإحداثيات من غير ما يبان.");
+  if (kind === "link" && endAz === null && !byAzimuth) notes.push("مفيش انحراف عند نقطة النهاية، فالقفل الزاوي ما اتحسبش؛ اتحسب القفل الخطي بس.");
+  if (kind === "loop" && !byAzimuth && !deflected && input.angleKind !== "right" && input.angleKind !== "left") notes.push("الزوايا اتحسبت كزوايا يمين (مع عقارب الساعة من المحطة اللي قبل للي بعد)، زي ما الجهاز بيقيسها. لو قستها عكس عقارب الساعة اختار «زوايا شمال»: المضلع المقفول بيقفل بالاتنين، والغلط بيرسم صورته في المراية.");
+  if (tries.length > 1) notes.push(best.sign > 0 ? "الزوايا اتعاملت كزوايا يمين (مع عقارب الساعة من الخلفي للأمامي)، لأنها اللي بتقفل." : "الزوايا اتعاملت كزوايا شمال (عكس عقارب الساعة من الخلفي للأمامي)، لأنها اللي بتقفل.");
+
+  let areaM2 = null;
+  if (kind === "loop") {
+    let twice = 0;
+    for (let i = 0; i < n; i++) { const p = best.coords[i], q = best.coords[(i + 1) % n]; twice += p.E * q.N - q.E * p.N; }
+    areaM2 = Math.abs(twice) / 2;
+  }
+  return {
+    kind, method, byAzimuth, angleKind: byAzimuth ? null : best.sign > 0 ? "right" : "left",
+    angular: best.angular, linear: best.linear,
+    stations: best.stations, legs: best.legs,
+    closingPoint: kind === "link" ? end : kind === "loop" ? start : null,
+    areaM2, notes,
+  };
+}
+
+// ---------- reading a traverse sheet ----------
+const trvNormHead = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()[\]/:'"°′″#№*]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const TRV_HEADS = [
+  ["target", /^(to|target|tgt|sighted|sightedpoint|observedpoint|pointobserved|tostation|stationto|topoint|pointto|الي|هدف|الهدف|المرصود|المرصوده|النقطهالمرصوده|نقطهالرصد)$/],
+  ["id:station", /^(station|stn|sta|st|stationname|stationid|stationno|stationnumber|from|fromstation|stationfrom|occupied|occupiedstation|instrument|inst|instrumentstation|setup|محطه|المحطه|محطهالجهاز|من|رقمالمحطه|اسمالمحطه)$/],
+  ["id:point", /^(point|pt|pnt|pointname|pointid|pointno|pointnumber|ptno|ptid|نقطه|النقطه|رقمالنقطه|اسمالنقطه)$/],
+  ["id:weak", /^(name|id|no|number|num|nr|رقم|م|اسم|الاسم)$/],
+  ["line", /^(line|side|leg|course|الضلع|ضلع|الخط|خط)$/],
+  ["deg", /^(deg|degree|degrees|درجه|درجات|الدرجات|الدرجه|د)$/],
+  ["min", /^(min|mins|minute|minutes|دقيقه|دقائق|دقايق|الدقائق|الدقيقه|ق)$/],
+  ["sec", /^(sec|secs|second|seconds|ثانيه|ثواني|الثواني|الثانيه|ث)$/],
+  ["sd", /^(sd|slope|slopedist|slopedistance|مسافهمائله|المسافهالمائله|مائله|المائله)$/],
+  ["zenith", /^(z|za|zenith|zenithangle|v|va|vertical|verticalangle|vangle|زاويهراسيه|الزاويهالراسيه|راسيه|سمتيه)$/],
+  ["azimuth", /^(azimuth|azimuths|az|azi|bearing|bearings|brg|wcb|fb|forebearing|انحراف|الانحراف|الانحرافالدائري|انحرافدائري|الانحرافالامامي|سمت|السمت)$/],
+  ["angle", /^(angle|angles|hz|ha|hzangle|horizontalangle|hangle|hzreading|reading|beta|β|observed|observedangle|measuredangle|زاويه|الزاويه|زوايا|الزوايا|الزاويهالافقيه|زاويهافقيه|الزاويهالمقاسه|زاويهمقاسه|القراءه|القراءهالافقيه|قراءهافقيه)$/],
+  ["distance", /^(distance|dist|length|len|hd|hdist|horizontaldistance|horizdist|مسافه|المسافه|طول|الطول|طولالضلع|مسافهافقيه|المسافهالافقيه)$/],
+  ["E", /^(e|east|easting|x|شرقي|الشرقي|احداثيشرقي|الاحداثيالشرقي)$/],
+  ["N", /^(n|north|northing|y|شمالي|الشمالي|احداثيشمالي|الاحداثيالشمالي)$/],
+];
+const TRV_TOTAL = /^(total|totals|sum|σ|∑|المجموع|مجموع|الاجمالي|اجمالي|المجاميع|الجمله|جمله)$/;
+// A header cell's column kind, also with a unit after the name ("Distance (m)", "المسافة م", "Hz dms").
+const trvHeadKey = (cell) => {
+  if (typeof cell === "number" || trvBlank(cell)) return null;
+  const h = trvNormHead(cell);
+  const find = (x) => TRV_HEADS.find(([, re]) => re.test(x))?.[0] ?? null;
+  return find(h) ?? find(h.replace(/(meters?|metres?|بالمتر|متر|m|م|dms|ddmmss|deg|بالدرجات|دمث|دقث)$/, ""));
+};
+// "AB", "A-B", "A→B", "A to B": the stations at the two ends of a line.
+const trvLineEnds = (v) => {
+  const s = String(v ?? "").trim();
+  const p = s.split(/\s*(?:->|→|←|–|—|-|\/)\s*|\s+(?:to|الى|إلى|الي)\s+|\s+/i).filter(Boolean);
+  if (p.length === 2) return p;
+  if (/^[A-Za-zء-ي]{2}$/.test(s)) return [s[0], s[1]];
+  return [s, null];
+};
+
+function trvHeaderRow(cells) {
+  const cols = {};
+  const ids = { station: [], point: [], weak: [] };
+  (cells ?? []).forEach((c, i) => {
+    const key = trvHeadKey(c);
+    if (!key) return;
+    if (key.startsWith("id:")) ids[key.slice(3)].push(i);
+    else if (cols[key] === undefined) cols[key] = i;
+  });
+  // The station column: a station name before a point name before a plain number; a second
+  // station or point column next to it is the point sighted.
+  const named = ids.station.length ? ids.station : ids.point;
+  if (named.length) {
+    cols.id = named[0];
+    const other = ids.station.length ? ids.point[0] ?? ids.station[1] : ids.point[1];
+    if (cols.target === undefined && other !== undefined) cols.target = other;
+  } else if (ids.weak.length) cols.id = ids.weak[0];
+  return cols;
+}
+
+// Readings at each set-up (station, point sighted, horizontal circle reading, distance): the angle at
+// a station is the reading on the fore station less the reading on the back one, over every pair of
+// readings (face left, face right, more sets); a leg's length is the mean of all its measurements.
+function trvDirectionSets(obs, format, notes) {
+  const groups = [];
+  for (const o of obs) {
+    const g = groups[groups.length - 1];
+    if (g && trvSame(o.id, g.id)) g.obs.push(o);
+    else groups.push({ id: String(o.id ?? "").trim(), obs: [o] });
+  }
+  const ids = groups.map((g) => g.id);
+  const n = groups.length;
+  const sights = (g, t) => (g ? g.obs.filter((o) => trvSame(o.target, t)) : []);
+  const loop = n >= 3 && sights(groups[n - 1], ids[0]).length > 0 && sights(groups[0], ids[n - 1]).length > 0;
+  let spread = 0, spreadAt = "";
+  const rows = groups.map((g, k) => {
+    const prev = k > 0 ? ids[k - 1] : loop ? ids[n - 1] : null;
+    const next = k < n - 1 ? ids[k + 1] : loop ? ids[0] : null;
+    const targets = [...new Set(g.obs.map((o) => String(o.target ?? "").trim()).filter(Boolean))];
+    const back = prev ?? targets.find((t) => t !== next) ?? null;
+    const fore = next ?? targets.find((t) => t !== back) ?? null;
+    const seq = g.obs.map((o) => ({ t: String(o.target ?? "").trim(), hz: parseTraverseAngle(o.angle, format) })).filter((o) => o.hz !== null && (o.t === back || o.t === fore));
+    const angles = [];
+    for (let i = 0; i + 1 < seq.length;) {
+      if (seq[i].t !== seq[i + 1].t) {
+        const [b, f] = seq[i].t === back ? [seq[i], seq[i + 1]] : [seq[i + 1], seq[i]];
+        angles.push(trvNorm360(f.hz - b.hz));
+        i += 2;
+      } else i += 1;
+    }
+    let angle = null;
+    if (back && fore && back !== fore && angles.length) {
+      const diffs = angles.map((a) => trvNorm180(a - angles[0]));
+      angle = trvNorm360(angles[0] + diffs.reduce((s, d) => s + d, 0) / diffs.length);
+      const sp = (Math.max(...diffs) - Math.min(...diffs)) * 3600;
+      if (sp > spread) { spread = sp; spreadAt = g.id; }
+    }
+    let distance = null;
+    if (next !== null) {
+      const ds = [...sights(g, next), ...sights(groups[(k + 1) % n], g.id)].map((o) => toNumber(o.distance)).filter((d) => d !== null && d > 0);
+      if (ds.length) distance = ds.reduce((s, d) => s + d, 0) / ds.length;
+    }
+    return { id: g.id, angle: angle === null ? null : trvDmsText(angle), distance, back, fore };
+  });
+  notes.push("الشيت قراءات جهاز (محطة / نقطة مرصودة): الزاوية عند كل محطة = القراءة على الأمامي − القراءة على الخلفي، متوسط كل الأرصاد، والمسافة متوسط القياس رايح وجاي.");
+  if (spread >= 0.05) notes.push(`أكبر فرق بين الأرصاد في الزاوية: ${spread.toFixed(1)}″ عند ${spreadAt}.`);
+  let references = null;
+  if (loop) notes.push("آخر محطة راصدة أول محطة، فده ترافيرس مقفول على نفسه.");
+  else {
+    const back = rows[0].back, fore = rows[n - 1].fore;
+    references = { back: back ? { id: back } : null, fore: fore ? { id: fore } : null };
+    if (back) notes.push(`الرصد الخلفي عند ${rows[0].id} على ${back}: اكتب انحراف الخط من ${back} لـ ${rows[0].id} أو إحداثيات ${back}.`);
+    if (fore) notes.push(`الرصد الأمامي عند ${rows[n - 1].id} على ${fore}: اكتب انحراف الخط من ${rows[n - 1].id} لـ ${fore} أو إحداثيات ${fore}.`);
+  }
+  return { rows: rows.map(({ id, angle, distance }) => ({ id, angle, distance })), notes, kind: loop ? "loop" : null, references };
+}
+
+/**
+ * Turn a sheet into traverse rows { id, angle, distance, azimuth?, E?, N? }. Columns are found by
+ * their headers in Arabic or English, which may sit under a title and span two rows (an angle
+ * split into degrees, minutes and seconds); a sheet with no headers is station, angle, distance or
+ * station, degrees, minutes, seconds, distance. A slope distance with a zenith angle gives the
+ * horizontal distance; a sheet of set-ups (station, point sighted, reading) gives the angles; a
+ * total row is dropped. Returns { rows, notes, kind (a "loop" or "link" the sheet shows, or null),
+ * references ({ back, fore } points off the traverse, or null) }.
+ */
+function traverseRowsFromMatrix(matrix, options = {}) {
+  const format = options.angleFormat === "dd" ? "dd" : "ddmmss";
+  const rows = (matrix ?? []).filter((r) => Array.isArray(r) && r.some((c) => !trvBlank(c)));
+  if (!rows.length) fail("الشيت فاضي.");
+  const notes = [];
+
+  // The header: the row among the first ones naming the most columns.
+  const score = (k) => Object.keys(k).length + ((k.angle ?? k.deg ?? k.azimuth) !== undefined && (k.distance ?? k.sd ?? k.line) !== undefined ? 2 : 0);
+  let h = -1, cols = {}, best = 1;
+  for (let i = 0; i < Math.min(rows.length, 12); i++) {
+    const k = trvHeaderRow(rows[i]);
+    if (score(k) > best) { best = score(k); h = i; cols = k; }
+  }
+  let body;
+  if (h >= 0) {
+    body = rows.slice(h + 1);
+    // A second header row with degrees / minutes / seconds under the names above them.
+    const sub = rows[h + 1]?.map(trvHeadKey) ?? [];
+    if (sub.includes("deg") && rows[h + 1].every((c) => typeof c !== "number")) {
+      body = rows.slice(h + 2);
+      let angleSet = false;
+      sub.forEach((key, j) => {
+        if (key !== "deg") return;
+        let a = j;
+        while (a > 0 && trvBlank(rows[h][a])) a--;
+        const above = trvHeadKey(rows[h][a]);
+        const min = sub[j + 1] === "min" ? j + 1 : undefined;
+        const sec = sub[j + 2] === "sec" ? j + 2 : sub[j + 1] === "sec" ? j + 1 : undefined;
+        if (above === "azimuth") {
+          if (cols.azDeg === undefined) Object.assign(cols, { azDeg: j, azMin: min, azSec: sec });
+          if (cols.azimuth === a) delete cols.azimuth;
+        } else if (!angleSet && above !== "zenith") {
+          angleSet = true;
+          Object.assign(cols, { deg: j, min, sec });
+          if (cols.angle === a) delete cols.angle;
+        }
+      });
+    }
+  } else {
+    // No headers: station, angle, distance; or station, degrees, minutes, seconds, distance.
+    body = rows;
+    const w = Math.max(...rows.map((r) => r.length));
+    const minSec = (r) => [r[2], r[3]].every((v) => trvBlank(v) || (toNumber(v) !== null && toNumber(v) >= 0 && toNumber(v) < 60));
+    if (w >= 5 && rows.filter((r) => !trvBlank(r[1])).every(minSec)) Object.assign(cols, { id: 0, deg: 1, min: 2, sec: 3, distance: 4 });
+    else if (w >= 3) Object.assign(cols, { id: 0, angle: 1, distance: 2 });
+    else fail("الشيت محتاج على الأقل: المحطة، الزاوية، المسافة.");
+    notes.push(cols.deg !== undefined ? "الشيت من غير عناوين؛ اعتبرت الأعمدة: المحطة، درجات، دقائق، ثواني، المسافة." : "الشيت من غير عناوين؛ اعتبرت الأعمدة: المحطة، الزاوية، المسافة.");
+  }
+  // A "line" column of lengths is the distance.
+  if (cols.line !== undefined && cols.distance === undefined && cols.sd === undefined && body.every((r) => trvBlank(r[cols.line]) || toNumber(r[cols.line]) !== null)) {
+    cols.distance = cols.line;
+    delete cols.line;
+  }
+  if (cols.angle === undefined && cols.deg === undefined && cols.azimuth === undefined && cols.azDeg === undefined) fail("مش لاقي عمود الزاوية أو الانحراف في الشيت (Angle / الزاوية، أو درجات ودقائق وثواني، أو Azimuth / الانحراف).");
+  if (cols.distance === undefined && cols.sd === undefined) fail("مش لاقي عمود المسافة في الشيت (Distance / المسافة).");
+
+  const cell = (r, k) => (cols[k] === undefined ? null : r[cols[k]] ?? null);
+  const dms = (r, d, m, s) => {
+    const p = [cell(r, d), cell(r, m), cell(r, s)];
+    return p.every(trvBlank) ? null : p.map((x) => (trvBlank(x) ? 0 : String(x).trim())).join(" ");
+  };
+  const hasAz = cols.azimuth !== undefined || cols.azDeg !== undefined;
+  const hasXY = cols.E !== undefined && cols.N !== undefined;
+  let obs = body.map((r) => {
+    let id = cell(r, "id");
+    let target = cell(r, "target");
+    if (trvBlank(id) && cols.line !== undefined) {
+      const [from, to] = trvLineEnds(cell(r, "line"));
+      id = from;
+      if (trvBlank(target)) target = to;
+    }
+    let angle = cell(r, "angle");
+    if (cols.deg !== undefined && trvBlank(angle)) angle = dms(r, "deg", "min", "sec");
+    let distance = cell(r, "distance");
+    if (trvBlank(distance) && cols.sd !== undefined && !trvBlank(cell(r, "sd"))) {
+      const sd = toNumber(cell(r, "sd"));
+      const z = cols.zenith !== undefined ? parseTraverseAngle(cell(r, "zenith"), "ddmmss") : null;
+      distance = sd !== null && z !== null ? sd * Math.sin(z * TRV_D2R) : sd;
+    }
+    const o = { id, angle, distance, target };
+    if (hasAz) o.azimuth = cols.azDeg !== undefined && trvBlank(cell(r, "azimuth")) ? dms(r, "azDeg", "azMin", "azSec") : cell(r, "azimuth");
+    if (hasXY) { o.E = cell(r, "E"); o.N = cell(r, "N"); }
+    return o;
+  }).filter((o) => ![o.id, o.angle, o.distance, o.azimuth, o.E, o.N].every(trvBlank));
+  if (cols.sd !== undefined && cols.distance === undefined) notes.push(cols.zenith !== undefined ? "المسافة الأفقية اتحسبت من المسافة المائلة والزاوية الرأسية (Zenith)." : "مفيش زاوية رأسية؛ المسافة المائلة اتاخدت على إنها أفقية.");
+
+  // Total rows: named so, or at the end with no station and a sum in them.
+  const before = obs.length;
+  obs = obs.filter((o) => !TRV_TOTAL.test(trvNormHead(o.id)));
+  while (obs.length > 2 && trvBlank(obs[obs.length - 1].id)) {
+    const last = obs[obs.length - 1];
+    const a = trvObserved(last.angle, format).angle;
+    const d = toNumber(last.distance);
+    const sum = obs.slice(0, -1).reduce((s, o) => s + (toNumber(o.distance) ?? 0), 0);
+    if ((a !== null && a > 360) || (d !== null && Math.abs(d - sum) < 0.05)) obs.pop();
+    else break;
+  }
+  if (obs.length < before) notes.push("سطر المجموع اتشال.");
+  // Headerless: lines above the data that are not readings (a title).
+  if (h < 0) {
+    while (obs.length && ((!trvBlank(obs[0].angle) && trvObserved(obs[0].angle, format).angle === null) || (!trvBlank(obs[0].distance) && toNumber(obs[0].distance) === null))) obs.shift();
+  }
+
+  if (cols.target !== undefined && obs.some((o, i) => i > 0 && trvSame(o.id, obs[i - 1].id))) return trvDirectionSets(obs, format, notes);
+
+  // Known points off the traverse at its ends: coordinates with no angle and no distance.
+  const xy = (o) => hasXY && toNumber(o.E) !== null && toNumber(o.N) !== null;
+  const bare = (o) => trvBlank(o.angle) && trvBlank(o.distance);
+  let references = null;
+  if (hasXY && obs.length >= 4 && !obs.every(xy)) {
+    const first = obs[0], last = obs[obs.length - 1];
+    if (xy(first) && bare(first) && !trvBlank(obs[1].angle)) {
+      obs.shift();
+      references = { ...references, back: { id: String(first.id ?? "").trim(), E: toNumber(first.E), N: toNumber(first.N) } };
+      notes.push(`${String(first.id ?? "").trim()}: نقطة معلومة قبل البداية من غير زاوية ولا مسافة، اتاخدت كنقطة خلفية.`);
+    }
+    if (xy(last) && bare(last) && !trvBlank(obs[obs.length - 2].angle)) {
+      obs.pop();
+      references = { ...references, fore: { id: String(last.id ?? "").trim(), E: toNumber(last.E), N: toNumber(last.N) } };
+      notes.push(`${String(last.id ?? "").trim()}: نقطة معلومة بعد النهاية من غير زاوية ولا مسافة، اتاخدت كنقطة أمامية.`);
+    }
+  }
+  let kind = null;
+  if (obs.length >= 4 && trvSame(obs[0].id, obs[obs.length - 1].id)) {
+    kind = "loop";
+    notes.push("أول محطة متكررة في الآخر، فده ترافيرس مقفول على نفسه.");
+  } else if (obs.length >= 3 && xy(obs[0]) && xy(obs[obs.length - 1]) && obs.slice(1, -1).every((o) => !xy(o))
+    && (toNumber(obs[0].E) !== toNumber(obs[obs.length - 1].E) || toNumber(obs[0].N) !== toNumber(obs[obs.length - 1].N))) {
+    kind = "link";
+    notes.push("أول وآخر محطة ليهم إحداثيات، فده ترافيرس مقفول بين نقطتين معلومتين.");
+  }
+  const out = obs.map((o) => {
+    const r = { id: o.id, angle: o.angle, distance: o.distance };
+    if (hasAz) r.azimuth = o.azimuth;
+    if (hasXY) { r.E = o.E; r.N = o.N; }
+    return r;
+  });
+  return { rows: out, notes, kind, references };
+}
+
 // ---- src/engine/registry.js
 // One registry of calculation tools, shared by the REST API (the calculator tabs)
 // and the AI assistant (as Claude tool definitions), so both use the same math.
@@ -3604,6 +4452,38 @@ const TOOLS = [
       required: ["startRL"],
     },
     run: (input, ctx) => reduceLevelBook({ ...input, rows: rowsFrom(input, "rows", ctx) }),
+  },
+  {
+    name: "solve_traverse",
+    description:
+      "Solve and adjust a traverse (ترافيرس): closed on itself (loop), closed between two known points (link), or open. " +
+      "Checks the angle sum ((n-2)·180 or (n+2)·180) or the closing azimuth against c·√n seconds, shares the angular misclosure equally, " +
+      "computes azimuths, ΔE/ΔN, the linear misclosure and precision 1:X, and adjusts by Bowditch (compass) or transit. " +
+      "Stations in order; angle = horizontal angle at the station from the previous station to the next (to the right, clockwise, unless angleKind says left); " +
+      "distance = horizontal distance to the next station; a deflection may be written \"12 30 R\" / \"12 30 L\". Angles as \"d m s\" text, DD.MMSS numbers or decimal degrees (angleFormat \"dd\"). " +
+      "A station may carry azimuth (of the leg to the next station; whole-circle or quadrant bearing \"N 30 15 E\"), used when the angles are missing (a bearing table) or to orient the first leg, " +
+      "and E, N (known coordinates, used for the start and, on a link, the end when those are not given). A loop may repeat its first station at the end.",
+    input_schema: {
+      type: "object",
+      properties: {
+        kind: { type: "string", enum: ["loop", "link", "open"] },
+        stations: { type: "array", items: { type: "object", properties: { id: { type: "string" }, angle: numOrStr, distance: numOrStr, azimuth: numOrStr, E: num, N: num }, required: ["id"] } },
+        start: { type: "object", properties: { E: num, N: num }, required: ["E", "N"] },
+        startAzimuth: { ...numOrStr, description: "Azimuth of the first leg (loop, open; may orient a link)." },
+        backAzimuth: { ...numOrStr, description: "Link or open: azimuth of the known line into the start, from the backsight point." },
+        backsight: { type: "object", properties: { E: num, N: num }, description: "Link or open: the known backsight point, instead of backAzimuth." },
+        end: { type: "object", properties: { E: num, N: num }, description: "Link: the known end point." },
+        endAzimuth: { ...numOrStr, description: "Link: azimuth of the known line out of the end, to the foresight point." },
+        foresight: { type: "object", properties: { E: num, N: num }, description: "Link: the known foresight point, instead of endAzimuth." },
+        angleFormat: { type: "string", enum: ["ddmmss", "dd"], description: "How plain numbers are read: DD.MMSS (default) or decimal degrees." },
+        angleKind: { type: "string", enum: ["auto", "right", "left"] },
+        method: { type: "string", enum: ["bowditch", "transit"] },
+        angleTolSec: { type: "number", description: "c in the allowable angular misclosure c·√n seconds (default 30)." },
+        precisionRequired: { type: "number", description: "X in the required precision 1:X (default 5000)." },
+      },
+      required: ["kind", "stations"],
+    },
+    run: (input) => solveTraverse(input),
   },
   {
     name: "profile_design",
@@ -4307,7 +5187,7 @@ ${parts.join("\n")}
   return svg;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat };
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix };
 })();
 </script>
 <script>
@@ -6734,6 +7614,271 @@ $("#lv-file").onchange = async (e) => {
   } catch (err) { showError($("#lv-out"), err); }
 };
 
+// ---------- traverse ----------
+// Worked examples from true coordinates, with small field errors so the adjustment shows.
+const TR_EXAMPLES = {
+  loop: { e: "1030.200", n: "2215.600", az: "66 58 00.9", rows: "Station, Angle, Distance\nE, 238 59 35.3, 190.9203\nD, 261 23 36.8, 199.2095\nC, 251 31 02.0, 202.6185\nB, 241 02 17.7, 183.8471\nA, 267 03 40.2, 217.7048" },
+  link: { e: "1000.000", n: "2000.000", back: "33 41 24.2", ee: "1610.500", en: "2250.800", fore: "75 26 44.2", rows: "Station, Angle, Distance\nA, 206 38 50.0, 172.9666\nP1, 218 10 33.5, 172.2974\nP2, 130 42 56.2, 184.2223\nP3, 195 40 30.4, 165.9706\nB, 190 32 37.8," },
+  open: { e: "1150.300", n: "2085.600", az: "98 30 39.7", rows: "Station, Angle, Distance\nP1, , 172.2974\nP2, 130 42 56.2, 184.2073\nP3, ," },
+};
+const TR_FIELDS = ["e", "n", "az", "back", "be", "bn", "ee", "en", "fore", "fe", "fn"];
+const FEDDAN = 4200.83;
+let trLast = null;
+let trExample = true; // the boxes hold a worked example, not the engineer's own data
+const trKind = () => $("#tr-kind").value;
+const trVal = (k) => $(`#tr-${k}`).value.trim();
+function trShowFields() {
+  const k = trKind();
+  document.querySelectorAll("#tab-trav [data-for]").forEach((el) => (el.hidden = !el.dataset.for.split(" ").includes(k)));
+}
+function trFill(kind) {
+  const x = TR_EXAMPLES[kind];
+  for (const k of TR_FIELDS) $(`#tr-${k}`).value = x[k] ?? "";
+  $("#tr-rows").value = x.rows;
+  trExample = true;
+  trFileNotes = null;
+}
+// Pasted lines: split on tabs, commas or semicolons. With spaces only, an angle written d m s has
+// spaces of its own, so the first word is the station, the last the distance and the rest the
+// angle, unless a header names separate degrees, minutes and seconds columns.
+function trMatrix(text) {
+  const lines = text.replace(/^﻿/, "").split(/\r?\n/).filter((l) => l.trim());
+  const unquote = (c) => c.trim().replace(/^"(.*)"$/, "$1").replace(/""/g, '"');
+  if (lines.some((l) => /[\t;,]/.test(l))) return lines.map((l) => l.split(/[\t;,]/).map(unquote));
+  const words = lines.map((l) => l.trim().split(/\s+/));
+  const isWordNum = (w) => /^[-+]?[\d٠-٩.٫°º'′"″:]+$/.test(w);
+  const rest = words[0]?.slice(1) ?? [];
+  const header = rest.length && rest.filter((w) => !isWordNum(w)).length > rest.length / 2;
+  if (header && words[0].length >= 5) return words;
+  return words.map((t, i) => ((header && i === 0) || t.length <= 3 ? t : t.length === 4 ? [t[0], t.slice(1).join(" "), ""] : [t[0], t.slice(1, -1).join(" "), t[t.length - 1]]));
+}
+function trInput() {
+  const kind = trKind();
+  const pt = (e, n) => (trVal(e) || trVal(n) ? { E: trVal(e), N: trVal(n) } : undefined);
+  const parsed = E.traverseRowsFromMatrix(trMatrix($("#tr-rows").value), { angleFormat: $("#tr-fmt").value });
+  return {
+    parsed,
+    input: {
+      kind, stations: parsed.rows, method: $("#tr-method").value, angleFormat: $("#tr-fmt").value,
+      angleKind: $("#tr-angles").value === "left" ? "left" : kind === "link" ? "auto" : "right",
+      start: pt("e", "n"),
+      startAzimuth: kind === "link" ? undefined : trVal("az"),
+      backAzimuth: kind === "loop" ? undefined : trVal("back"),
+      backsight: kind === "loop" ? undefined : pt("be", "bn"),
+      end: kind === "link" ? pt("ee", "en") : undefined,
+      endAzimuth: kind === "link" ? trVal("fore") : undefined,
+      foresight: kind === "link" ? pt("fe", "fn") : undefined,
+      angleTolSec: numOrUndef($("#tr-c").value), precisionRequired: numOrUndef($("#tr-ratio").value),
+    },
+  };
+}
+// The plan: the shape after adjustment, the legs as measured (dashed) and the gap they leave at the
+// closing point, drawn larger when too small to see, with a north arrow and a scale bar.
+function trPlan(r) {
+  const adj = r.stations.map((s) => [s.E, s.N]);
+  const ring = r.kind === "loop" ? [...adj, adj[0]] : adj;
+  const raw = [adj[0]];
+  for (const l of r.legs) raw.push([raw[raw.length - 1][0] + l.dE, raw[raw.length - 1][1] + l.dN]);
+  const span = (k) => Math.max(...ring.map((p) => p[k])) - Math.min(...ring.map((p) => p[k]));
+  const size = Math.max(span(0), span(1), 1e-6);
+  const f = r.linear?.f ?? 0;
+  let mag = 1;
+  if (f > 0 && f < 0.03 * size) {
+    const x = (0.06 * size) / f, p = 10 ** Math.floor(Math.log10(x));
+    mag = [1, 2, 5, 10].find((m) => m * p >= x) * p;
+  }
+  const before = r.linear ? raw.map((p, i) => [ring[i][0] + mag * (p[0] - ring[i][0]), ring[i][1] + mag * (p[1] - ring[i][1])]) : null;
+  const all = [...ring, ...(before ?? [])];
+  const minE = Math.min(...all.map((p) => p[0])), maxE = Math.max(...all.map((p) => p[0]));
+  const minN = Math.min(...all.map((p) => p[1])), maxN = Math.max(...all.map((p) => p[1]));
+  const W = 640, pad = 46;
+  const sE = Math.max(maxE - minE, 1e-6), sN = Math.max(maxN - minN, 1e-6);
+  const H = Math.round(Math.min(560, Math.max(280, (W - 2 * pad) * (sN / sE) + 2 * pad)));
+  const k = Math.min((W - 2 * pad) / sE, (H - 2 * pad) / sN);
+  const ox = (W - sE * k) / 2, oy = (H - sN * k) / 2;
+  const X = (e) => ox + (e - minE) * k, Y = (n) => H - oy - (n - minN) * k;
+  const xy = (list) => list.map(([e, n]) => `${X(e).toFixed(1)},${Y(n).toFixed(1)}`).join(" ");
+  const cx = adj.reduce((s, p) => s + p[0], 0) / adj.length, cy = adj.reduce((s, p) => s + p[1], 0) / adj.length;
+  const known = new Set([0, ...(r.kind === "link" ? [adj.length - 1] : [])]);
+  const marks = adj.map(([e, n], i) => (known.has(i)
+    ? `<rect class="known" x="${(X(e) - 6).toFixed(1)}" y="${(Y(n) - 6).toFixed(1)}" width="12" height="12" rx="2"/>`
+    : `<circle class="st" cx="${X(e).toFixed(1)}" cy="${Y(n).toFixed(1)}" r="4.5"/>`)).join("");
+  const labels = r.stations.map((s) => {
+    const dx = X(s.E) - X(cx), dy = Y(s.N) - Y(cy), d = Math.hypot(dx, dy) || 1;
+    return `<text x="${(X(s.E) + (dx / d) * 15).toFixed(1)}" y="${(Y(s.N) + (dy / d) * 15 + 4).toFixed(1)}" text-anchor="middle">${esc(s.id)}</text>`;
+  }).join("");
+  const gap = before ? `<line class="gap" x1="${X(before[before.length - 1][0]).toFixed(1)}" y1="${Y(before[before.length - 1][1]).toFixed(1)}" x2="${X(ring[ring.length - 1][0]).toFixed(1)}" y2="${Y(ring[ring.length - 1][1]).toFixed(1)}"/>` : "";
+  const want = ((W - 2 * pad) * 0.22) / k, p10 = 10 ** Math.floor(Math.log10(want));
+  const len = [5, 2, 1].map((m) => m * p10).find((v) => v <= want) ?? p10, bar = len * k;
+  const shape = r.kind === "loop" ? `<polygon class="adj" points="${xy(adj)}"/>` : `<polyline class="adj open" points="${xy(adj)}"/>`;
+  const rawLabel = mag > 1 ? `قبل توزيع خطأ القفل (مكبّر ×${mag.toLocaleString("en-US")})` : "قبل توزيع خطأ القفل";
+  return `<figure class="tr-plan"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="مسقط الترافيرس">
+    ${before ? `<polyline class="raw" points="${xy(before)}"/>` : ""}${shape}${gap}${marks}${labels}
+    <g class="north" transform="translate(${W - 26} 34)"><line x1="0" y1="16" x2="0" y2="-10"/><path d="M0 -20 6 -6 0 -9 -6 -6Z"/><text x="0" y="32" text-anchor="middle">N</text></g>
+    <g class="scale" transform="translate(${pad} ${H - 14})"><line x1="0" y1="0" x2="${bar.toFixed(1)}" y2="0"/><line x1="0" y1="-4" x2="0" y2="4"/><line x1="${bar.toFixed(1)}" y1="-4" x2="${bar.toFixed(1)}" y2="4"/><text x="${(bar / 2).toFixed(1)}" y="-7" text-anchor="middle">${+len.toPrecision(3)} م</text></g>
+  </svg>
+  <div class="legend"><span><i></i>بعد التصحيح</span>${before ? `<span><i class="raw"></i>${rawLabel}</span><span><i class="gap"></i>خطأ القفل</span>` : ""}<span><i class="known"></i>نقطة معلومة</span></div></figure>`;
+}
+const trRead = (n) => (n === 2 ? "اتقرت محطتين من الملف." : n <= 10 ? `اتقرت ${n} محطات من الملف.` : `اتقرت ${n} محطة من الملف.`);
+function trRender(r, extra) {
+  const dms = E.traverseDms;
+  const hasObs = r.stations.some((s) => s.observed !== null);
+  const cols = [
+    { key: "id", label: "المحطة" },
+    ...(hasObs ? [{ key: "observed", label: "الزاوية المقاسة" }] : []),
+    ...(r.angular ? [{ key: "corr", label: "تصحيح الزاوية (″)", num: 1, d: 2 }, { key: "adjusted", label: "الزاوية المصححة" }] : []),
+    { key: "azimuth", label: "انحراف الضلع" }, { key: "distance", label: "طول الضلع (م)", num: 1 },
+    { key: "dE", label: "ΔE", num: 1 }, { key: "dN", label: "ΔN", num: 1 },
+    ...(r.linear ? [{ key: "corrE", label: "تصحيح ΔE", num: 1, d: 4 }, { key: "corrN", label: "تصحيح ΔN", num: 1, d: 4 }, { key: "dEAdj", label: "ΔE المصحح", num: 1 }, { key: "dNAdj", label: "ΔN المصحح", num: 1 }] : []),
+    { key: "E", label: "E", num: 1 }, { key: "N", label: "N", num: 1 },
+  ];
+  // No "-0.000" for a correction that is nothing.
+  const z = (v) => (typeof v === "number" && Math.abs(v) < 5e-6 ? 0 : v);
+  const fx = (v, d) => z(v).toFixed(d).replace(/^-(0\.?0*)$/, "$1");
+  const lines = r.stations.map((s, i) => {
+    const l = r.legs[i];
+    return {
+      id: s.id, observed: s.observed === null ? "" : dms(s.observed), corr: s.used ? z(s.correctionSec) : null,
+      adjusted: s.used ? dms(s.adjusted) : "", azimuth: l ? dms(l.azimuth) : "", distance: l?.distance,
+      dE: l?.dE, dN: l?.dN, corrE: z(l?.corrE), corrN: z(l?.corrN), dEAdj: l?.dEAdj, dNAdj: l?.dNAdj, E: s.E, N: s.N,
+    };
+  });
+  if (r.kind === "loop") lines.push({ id: `${r.stations[0].id} (القفل)`, E: r.stations[0].E, N: r.stations[0].N });
+  // The CSV keeps a tenth of a millimetre and a hundredth of a second.
+  const round = (v, d) => (typeof v === "number" ? Math.round(v * 10 ** d) / 10 ** d : v);
+  trLast = { columns: cols, rows: lines.map((x) => Object.fromEntries(Object.entries(x).map(([key, v]) => [key, round(v, key === "corr" ? 2 : 4)]))) };
+
+  const items = [];
+  let stamps = "";
+  const a = r.angular, L = r.linear, n = r.stations.length;
+  if (a) {
+    if (a.observedSum !== undefined) items.push(["مجموع الزوايا المقاسة", dms(a.observedSum)], [a.theoreticalSum === (n - 2) * 180 ? "المفروض (n − 2) × 180" : "المفروض (n + 2) × 180", `${a.theoreticalSum}°`]);
+    else if (a.closingAzimuth !== undefined) items.push(["الانحراف المحسوب للخط الأمامي", dms(a.closingAzimuth)], ["الانحراف المعلوم", dms(a.knownAzimuth)]);
+    items.push(["خطأ القفل الزاوي (″)", fx(a.misclosureSec, 1), a.accepted ? "" : "bad"], ["المسموح ± c√n (″)", a.allowableSec.toFixed(1)], ["التصحيح لكل زاوية (″)", fx(a.correctionSec, 2)]);
+    stamps += stamp(a.accepted, a.accepted ? "القفل الزاوي مقبول" : "القفل الزاوي مرفوض", a.accepted ? "ANGULAR CLOSURE OK" : "RE-OBSERVE ANGLES");
+  }
+  if (L) {
+    const ratio = Number.isFinite(L.precision) ? `1 : ${Math.round(L.precision).toLocaleString("en-US")}` : "مقفول تمامًا";
+    items.push(["طول الترافيرس (م)", L.totalLength.toFixed(3)], ["خطأ القفل في E (م)", fx(L.fE, 3)], ["خطأ القفل في N (م)", fx(L.fN, 3)],
+      ["خطأ القفل الخطي (م)", L.f.toFixed(3), L.accepted ? "" : "bad"], ["الدقة", ratio, L.accepted ? "ok" : "bad"], ["المطلوب", `1 : ${Math.round(L.required).toLocaleString("en-US")}`]);
+    stamps += stamp(L.accepted, L.accepted ? "الدقة الخطية مقبولة" : "الدقة الخطية أقل من المطلوب", L.accepted ? "LINEAR CLOSURE OK" : "CHECK DISTANCES");
+  } else items.push(["طول الترافيرس (م)", r.legs.reduce((s, l) => s + l.distance, 0).toFixed(3)]);
+  if (r.areaM2 !== null) {
+    const sahm = r.areaM2 / (FEDDAN / 576);
+    let fd = Math.floor(sahm / 576), q = Math.floor((sahm - fd * 576) / 24), s = +(sahm - fd * 576 - q * 24).toFixed(2);
+    if (s >= 24) { s = 0; q += 1; }
+    if (q >= 24) { q = 0; fd += 1; }
+    items.push(["مساحة المضلع (م²)", r.areaM2.toFixed(2)], ["بالفدان", (r.areaM2 / FEDDAN).toFixed(4)], ["فدان / قيراط / سهم", `${fd} ف ${q} ط ${s.toFixed(2)} س`]);
+  }
+  const method = L ? `<p class="hint">${esc(r.method === "transit" ? "التصحيح: ترانزيت (على قدر ΔE و ΔN)." : "التصحيح: بوديتش (على قدر طول الضلع).")}</p>` : "";
+  const notes = [...extra, ...r.notes];
+  const noteHtml = notes.length ? `<div class="notice">${notes.map(esc).join("<br>")}</div>` : "";
+  $("#tr-out").innerHTML = panel("TR", "نتيجة الترافيرس", `${stamps ? `<div>${stamps}</div>` : ""}${readouts(items)}${method}${noteHtml}${table(cols, lines)}`);
+  $("#tr-plot").innerHTML = trPlan(r);
+  $("#tr-csv").disabled = false;
+}
+// What reading a file found, shown with every result until the rows are edited.
+let trFileNotes = null;
+function runTraverse() {
+  const out = $("#tr-out");
+  let parsed = null;
+  try {
+    const t = trInput();
+    parsed = t.parsed;
+    trRender(calc("solve_traverse", t.input), trFileNotes ?? parsed.notes);
+  } catch (err) {
+    trLast = null;
+    $("#tr-plot").innerHTML = "";
+    $("#tr-csv").disabled = true;
+    if (trFileNotes && parsed) out.innerHTML = `<div class="notice">${trFileNotes.map((x, i) => (i ? esc(x) : `<b>${esc(x)}</b>`)).join("<br>")}<br>${esc(err?.message || err)}<br>${esc("كمّل أو صحّح البيانات فوق واضغط «احسب وصحّح».")}</div>`;
+    else showError(out, err);
+  }
+}
+// A spreadsheet cell as the engineer sees it: an Excel time (123:45:30) is an angle in d m s.
+function trCell(c) {
+  if (!c || c.t === "e" || c.t === "z") return null;
+  if (c.t === "n" && typeof c.w === "string" && /^\s*\d+:\d{1,2}(:\d{1,2}([.,]\d+)?)?\s*$/.test(c.w)) {
+    const t = Math.round(c.v * 86400 * 1000) / 1000;
+    const d = Math.floor(t / 3600), m = Math.floor((t - d * 3600) / 60);
+    return `${d} ${m} ${+(t - d * 3600 - m * 60).toFixed(3)}`;
+  }
+  return c.v ?? null;
+}
+function trSheetMatrix(ws) {
+  if (!ws?.["!ref"]) return [];
+  const g = XLSX.utils.decode_range(ws["!ref"]);
+  const out = [];
+  for (let i = g.s.r; i <= Math.min(g.e.r, g.s.r + 5000); i++) {
+    const row = [];
+    for (let j = g.s.c; j <= Math.min(g.e.c, g.s.c + 60); j++) row.push(trCell(ws[XLSX.utils.encode_cell({ r: i, c: j })]));
+    out.push(row);
+  }
+  return out;
+}
+// A file read: the rows go into the box (with a header line), the known points into their fields,
+// the kind of traverse follows the sheet when it shows one, and the traverse is solved.
+function trLoad(got) {
+  const { rows, notes, kind, references } = got;
+  const hasAz = rows.some((r) => "azimuth" in r), hasXY = rows.some((r) => "E" in r);
+  const text = (v, dp) => (v === null || v === undefined ? "" : typeof v === "number"
+    ? String(dp === undefined ? Number(v.toPrecision(12)) : Math.round(v * 10 ** dp) / 10 ** dp)
+    : String(v).replace(/[\t;,]+/g, " ").replace(/\s+/g, " ").trim());
+  const head = ["Station", "Angle", "Distance", ...(hasAz ? ["Azimuth"] : []), ...(hasXY ? ["E", "N"] : [])];
+  $("#tr-rows").value = [head.join(", "), ...rows.map((r) => [text(r.id), text(r.angle), text(r.distance, 4), ...(hasAz ? [text(r.azimuth)] : []), ...(hasXY ? [text(r.E), text(r.N)] : [])].join(", "))].join("\n");
+  if (trExample) for (const k of TR_FIELDS) $(`#tr-${k}`).value = "";
+  trExample = false;
+  if (kind && kind !== trKind()) { $("#tr-kind").value = kind; trShowFields(); }
+  const fill = (e, n, p) => {
+    if (p && isNum(p.E) && isNum(p.N) && !trVal(e) && !trVal(n)) { $(`#tr-${e}`).value = Number(p.E); $(`#tr-${n}`).value = Number(p.N); }
+  };
+  if (hasXY) fill("e", "n", rows[0]);
+  if (hasXY && trKind() === "link") fill("ee", "en", rows[rows.length - 1]);
+  if (references?.back) fill("be", "bn", references.back);
+  if (references?.fore) fill("fe", "fn", references.fore);
+  trFileNotes = [trRead(rows.length), ...notes];
+  runTraverse();
+}
+$("#tr-run").onclick = () => runTraverse();
+$("#tr-kind").onchange = () => {
+  trShowFields();
+  if (trExample) trFill(trKind());
+  runTraverse();
+};
+for (const k of TR_FIELDS) $(`#tr-${k}`).addEventListener("input", () => (trExample = false));
+$("#tr-rows").addEventListener("input", () => { trExample = false; trFileNotes = null; });
+bindCsv($("#tr-csv"), "traverse.csv", () => trLast);
+$("#tr-file").onchange = async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const ext = extOf(file.name);
+    let sheets;
+    if (SHEET_EXT.has(ext) || (!OFFICE_EXT.has(ext) && latin1(bytes.subarray(0, 2)) === "PK")) {
+      await needLib("xlsx");
+      const wb = XLSX.read(bytes, { type: "array" });
+      sheets = wb.SheetNames.map((s) => trSheetMatrix(wb.Sheets[s]));
+    } else {
+      const t = decodeText(bytes);
+      if (t === null) throw new Error("الملف ده مش جدول. ارفع Excel أو CSV أو TXT فيه المحطات والزوايا والمسافات.");
+      sheets = [trMatrix(t)];
+    }
+    // The first sheet that reads as a traverse.
+    let got = null, firstErr = null;
+    for (const m of sheets) {
+      try {
+        const p = E.traverseRowsFromMatrix(m, { angleFormat: $("#tr-fmt").value });
+        if (p.rows.length >= 2) { got = p; break; }
+      } catch (err) { if (!firstErr) firstErr = err; }
+    }
+    if (!got) throw firstErr ?? new Error("الملف مفيهوش جدول ترافيرس. لازم يكون فيه أعمدة: المحطة، الزاوية، المسافة.");
+    trLoad(got);
+  } catch (err) { showError($("#tr-out"), err); }
+};
+trFill("loop");
+trShowFields();
+
 // ---------- profile ----------
 let pfLast = null;
 const pfCols = [
@@ -7270,6 +8415,7 @@ runLevel();
 runProfile();
 runSection();
 runVolumes();
+runTraverse();
 I18N.start();
 
 </script>
