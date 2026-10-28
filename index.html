@@ -24,6 +24,14 @@
     if (!seen) h.classList.add("show-intro");
   })(document.documentElement);
 </script>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#090e13">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Al-Mohandes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -300,6 +308,13 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
+.install-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.install-btn[hidden] { display: none; }
+.install-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ios-tip { max-width: min(420px, calc(100vw - 32px)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 16px; background: var(--sheet); color: var(--ink); padding: 18px; }
+.ios-tip::backdrop { background: color-mix(in srgb, var(--paper) 70%, transparent); }
+.ios-tip h3 { margin: 0 0 8px; color: var(--gold); font-size: 16px; }
+.ios-tip ol { margin: 0 0 14px; padding-inline-start: 20px; line-height: 1.8; }
 /* Scientific calculator: a tab on the page edge opens a side panel; wide screens make room for it. */
 .sc-tab { position: fixed; top: 50%; inset-inline-end: 0; z-index: 39; transform: translateY(-50%); width: 42px; height: 58px; display: grid; place-items: center; cursor: pointer;
   color: var(--gold); background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); border-inline-end: 0; border-start-start-radius: 14px; border-end-start-radius: 14px; box-shadow: 0 6px 24px -10px var(--shadow); }
@@ -502,6 +517,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <span class="pill" data-ai>المساعد: <b id="ai-status">بيتصل…</b></span>
         <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
         <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
+        <button id="install-btn" class="ghost install-btn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>تثبيت التطبيق</button>
         <span id="auth" class="auth" hidden><button id="sign-in-btn" class="ghost" type="button">تسجيل الدخول</button><span id="user-btn" data-no-i18n></span></span>
       </div>
     </div>
@@ -536,6 +552,15 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="sc-hist-h"><span>السجل</span><button id="sc-clear" class="link" type="button">مسح السجل</button></div>
   <ol id="sc-hist" class="sc-hist" dir="ltr"></ol>
 </aside>
+<dialog id="ios-tip" class="ios-tip" aria-labelledby="ios-tip-h">
+  <h3 id="ios-tip-h">تثبيت التطبيق على الآيفون</h3>
+  <ol>
+    <li>افتح الموقع من Safari.</li>
+    <li>دوس زرار المشاركة ⬆︎ تحت.</li>
+    <li>اختار «إضافة إلى الشاشة الرئيسية».</li>
+  </ol>
+  <form method="dialog"><button class="primary" type="submit">تمام</button></form>
+</dialog>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" aria-label="أدوات وحسابات وتعريفات" inert>
   <div class="dr-head">
@@ -745,6 +770,12 @@ const I18N = (() => {
     "أهلاً وسهلاً بيك يا هندسة": "Welcome, engineer",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
+    "تثبيت التطبيق": "Install app",
+    "تثبيت التطبيق على الآيفون": "Install the app on iPhone",
+    "افتح الموقع من Safari.": "Open the site in Safari.",
+    "دوس زرار المشاركة ⬆︎ تحت.": "Tap the Share button ⬆︎ at the bottom.",
+    "اختار «إضافة إلى الشاشة الرئيسية».": "Choose “Add to Home Screen”.",
+    "تمام": "OK",
     "المساعد:": "Assistant:",
     "بيتصل…": "connecting…",
     "متصل": "online",
@@ -5220,6 +5251,34 @@ const CLERK_PUBLISHABLE_KEY = "";
   };
   // After the page has loaded, so sign-in never delays the tools.
   if (host) { if (document.readyState === "complete") start(); else window.addEventListener("load", start, { once: true }); }
+}
+
+// ---------- installable app (PWA) ----------
+// Only on the website build, which links the manifest; the claude.ai copy has no service worker.
+{
+  const site = /^https?:$/.test(location.protocol) && document.querySelector('link[rel="manifest"]');
+  const standalone = window.matchMedia?.("(display-mode: standalone)").matches || navigator.standalone === true;
+  const btn = $("#install-btn");
+  if (site && "serviceWorker" in navigator) {
+    const reg = () => navigator.serviceWorker.register("sw.js").catch(() => { /* offline support is optional */ });
+    if (document.readyState === "complete") reg(); else window.addEventListener("load", reg, { once: true });
+  }
+  if (site && !standalone) {
+    let prompt = null;
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); prompt = e; btn.hidden = false; });
+    window.addEventListener("appinstalled", () => { prompt = null; btn.hidden = true; });
+    // iPhone and iPad have no install prompt: show how to add it from Safari instead.
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (ios) btn.hidden = false;
+    btn.onclick = async () => {
+      if (prompt) {
+        prompt.prompt();
+        const { outcome } = await prompt.userChoice;
+        if (outcome === "accepted") btn.hidden = true;
+        prompt = null;
+      } else if (ios) $("#ios-tip").showModal();
+    };
+  }
 }
 
 // ---------- small helpers ----------
