@@ -115,17 +115,21 @@ h1, .brand-name {
   margin: 0; font-family: "Aref Ruqaa", var(--f-head); font-size: 32px; font-weight: 700; line-height: 1.15; color: var(--gold);
 }
 .brand small { display: block; color: var(--muted); font-size: 11.5px; letter-spacing: .02em; }
-.bar .grow { flex: 1; }
-.actions { position: relative; display: flex; gap: 6px; align-items: center; }
-/* Language, theme and install sit inline on wide screens and fold into a small menu on phones. */
-.prefs { display: contents; }
-.icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 12px; cursor: pointer; color: var(--gold);
-  background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); }
-.icon-btn:hover { background: color-mix(in srgb, var(--gold) 14%, var(--sheet)); }
-.icon-btn svg, .sign-in svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; }
-.prefs-btn { display: none; }
+/* Second group: the search bar, language, theme, install and sign-in. On desktop it closes the
+   top row; below desktop width it is a row of its own under the name. */
+.utility { display: flex; align-items: center; gap: 6px; margin-inline-start: auto; min-width: 0; }
+.find-bar { display: inline-flex; align-items: center; gap: 8px; width: 230px; min-width: 0; height: 34px; padding: 0 12px; border-radius: 12px; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--muted); background: var(--paper); border: 1px solid var(--line); text-align: start; }
+.find-bar:hover { color: var(--ink); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.find-bar .find-ic { flex: none; color: var(--gold); }
+.find-bar .ph { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.find-bar kbd { font-family: var(--f-num); font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+@media (pointer: coarse) { .find-bar kbd { display: none; } }
+/* Everything in the group shares the search bar's height and corners. */
+.utility .seg, .utility button.ghost { flex: none; height: 34px; }
+.utility button.ghost { border-radius: 12px; }
 .sign-in { display: inline-flex; align-items: center; gap: 6px; }
-.sign-in svg { width: 15px; height: 15px; }
+.sign-in svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; }
 .pill { font-family: var(--f-num); font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; white-space: nowrap; background: var(--sheet); }
 .pill b { color: var(--ink); font-weight: 500; }
 #ai-status.on { color: var(--fill); }
@@ -153,31 +157,30 @@ nav button[aria-selected="true"] { color: var(--ink); font-weight: 600; }
 nav button[aria-selected="true"]::after { background: var(--accent); box-shadow: 0 0 12px var(--glow); }
 nav button[aria-selected="true"] .code { background: var(--accent-soft); color: var(--accent); }
 .specs { display: flex; gap: 6px; align-items: center; flex: none; padding-bottom: 10px; }
-/* Below desktop width the pills step aside, and language, theme and sign-in fold into two icon
-   buttons, so the top row always stays on one line. */
+/* Below desktop width: the name keeps the first row beside the menu button, and the second group
+   drops to a full row under it, the search bar taking the room the buttons leave. */
 @media (max-width: 1099px) {
   .specs { display: none; }
-  .prefs-btn { display: inline-grid; }
-  .prefs { display: none; position: absolute; top: calc(100% + 8px); inset-inline-end: 0; z-index: 30; flex-direction: column; align-items: stretch; gap: 8px;
-    min-width: 190px; padding: 10px; border-radius: 14px; background: var(--sheet); border: 1px solid var(--line); box-shadow: 0 18px 40px -16px var(--shadow); }
-  .prefs.open { display: flex; }
-  .prefs .seg { justify-content: center; }
-  .prefs .seg button { flex: 1; padding-block: 6px; }
-  .prefs button.ghost { padding: 8px 12px; border-radius: 10px; text-align: center; justify-content: center; }
-  button.sign-in { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 12px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); }
-  .sign-in .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .sign-in svg { width: 20px; height: 20px; stroke-width: 2.1; }
+  .bar { flex-wrap: wrap; row-gap: 10px; }
+  .brand { flex: 1; min-width: 0; }
+  .utility { flex: 1 1 100%; margin-inline-start: 0; }
+  .find-bar { flex: 1; width: auto; height: 36px; }
+  .utility .seg, .utility button.ghost { height: 36px; }
+  /* Sign-in and install become gold icon buttons; their labels stay for screen readers. */
+  button.sign-in, button.install-btn { width: 36px; padding: 0; justify-content: center; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); }
+  .sign-in .lbl, .install-btn .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sign-in svg, .install-btn svg { width: 20px; height: 20px; stroke-width: 2.1; }
 }
-/* Phones: icon buttons that never squeeze, a name sized to the width, and the tabs as equal columns. */
+/* Phones: a larger name on its own row, taller touch targets, and the tabs as equal columns. */
 @media (max-width: 760px) {
-  .bar { gap: 4px; padding-block: 8px; flex-wrap: nowrap; }
-  .menu-btn, .icon-btn, .sign-in { flex: none; }
-  .brand { gap: 6px; margin-inline-start: 2px; }
-  .logo { width: 34px; height: 34px; }
-  .wordmark h1 { font-size: clamp(18px, 5.6vw, 24px); }
-  :root[lang="en"] .wordmark h1 { font-size: clamp(16px, 4.6vw, 24px); }
-  .icon-btn, button.sign-in { width: 34px; height: 34px; }
-  .brand small { font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { gap: 8px; row-gap: 8px; padding-block: 8px; }
+  .brand { gap: 8px; }
+  .logo { width: 40px; height: 40px; }
+  .wordmark h1 { font-size: 26px; }
+  .brand small { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .find-bar { height: 38px; padding: 0 10px; }
+  .utility .seg, .utility button.ghost { height: 38px; }
+  button.sign-in, button.install-btn { width: 38px; }
   nav { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0; overflow: visible; }
   nav button { flex-direction: column; gap: 3px; padding: 7px 2px 9px; font-size: 12px; line-height: 1.2; white-space: normal; text-align: center; }
   nav button .code { font-size: 10px; padding: 1px 5px; }
@@ -185,8 +188,6 @@ nav button[aria-selected="true"] .code { background: var(--accent-soft); color: 
   /* Repainting a blurred, see-through header over the 3D scenes is costly while scrolling on a phone. */
   header { backdrop-filter: none; -webkit-backdrop-filter: none; background: color-mix(in srgb, var(--paper) 96%, transparent); }
 }
-/* The narrowest phones: the seal makes way so the English name still fits beside the buttons. */
-@media (max-width: 340px) { .bar .logo { display: none; } }
 
 /* ---- cards ---- */
 main .wrap { padding-block: 24px 40px; display: flex; flex-direction: column; gap: 18px; }
@@ -408,7 +409,6 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .sc-hist li b { font-weight: 500; color: var(--ink); white-space: nowrap; }
 /* Site search: a palette over the page. */
 .find-ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
-@media (max-width: 760px) { #find-btn .find-ic { width: 18px; height: 18px; } }
 .find { position: fixed; inset: 0; z-index: 45; background: color-mix(in srgb, var(--paper) 70%, transparent); padding: max(56px, 8vh) 16px 16px; }
 .find[hidden] { display: none; }
 .find-box { width: min(640px, 100%); margin: 0 auto; background: var(--sheet); border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); border-radius: 16px; box-shadow: 0 20px 60px -20px var(--shadow); padding: 10px; }
@@ -456,7 +456,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 :root[lang="en"] .gl-en { display: none; }
 .gl dd { margin: 4px 0 0; font-size: 13px; color: color-mix(in srgb, var(--ink) 85%, var(--muted)); line-height: 1.65; }
 .dr-empty { color: var(--muted); font-size: 13px; text-align: center; margin-top: 24px; }
-@media (max-width: 760px) { .menu-btn { width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 0; gap: 0; } .menu-btn .burger { width: 18px; } }
+@media (max-width: 760px) { .menu-btn { flex: none; width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 0; gap: 0; } .menu-btn .burger { width: 18px; } }
 
 /* ---- welcome screen (first thing on each visit) ---- */
 .intro { display: none; }
@@ -565,19 +565,15 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div class="wrap">
     <div class="bar">
       <button id="menu-btn" class="menu-btn" type="button" aria-controls="drawer" aria-expanded="false"><span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>الأدوات</button>
-      <button id="find-btn" class="menu-btn" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>بحث</button>
       <div class="brand">
         <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
         <div class="wordmark"><h1>المهندس <span class="brand-egy-head" role="img" aria-label="المهندس بالمصري القديم: imy-r kꜣt، يعني المشرف على الأعمال" data-no-i18n>𓅓𓂋𓂓𓏏𓀋</span></h1><small>المهندس كيو اس</small></div>
       </div>
-      <span class="grow"></span>
-      <div class="actions">
-        <button id="prefs-btn" class="icon-btn prefs-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="prefs" aria-label="الإعدادات" title="الإعدادات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg></button>
-        <div id="prefs" class="prefs">
-          <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
-          <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
-          <button id="install-btn" class="ghost install-btn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>تثبيت التطبيق</button>
-        </div>
+      <div class="utility">
+        <button id="find-btn" class="find-bar" type="button" aria-controls="find" aria-label="بحث في الموقع"><svg class="find-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span class="ph">ابحث في الموقع…</span><kbd dir="ltr" data-no-i18n>Ctrl K</kbd></button>
+        <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">ع</button><button type="button" data-lang="en">EN</button></div>
+        <button id="theme-btn" class="ghost" type="button">☀ فاتح</button>
+        <button id="install-btn" class="ghost install-btn" type="button" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg><span class="lbl">تثبيت التطبيق</span></button>
         <span id="auth" class="auth"><button id="sign-in-btn" class="ghost sign-in" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.2" r="4.2"/><path d="M3.8 21c1-4.3 4.3-6.6 8.2-6.6s7.2 2.3 8.2 6.6"/></svg><span class="lbl">تسجيل الدخول</span></button><span id="user-btn" data-no-i18n></span></span>
       </div>
     </div>
@@ -837,7 +833,7 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
-    "الإعدادات": "Settings",
+    "ابحث في الموقع…": "Search the site…",
     "تثبيت التطبيق": "Install app",
     "حمّل التطبيق": "Get the app",
     "افتح الملف اللي اتحمل علشان تثبّت التطبيق.": "Open the downloaded file to install the app.",
@@ -5446,22 +5442,6 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
     };
     paint();
   }
-}
-
-// ---------- header preferences: a small menu on phones, inline on wider screens ----------
-{
-  const btn = $("#prefs-btn");
-  const box = $("#prefs");
-  const setPrefs = (open, fromBack = false) => {
-    if (open === box.classList.contains("open")) return;
-    box.classList.toggle("open", open);
-    btn.setAttribute("aria-expanded", String(open));
-    if (open) Back.open("prefs", () => setPrefs(false, true));
-    else if (!fromBack) Back.close("prefs");
-  };
-  btn.onclick = (e) => { e.stopPropagation(); setPrefs(!box.classList.contains("open")); };
-  document.addEventListener("click", (e) => { if (!box.contains(e.target)) setPrefs(false); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && box.classList.contains("open")) { setPrefs(false); btn.focus(); } });
 }
 
 // ---------- small helpers ----------
