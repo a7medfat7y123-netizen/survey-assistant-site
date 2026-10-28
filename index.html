@@ -182,6 +182,8 @@ nav button[aria-selected="true"] .code { background: var(--accent-soft); color: 
   nav button { flex-direction: column; gap: 3px; padding: 7px 2px 9px; font-size: 12px; line-height: 1.2; white-space: normal; text-align: center; }
   nav button .code { font-size: 10px; padding: 1px 5px; }
   nav button::after { inset-inline: 16%; }
+  /* Repainting a blurred, see-through header over the 3D scenes is costly while scrolling on a phone. */
+  header { backdrop-filter: none; -webkit-backdrop-filter: none; background: color-mix(in srgb, var(--paper) 96%, transparent); }
 }
 /* The narrowest phones: the seal makes way so the English name still fits beside the buttons. */
 @media (max-width: 340px) { .bar .logo { display: none; } }
@@ -1224,14 +1226,6 @@ const I18N = (() => {
 
 I18N.start();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dxf-parser@1.1.2/dist/dxf-parser.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 const Engine = (() => {
 "use strict";
@@ -3935,12 +3929,27 @@ return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatri
 "use strict";
 
 const V3 = (() => {
+  // three.js loads in the background on first use, so it never holds up the first screen.
+  // Scenes asked for before it arrives wait in `waiting` and mount when it does.
+  const THREE_URLS = ["https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js", "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"];
+  let threeLoad = null;
+  const loadScript = (src) => new Promise((ok, bad) => {
+    const tag = document.createElement("script");
+    tag.src = src;
+    tag.onload = ok;
+    tag.onerror = bad;
+    document.head.append(tag);
+  });
+  const loadThree = () => (threeLoad ??= THREE_URLS.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve()));
+  const threeReady = () => typeof THREE !== "undefined" && Boolean(THREE.OrbitControls);
+  const waiting = new Map(); // host -> [build, opts]
+
   let webgl = null;
   const supported = () => {
     if (webgl === null) {
       try {
         const c = document.createElement("canvas");
-        webgl = Boolean(typeof THREE !== "undefined" && THREE.OrbitControls && (c.getContext("webgl2") || c.getContext("webgl")));
+        webgl = Boolean(c.getContext("webgl2") || c.getContext("webgl"));
       } catch { webgl = false; }
     }
     return webgl;
@@ -4020,13 +4029,27 @@ const V3 = (() => {
    * Mount a scene into `host`. build(scene, api) adds objects and may return
    * { view: [x,y,z] direction to look from, fit: 0..1 tighter/looser }.
    */
-  function mount(host, build, { autoRotate = false, height, interactive = true, flyIn = false } = {}) {
+  /** Returns false when there is no WebGL; opts.fail runs if three.js then fails to load. */
+  function mount(host, build, opts = {}) {
     unmount(host);
     if (!supported()) return false;
+    if (threeReady()) return mountNow(host, build, opts);
+    waiting.set(host, [build, opts]);
+    loadThree().then(() => {
+      for (const [h, [b, o]] of waiting) if (h.isConnected) mountNow(h, b, o);
+      waiting.clear();
+    }, () => {
+      for (const [, [, o]] of waiting) o.fail?.();
+      waiting.clear();
+    });
+    return true;
+  }
+
+  function mountNow(host, build, { autoRotate = false, height, interactive = true, flyIn = false } = {}) {
     // Phones have dense screens and weak GPUs: fewer pixels and no MSAA there.
     const coarse = window.matchMedia?.("(pointer: coarse)").matches;
-    const renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: !coarse, alpha: true, powerPreference: coarse ? "low-power" : "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 2));
     renderer.outputEncoding = THREE.sRGBEncoding;
     const canvas = renderer.domElement;
     canvas.className = "v3-canvas";
@@ -4159,6 +4182,7 @@ const V3 = (() => {
   }
 
   function unmount(host) {
+    waiting.delete(host);
     if (host?._v3) { host._v3.dispose(); host._v3 = null; }
     live.delete(host);
   }
@@ -5229,6 +5253,56 @@ if (!inViewer) {
 document.querySelectorAll(".dl").forEach((b) => (b.hidden = !downloads));
 $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
 
+// ---------- Back button ----------
+// Each step is a history entry: a tab (with its own #link), an open panel, a calculator opened from
+// the tools menu. The phone's Back button then steps back through them instead of leaving the app.
+const Back = (() => {
+  const on = !inViewer; // inside the claude.ai viewer the frame's history belongs to the host page
+  const layers = []; // open panels, newest last: { key, close }
+  let ours = null; // set while we step back ourselves: true, or what to run once we land
+  let tab = null; // the tab on screen
+  let showTabFromBack = () => {};
+  const remember = (st) => history.replaceState({ ...history.state, ...st }, "", tab ? `#${tab}` : undefined);
+  window.addEventListener("popstate", (e) => {
+    if (ours) {
+      const then = ours;
+      ours = null;
+      remember({ tab }); // the entry we landed on now names the tab that is on screen
+      if (then !== true) then();
+      return;
+    }
+    const top = layers.pop();
+    if (top) top.close();
+    else if (e.state?.tab && e.state.tab !== tab) showTabFromBack(e.state.tab);
+  });
+  return {
+    /** A panel opened; Back will call close(), which must not call Back.close itself. */
+    open(key, close) {
+      if (!on) return;
+      layers.push({ key, close });
+      history.pushState({ tab, layer: key }, "");
+    },
+    /** The page closed panel `key` itself: drop it, and any panel opened over it, from history. */
+    close(key, then) {
+      const i = on ? layers.map((l) => l.key).lastIndexOf(key) : -1;
+      if (i < 0) { then?.(); return; }
+      const steps = layers.length - i;
+      layers.length = i;
+      ours = then || true;
+      history.go(-steps);
+    },
+    /** The tab on screen changed. With a panel open the step replaces that entry instead of stacking on it. */
+    tab(name, mode) {
+      const same = name === tab;
+      tab = name;
+      if (!on || mode === "none") return;
+      if (mode === "replace" || layers.length) remember({ tab: name });
+      else if (!same) history.pushState({ tab: name }, "", `#${name}`);
+    },
+    onTab(fn) { showTabFromBack = fn; },
+  };
+})();
+
 // ---------- welcome screen (first thing on each visit) ----------
 {
   const close = () => {
@@ -5242,7 +5316,8 @@ $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
   if (document.documentElement.classList.contains("show-intro")) {
     // The same 3D site as the page's welcome, full screen behind the title.
     const coarse = window.matchMedia?.("(pointer: coarse)").matches;
-    if (!V3.mount($("#intro-3d"), siteScene(), { autoRotate: true, interactive: !coarse, flyIn: true })) $(".finder").hidden = true;
+    const noScene = () => { $(".finder").hidden = true; };
+    if (!V3.mount($("#intro-3d"), siteScene(), { autoRotate: true, interactive: !coarse, flyIn: true, fail: noScene })) noScene();
     $("#intro-go").focus();
     // Eyepiece readout: the virtual camera's bearing, zenith angle and slope distance to its target.
     const dms = (deg) => {
@@ -5250,8 +5325,9 @@ $("#tb-date").textContent = new Date().toLocaleDateString("en-GB");
       return `${Math.floor(s / 3600)}°${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}′${String(s % 60).padStart(2, "0")}″`;
     };
     const hud = () => {
+      if (!document.documentElement.classList.contains("show-intro")) return;
       const v = $("#intro-3d")._v3;
-      if (!v || !document.documentElement.classList.contains("show-intro")) return;
+      if (!v) { setTimeout(hud, 250); return; } // the scene is still loading
       const dx = v.target.x - v.camera.position.x, dy = v.target.y - v.camera.position.y, dz = v.target.z - v.camera.position.z;
       const flat = Math.hypot(dx, dz);
       $("#hud-hz").textContent = dms(((Math.atan2(dx, -dz) * 180) / Math.PI + 360) % 360);
@@ -5376,7 +5452,13 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
 {
   const btn = $("#prefs-btn");
   const box = $("#prefs");
-  const setPrefs = (open) => { box.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); };
+  const setPrefs = (open, fromBack = false) => {
+    if (open === box.classList.contains("open")) return;
+    box.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    if (open) Back.open("prefs", () => setPrefs(false, true));
+    else if (!fromBack) Back.close("prefs");
+  };
   btn.onclick = (e) => { e.stopPropagation(); setPrefs(!box.classList.contains("open")); };
   document.addEventListener("click", (e) => { if (!box.contains(e.target)) setPrefs(false); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && box.classList.contains("open")) { setPrefs(false); btn.focus(); } });
@@ -5667,11 +5749,14 @@ function markdown(src) {
 }
 
 // ---------- tabs ----------
-function showTab(name) {
+/** step: "push" (a step Back returns from), "replace" (the first tab on load) or "none" (Back itself). */
+function showTab(name, step = "push") {
   document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   document.querySelectorAll(".tab").forEach((t) => (t.hidden = t.id !== `tab-${name}`));
   try { localStorage.setItem("tab", name); } catch { /* storage blocked */ }
+  Back.tab(name, step);
 }
+Back.onTab((name) => { if ($(`#tab-${name}`)) showTab(name, "none"); });
 document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
 
 // ---------- welcome card ----------
@@ -5687,9 +5772,11 @@ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show
   try { hidden = localStorage.getItem("welcome-hidden") === "1"; } catch { /* ignore */ }
   $("#welcome").hidden = hidden;
   $("#welcome-open").hidden = !hidden;
-  // On touch screens the welcome scene only turns by itself, so swiping still scrolls the page.
+  // On touch screens the welcome scene stays still: a turning scene redraws every frame, which is
+  // the heaviest thing a phone does here. Swiping over it still scrolls the page.
   const coarse = window.matchMedia?.("(pointer: coarse)").matches;
-  if (!V3.mount($("#hero-3d"), siteScene(), { autoRotate: true, interactive: !coarse })) $("#hero-3d").classList.add("flat");
+  const flat = () => $("#hero-3d").classList.add("flat");
+  if (!V3.mount($("#hero-3d"), siteScene(), { autoRotate: !coarse, interactive: !coarse, fail: flat })) flat();
   $("#welcome-close").onclick = () => setWelcome(false);
   $("#welcome-open").onclick = () => { setWelcome(true); $("#welcome").scrollIntoView({ block: "start" }); };
   document.querySelectorAll("#welcome [data-go]").forEach((b) => {
@@ -5701,10 +5788,11 @@ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show
   });
 }
 {
-  let t = null;
-  try { t = localStorage.getItem("tab"); } catch { /* ignore */ }
+  // A #link to a tab opens that tab; otherwise the last one used.
+  let t = location.hash.slice(1);
+  if (!t || !$(`#tab-${t}`)) { try { t = localStorage.getItem("tab"); } catch { t = null; } }
   if (!inViewer && (!t || t === "chat")) t = "level";
-  if (t && $(`#tab-${t}`)) showTab(t);
+  if (t && $(`#tab-${t}`)) showTab(t, "replace");
 }
 
 // ---------- reading files in the browser ----------
@@ -5789,7 +5877,31 @@ async function tiles(src, w, h, label, notes) {
   return out;
 }
 
+// The file readers' libraries load the first time a file needs them, not with the page: together
+// they are most of what a phone would otherwise download and parse before showing anything.
+const FILE_LIBS = {
+  xlsx: ["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"],
+  dxf: ["https://cdn.jsdelivr.net/npm/dxf-parser@1.1.2/dist/dxf-parser.js"],
+  fflate: ["https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"],
+  shapefile: ["https://cdn.jsdelivr.net/npm/shapefile@0.6.6/dist/shapefile.min.js"],
+  // The worker script runs on the page itself, as it always has here.
+  pdf: ["https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"],
+};
+const libLoads = {};
+function needLib(name) {
+  const one = (src) => new Promise((ok, bad) => {
+    const tag = document.createElement("script");
+    tag.src = src;
+    tag.onload = ok;
+    tag.onerror = () => bad(new Error("ما قدرتش أحمّل أداة قراءة الملف. اتأكد من النت وجرّب تاني."));
+    document.head.append(tag);
+  });
+  return (libLoads[name] ??= FILE_LIBS[name].reduce((p, src) => p.then(() => one(src)), Promise.resolve())
+    .catch((err) => { delete libLoads[name]; throw err; }));
+}
+
 async function readPdf(bytes, name) {
+  await needLib("pdf");
   const pdf = await pdfjsLib.getDocument({ data: bytes, isEvalSupported: false }).promise;
   const notes = [];
   const n = Math.min(pdf.numPages, MAX_PDF_PAGES);
@@ -5898,6 +6010,7 @@ function officeText(bytes, ext) {
 }
 
 async function shapefileResult(shp, dbf, name) {
+  await needLib("shapefile");
   const gj = await shapefile.read(shp.slice().buffer, dbf ? dbf.slice().buffer : undefined);
   const t = E.geojsonToTable(gj, name);
   return { kind: "table", tables: [t], notes: t.notes };
@@ -5906,16 +6019,23 @@ async function shapefileResult(shp, dbf, name) {
 async function parseOne(name, ext, head, bytes) {
   if (ext === ".pdf" || head.startsWith("%PDF")) return readPdf(bytes, name);
   if (ext === ".dwg" || /^AC10\d\d/.test(head)) return cadResult(await readDwg(bytes), name);
-  if (ext === ".dxf") return cadResult(E.modelFromDxf(new DxfParser().parseSync(decodeText(bytes) ?? "")), name);
+  if (ext === ".dxf") {
+    await needLib("dxf");
+    return cadResult(E.modelFromDxf(new DxfParser().parseSync(decodeText(bytes) ?? "")), name);
+  }
   if (UNSUPPORTED[ext]) throw new Error(UNSUPPORTED[ext]);
   if (IMAGE_EXT.has(ext)) return readImage(bytes, name, ext);
   if (SHEET_EXT.has(ext)) {
+    await needLib("xlsx");
     const wb = XLSX.read(bytes, { type: "array", cellDates: true });
     const tables = wb.SheetNames.map((s) => E.tableFromMatrix(XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false }), s)).filter((t) => t.rows.length);
     if (!tables.length) throw new Error("ملف الإكسل فاضي.");
     return { kind: "table", tables };
   }
-  if (OFFICE_EXT.has(ext)) return textResult(officeText(bytes, ext));
+  if (OFFICE_EXT.has(ext)) {
+    await needLib("fflate");
+    return textResult(officeText(bytes, ext));
+  }
   if (ext === ".shp") return shapefileResult(bytes, null, name);
 
   const text = decodeText(bytes);
@@ -5955,6 +6075,7 @@ async function ingestBytes(name, bytes, depth = 0) {
   const head = latin1(bytes.subarray(0, 8));
   if (ext === ".zip" || ext === ".kmz" || (head.startsWith("PK") && !OFFICE_EXT.has(ext) && !SHEET_EXT.has(ext))) {
     if (depth > 2) throw new Error("ملفات مضغوطة جوه بعض كتير.");
+    await needLib("fflate");
     let total = 0;
     let count = 0;
     const z = fflate.unzipSync(bytes, {
@@ -6055,7 +6176,7 @@ const SYSTEM = `أنت "المهندس": مهندس مساحة مساعد لمه
 
 لما النتيجة تأثر على السلامة أو كميات الصرف أو التوقيع، أضف سطر بإيه اللي لازم يتراجع في الموقع قبل التنفيذ.`;
 
-const history = [];
+const chatLog = [];
 let pending = [];
 let lastImages = [];
 let busy = false;
@@ -6127,7 +6248,7 @@ $("#chat-form").onsubmit = async (e) => {
   if (lastImages.length > images.length && maxImages) parts.push(`ملحوظة: اتبعت أول ${images.length} صورة بس من ${lastImages.length}.`);
   if (images.length) parts.push(`الصور المرفقة بالترتيب:\n${images.map((im, i) => `${i + 1}. ${im.label}`).join("\n")}`);
   parts.push(text || "راجع الملفات المرفقة وقولي ملاحظاتك.");
-  history.push({ role: "user", content: parts.join("\n\n") });
+  chatLog.push({ role: "user", content: parts.join("\n\n") });
 
   const wait = addMsg("assistant", `<span class="typing">بيراجع ويحسب…</span>`);
   const bubble = wait.querySelector(".bubble");
@@ -6150,7 +6271,7 @@ $("#chat-form").onsubmit = async (e) => {
   busy = true;
   $("#chat-send").disabled = true;
   try {
-    const input = history.map((m, i) => (i === 0 ? { role: "user", content: `${SYSTEM}\n\n---\n\n${m.content}` } : m));
+    const input = chatLog.map((m, i) => (i === 0 ? { role: "user", content: `${SYSTEM}\n\n---\n\n${m.content}` } : m));
     const res = await sample(input, {
       tools,
       images: images.map((im) => im.blob),
@@ -6158,13 +6279,13 @@ $("#chat-form").onsubmit = async (e) => {
       cache: false,
       onText: ({ text: t }) => { bubble.innerHTML = markdown(t); },
     });
-    history.push({ role: "assistant", content: res.text });
+    chatLog.push({ role: "assistant", content: res.text });
     const trailHtml = trail.length
       ? `<details class="trail"><summary>خطوات الحساب (${trail.length})</summary>${trail.map((t) => `<div><b>${esc(t.tool)}</b>${t.error ? ` — <span class="bad">${esc(t.error)}</span>` : ""}<pre>${esc(JSON.stringify(t.input, null, 1))}</pre>${t.result ? `<pre>${esc(JSON.stringify(shrink(t.result), null, 1))}</pre>` : ""}</div>`).join("")}</details>`
       : "";
     bubble.innerHTML = markdown(res.text || "(مفيش رد)") + (res.truncated ? `<div class="notice">الرد اتقطع لأنه طويل. اطلب جزء أصغر.</div>` : "") + trailHtml;
   } catch (err) {
-    history.pop();
+    chatLog.pop();
     const msg = err?.code === "not_granted" ? "ما اديتش الصفحة إذن تكلم Claude. افتح Permissions من قايمة الصفحة واسمح، وجرب تاني."
       : err?.code === "rate_limited" ? "طلبات كتير ورا بعض. استنى دقيقة وجرب تاني."
       : err?.message || "حصل خطأ.";
@@ -6178,7 +6299,7 @@ $("#chat-input").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#chat-form").requestSubmit(); }
 });
 $("#chat-reset").onclick = () => {
-  history.length = 0;
+  chatLog.length = 0;
   lastImages = [];
   log.querySelectorAll(".msg").forEach((m, i) => i > 0 && m.remove());
 };
@@ -6488,9 +6609,11 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
   body.addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b) return;
+    if (!b.dataset.calc && !b.dataset.gl) return;
+    // From the menu's front page, a calculator or the definitions is a step Back returns from.
+    if (view.type === "home") Back.open("drawer-view", backHome);
     if (b.dataset.calc) { view = { type: "calc", id: b.dataset.calc }; search.value = ""; }
-    else if (b.dataset.gl) view = { type: "glossary", field: b.dataset.gl };
-    else return;
+    else view = { type: "glossary", field: b.dataset.gl };
     render();
     body.scrollTop = 0;
   });
@@ -6503,10 +6626,14 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     else compute();
   });
   search.addEventListener("input", render);
-  $("#dr-back").onclick = () => { view = { type: "home" }; render(); };
+  function backHome() { view = { type: "home" }; render(); }
+  $("#dr-back").onclick = () => { backHome(); Back.close("drawer-view"); };
 
   const drawer = $("#drawer");
-  const setOpen = (open) => {
+  const setOpen = (open, fromBack = false) => {
+    if (open === document.documentElement.classList.contains("drawer-open")) return;
+    if (open) Back.open("drawer", () => setOpen(false, true));
+    else if (!fromBack) Back.close("drawer");
     document.documentElement.classList.toggle("drawer-open", open);
     drawer.inert = !open;
     $("#menu-btn").setAttribute("aria-expanded", String(open));
@@ -6651,7 +6778,10 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
   $("#sc-clear").onclick = () => { hist = []; store("sc-hist", "[]"); paintHist(); };
   document.querySelectorAll("[data-angle]").forEach((b) => (b.onclick = () => { angle = b.dataset.angle; store("sc-angle", angle); paintKeys(); preview(); }));
 
-  const setSci = (open) => {
+  const setSci = (open, fromBack = false) => {
+    if (open === !panel.hidden) return;
+    if (open) Back.open("sci", () => setSci(false, true));
+    else if (!fromBack) Back.close("sci");
     panel.hidden = !open;
     document.documentElement.classList.toggle("sci-open", open);
     $("#sc-tab").setAttribute("aria-expanded", String(open));
@@ -6724,13 +6854,16 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     li.scrollIntoView({ block: "nearest" });
     input.setAttribute("aria-activedescendant", li.id);
   };
-  const setFind = (open) => {
+  const setFind = (open, fromBack = false, then) => {
+    if (open === !box.hidden) return;
+    if (open) Back.open("find", () => setFind(false, true));
+    else if (!fromBack) Back.close("find", then);
     box.hidden = !open;
     document.documentElement.classList.toggle("find-open", open);
     if (open) { items = index(); input.value = ""; paint(); input.focus(); }
     else $("#find-btn").focus();
   };
-  const pick = (i) => { const it = shown[i]; if (!it) return; setFind(false); it.go(); };
+  const pick = (i) => { const it = shown[i]; if (it) setFind(false, false, () => it.go()); };
 
   $("#find-btn").onclick = () => setFind(true);
   input.addEventListener("input", paint);
