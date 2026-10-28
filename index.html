@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%84%BF%F0%93%8E%9B%F0%93%85%93%F0%93%82%A7%F0%93%86%91%F0%93%8F%8F%F0%93%8E%9B%F0%93%87%8C%F0%93%80%80&display=swap">
 <script>
   // Before first paint: saved theme and language, and the welcome screen once per visit.
   (function (h) {
@@ -309,45 +308,6 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   transform: translateX(105%); transition: transform .3s cubic-bezier(.2, .8, .2, 1); visibility: hidden; }
 :root[dir="ltr"] .drawer { transform: translateX(-105%); }
 .i18n-wait body { visibility: hidden; }
-/* The author's name in hieroglyphs, in a cartouche: an oval ring with a bar at the end of the reading. */
-.cartouche { display: inline-flex; align-items: center; position: relative; direction: ltr; unicode-bidi: isolate; padding: .14em .55em .14em .5em; margin-inline-end: .35em;
-  border: 2px solid currentColor; border-radius: 999px; color: var(--gold); font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: 1em; font-weight: 400; line-height: 1.1; letter-spacing: .02em; white-space: nowrap; }
-.cartouche::after { content: ""; position: absolute; right: -.4em; top: 14%; bottom: 14%; width: 2px; border-radius: 2px; background: currentColor; }
-.sig-name { font-family: var(--f-head); font-weight: 800; color: var(--ink); white-space: nowrap; }
-/* Name columns on both sides: the cartouche upright and read top to bottom, the name beside it. */
-.cartouche.v { flex-direction: column; padding: .42em .26em .48em; }
-.cartouche.v i { display: block; font-style: normal; line-height: 1.04; text-align: center; }
-.cartouche.v::after { top: auto; bottom: -.42em; left: 18%; right: 18%; width: auto; height: 2px; }
-.sig-rail { position: fixed; z-index: 2; display: flex; align-items: center; gap: 10px; pointer-events: none; }
-.sig-rail .sig-name { writing-mode: vertical-rl; text-shadow: 0 1px 12px var(--paper); }
-.sig-rail-l .sig-name { transform: rotate(180deg); }
-.intro .sig-rail { top: 130px; }
-.intro .sig-rail-l { left: 12px; }
-.intro .sig-rail-r { right: 12px; }
-.intro .sig-rail .cartouche { font-size: 26px; border-width: 2.5px; background: color-mix(in srgb, var(--paper) 55%, transparent); }
-.intro .sig-rail .sig-name { font-size: 15px; }
-@media (max-width: 699px) and (max-height: 740px) { .intro .sig-rail { top: 126px; } .intro .sig-rail .cartouche { font-size: 19px; } .intro .sig-rail .sig-name { font-size: 13px; } }
-@media (min-width: 700px) {
-  .intro .sig-rail { top: 50%; transform: translateY(-50%); }
-  .intro .sig-rail-l { left: 28px; }
-  .intro .sig-rail-r { right: 28px; }
-  .intro .sig-rail .cartouche { font-size: clamp(30px, 4.4vh, 44px); border-width: 3px; }
-  .intro .sig-rail .sig-name { font-size: clamp(18px, 2.6vh, 26px); }
-}
-/* Main page: centred in the margins beside the 1180px column, when the screen is wide enough. */
-.main-rail { display: none; z-index: 5; top: 50%; transform: translate(-50%, -50%); }
-.main-rail.sig-rail-l { left: calc((100vw - 1180px) / 4); }
-.main-rail.sig-rail-r { left: calc(100vw - (100vw - 1180px) / 4); }
-.main-rail .cartouche { font-size: 24px; background: var(--sheet); }
-.main-rail .sig-name { font-size: 16px; }
-@media (min-width: 1380px) { .main-rail { display: flex; } :root:not(.sci-open) .sig-bar { display: none; } }
-:root.sci-open .main-rail, .show-intro .main-rail { display: none; }
-.sig-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 20px; margin: 2px 0 14px; padding: 12px 16px; border-radius: var(--radius); border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--line)); background: var(--sheet); }
-.sig-bar .cartouche { font-size: clamp(28px, 7vw, 40px); border-width: 2.5px; padding: .08em .45em; }
-.sig-bar .sig-name { font-size: clamp(17px, 4.2vw, 22px); }
-.sig-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.sig-foot .cartouche { font-size: 24px; }
-.sig-foot .sig-name { font-size: 15px; }
 .install-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
 .install-btn[hidden] { display: none; }
 .install-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -530,8 +490,6 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   </div>
   <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
   <a id="get-app" class="get-app" href="app/al-mohandes.apk" download="Al-Mohandes.apk" type="application/vnd.android.package-archive" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7v7M9.2 11.5 12 14.2l2.8-2.7M10.5 18.5h3"/></svg><span>حمّل التطبيق</span></a>
-  <div class="sig-rail sig-rail-l" dir="ltr" aria-hidden="true"><span class="cartouche v" data-no-i18n><i>𓄿</i><i>𓎛</i><i>𓅓</i><i>𓂧</i><i>𓆑</i><i>𓏏</i><i>𓎛</i><i>𓇌</i><i>𓀀</i></span><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b></div>
-  <div class="sig-rail sig-rail-r" dir="ltr"><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b><span class="cartouche v" role="img" aria-label="المهندس أحمد فتحي" data-no-i18n><i>𓄿</i><i>𓎛</i><i>𓅓</i><i>𓂧</i><i>𓆑</i><i>𓏏</i><i>𓎛</i><i>𓇌</i><i>𓀀</i></span></div>
   <p id="get-app-done" class="get-app-done" role="status" hidden>افتح الملف اللي اتحمل علشان تثبّت التطبيق.</p>
   <div class="intro-card">
     <div class="intro-top">
@@ -616,10 +574,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   <div id="dr-body" class="dr-body"></div>
 </aside>
 
-<div class="sig-rail sig-rail-l main-rail" dir="ltr" aria-hidden="true"><span class="cartouche v" data-no-i18n><i>𓄿</i><i>𓎛</i><i>𓅓</i><i>𓂧</i><i>𓆑</i><i>𓏏</i><i>𓎛</i><i>𓇌</i><i>𓀀</i></span><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b></div>
-<div class="sig-rail sig-rail-r main-rail" dir="ltr"><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b><span class="cartouche v" role="img" aria-label="المهندس أحمد فتحي" data-no-i18n><i>𓄿</i><i>𓎛</i><i>𓅓</i><i>𓂧</i><i>𓆑</i><i>𓏏</i><i>𓎛</i><i>𓇌</i><i>𓀀</i></span></div>
 <main><div class="wrap">
-  <div class="sig-bar"><span class="cartouche" role="img" aria-label="المهندس أحمد فتحي" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b></div>
   <section id="welcome" class="panel hero" aria-labelledby="greet">
     <div id="hero-3d" class="hero-3d" role="img" aria-label="موقع عمل ثلاثي الأبعاد: جهاز توتال ستيشن بيرصد بريزم على جسر طريق، ومبنى تحت الإنشاء، وونش برجي"></div>
     <div class="hero-body">
@@ -797,7 +752,6 @@ BM2,,,0.900</textarea>
     <dl><dt>الإحداثيات</dt><dd>UTM أو محلي حسب المشروع</dd></dl>
     <dl><dt>المناسيب</dt><dd>من روبير المشروع · لأقرب 0.001 م</dd></dl>
     <dl><dt>الحسابات</dt><dd>محرك ثابت متختبر</dd></dl>
-    <dl><dt>تصميم وتطوير</dt><dd class="sig-foot"><span class="cartouche" role="img" aria-label="المهندس أحمد فتحي" data-no-i18n>𓄿𓎛𓅓𓂧𓆑𓏏𓎛𓇌𓀀</span><b class="sig-name" lang="ar" dir="rtl" data-no-i18n>المهندس أحمد فتحي</b></dd></dl>
     <dl><dt>الإصدار</dt><dd class="mono">SURVEY-ASSIST · REV E · 3D</dd></dl>
     <div class="note"><span>الملفات بتتقري جوه المتصفح بتاعك. الرسومات الـ 3D للتوضيح، والأرقام المظبوطة في الجداول ورسومات الـ 2D. أي نتيجة هتتبني عليها قرارات (توقيع، كميات للصرف، ميول حرجة) لازم تتراجع في الموقع.</span><button id="welcome-open" class="link" type="button" hidden>رسالة الترحيب</button></div>
   </footer>
@@ -817,7 +771,6 @@ const I18N = (() => {
     "الأدوات": "Tools",
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
-    "تصميم وتطوير": "Design and development",
     "تثبيت التطبيق": "Install app",
     "حمّل التطبيق": "Get the app",
     "افتح الملف اللي اتحمل علشان تثبّت التطبيق.": "Open the downloaded file to install the app.",
