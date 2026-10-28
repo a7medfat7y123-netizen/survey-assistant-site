@@ -414,6 +414,14 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
               linear-gradient(to top, var(--paper) 0%, color-mix(in srgb, var(--paper) 80%, transparent) 34%, transparent 62%),
               radial-gradient(140% 100% at 50% 40%, transparent 55%, color-mix(in srgb, var(--paper) 70%, transparent) 100%); }
 .intro .lang-seg { position: fixed; top: 22px; inset-inline-end: 22px; z-index: 2; }
+/* "Get the app", under the language switch on the welcome screen. */
+.get-app { position: fixed; top: 74px; right: 22px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; text-decoration: none;
+  font-weight: 600; font-size: 14px; color: #1d1404; background: var(--gold); border: 1px solid var(--gold); box-shadow: 0 8px 26px -10px var(--shadow); }
+.get-app:hover { filter: brightness(1.06); }
+.get-app[hidden] { display: none; }
+.get-app svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.get-app-done { position: fixed; top: 122px; right: 22px; z-index: 2; max-width: 240px; margin: 0; padding: 8px 12px; border-radius: 12px; font-size: 12.5px; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); }
+.get-app-done[hidden] { display: none; }
 /* Total station eyepiece: frame corners and a live readout of the camera's angles. */
 .finder { position: fixed; inset: 10px; pointer-events: none; z-index: 1; }
 .finder .corner { position: absolute; width: 30px; height: 30px; border: 0 solid color-mix(in srgb, var(--gold) 70%, transparent); animation: fade .6s 1.2s both; }
@@ -481,6 +489,8 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <div class="hud"><p class="hud-head"><i></i>TS · LIVE</p><p><b>HZ</b><span id="hud-hz">—</span></p><p><b>V</b><span id="hud-v">—</span></p><p><b>SD</b><span id="hud-sd">—</span></p></div>
   </div>
   <div class="seg lang-seg" role="group" aria-label="اللغة" data-no-i18n><button type="button" data-lang="ar">العربية</button><button type="button" data-lang="en">English</button></div>
+  <a id="get-app" class="get-app" href="app/al-mohandes.apk" download="Al-Mohandes.apk" type="application/vnd.android.package-archive" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7v7M9.2 11.5 12 14.2l2.8-2.7M10.5 18.5h3"/></svg><span>حمّل التطبيق</span></a>
+  <p id="get-app-done" class="get-app-done" role="status" hidden>افتح الملف اللي اتحمل علشان تثبّت التطبيق.</p>
   <div class="intro-card">
     <div class="intro-top">
       <div class="logo" aria-hidden="true"><svg viewBox="0 0 96 96" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="48" cy="48" r="45" stroke-width="2.4"/><circle cx="48" cy="48" r="37" stroke-width="1.2" stroke-dasharray="1.5 3"/><path d="M48 20v4M48 24 36 70M48 24l12 46" stroke-width="3.4"/><circle cx="48" cy="24" r="3.8" fill="currentColor" stroke="none"/><path d="M28 58A24 24 0 0 0 68 58" stroke-width="1.8"/><path d="M30 74h36M30 74V64" stroke-width="2.2"/><path d="M33 74l3-3M38 74l3-3M43 74l3-3M48 74l3-3M53 74l3-3M58 74l3-3" stroke-width="1.1"/><text x="48" y="89.4" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="5" fill="currentColor" stroke="none" letter-spacing=".5">EST · ENG</text></svg></div>
@@ -762,6 +772,8 @@ const I18N = (() => {
     "دخول": "Enter",
     "تسجيل الدخول": "Sign in",
     "تثبيت التطبيق": "Install app",
+    "حمّل التطبيق": "Get the app",
+    "افتح الملف اللي اتحمل علشان تثبّت التطبيق.": "Open the downloaded file to install the app.",
     "تثبيت التطبيق على الآيفون": "Install the app on iPhone",
     "افتح الموقع من Safari.": "Open the site in Safari.",
     "دوس زرار المشاركة ⬆︎ تحت.": "Tap the Share button ⬆︎ at the bottom.",
@@ -5256,19 +5268,32 @@ const CLERK_PUBLISHABLE_KEY = "";
   }
   if (site && !standalone) {
     let prompt = null;
-    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); prompt = e; btn.hidden = false; });
-    window.addEventListener("appinstalled", () => { prompt = null; btn.hidden = true; });
     // iPhone and iPad have no install prompt: show how to add it from Safari instead.
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    if (ios) btn.hidden = false;
-    btn.onclick = async () => {
+    const android = /android/i.test(navigator.userAgent);
+    // The welcome screen's "Get the app": the APK on Android, the install prompt or iPhone steps elsewhere.
+    const getApp = $("#get-app");
+    const paint = () => {
+      btn.hidden = !(prompt || ios);
+      getApp.hidden = !(android || prompt || ios);
+    };
+    const install = async () => {
       if (prompt) {
         prompt.prompt();
         const { outcome } = await prompt.userChoice;
-        if (outcome === "accepted") btn.hidden = true;
         prompt = null;
+        if (outcome === "accepted") { btn.hidden = true; getApp.hidden = true; } else paint();
       } else if (ios) $("#ios-tip").showModal();
     };
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); prompt = e; paint(); });
+    window.addEventListener("appinstalled", () => { prompt = null; btn.hidden = true; getApp.hidden = true; });
+    btn.onclick = install;
+    getApp.onclick = (e) => {
+      if (android) { $("#get-app-done").hidden = false; return; } // the link downloads the APK
+      e.preventDefault();
+      install();
+    };
+    paint();
   }
 }
 

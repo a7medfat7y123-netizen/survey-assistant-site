@@ -36,6 +36,8 @@ self.addEventListener("fetch", (e) => {
   }
 
   if (url.origin !== self.location.origin && !LIBS.test(url.hostname)) return;
+  if (url.pathname.endsWith(".apk")) return; // a download, not part of the app
+
   e.respondWith(
     caches.match(req).then((hit) => hit || fetch(req).then((res) => {
       if (res.ok || res.type === "opaque") { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
