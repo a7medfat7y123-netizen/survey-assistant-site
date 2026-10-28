@@ -509,6 +509,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .dr-out { margin-top: 14px; }
 .dr-out table td:first-child { text-align: start; white-space: normal; color: var(--muted); }
 .dr-out table td.num { font-weight: 600; color: var(--ink); }
+.dr-out .ar { font-family: var(--f-body); letter-spacing: normal; }
 .dr-note { font-size: 12px; color: var(--muted); line-height: 1.6; border-inline-start: 2px solid color-mix(in srgb, var(--gold) 50%, transparent); padding-inline-start: 10px; margin: 10px 0 0; }
 .dr-err { font-size: 13px; color: var(--cut); margin: 10px 0 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -2986,7 +2987,8 @@ const STEEL_DENSITY = 7850; // kg/m³
 const W_PER_HP = 745.7;
 const KW_PER_TR = 3.516853; // 1 ton of refrigeration = 12,000 BTU/h
 const BTUH_PER_KW = 3412.142;
-const FEDDAN_M2 = 4200.83; // Egyptian feddan = 24 qirat
+// Egyptian feddan: 333⅓ square qasaba of 3.55 m = 4200.833 m², 24 qirat of 24 sahm each.
+const FEDDAN_M2 = (3.55 * 3.55 * 1000) / 3;
 const EARTH_RADIUS = 6371000; // m, mean
 const CEMENT_BULK_DENSITY = 1440; // kg/m³
 const CEMENT_BAG_KG = 50;
@@ -3462,6 +3464,42 @@ const CALCULATORS = [
   },
 
   // ===================== surveying =====================
+  {
+    id: "feddan", group: "survey", code: "FD", title: engL("الفدان والقيراط والسهم", "Feddan, qirat and sahm"),
+    fields: [
+      engField("feddan", engL("فدان", "Feddan"), "", { value: "1", optional: true }),
+      engField("qirat", engL("قيراط", "Qirat"), "", { optional: true }),
+      engField("sahm", engL("سهم", "Sahm"), "", { optional: true }),
+      engField("m2", engL("متر مربع", "Square metres"), "", { optional: true }),
+    ],
+    run(v) {
+      // Whatever is written in the boxes is added up: 2 feddan and 5 qirat is one area.
+      const each = [["feddan", "فدان", FEDDAN_M2], ["qirat", "قيراط", FEDDAN_M2 / 24], ["sahm", "سهم", FEDDAN_M2 / 576], ["m2", "متر مربع", 1]];
+      let m2 = 0, any = false;
+      for (const [key, label, f] of each) {
+        const x = engNum(v, key, label, { optional: true, min: 0 });
+        if (x !== null) { m2 += x * f; any = true; }
+      }
+      if (!any) fail("اكتب المساحة في خانة واحدة على الأقل.");
+      // Whole feddan and qirat, the sahm to two decimals, carried up when they round to a whole one.
+      let sahm = Math.round((m2 / (FEDDAN_M2 / 576)) * 100) / 100;
+      const fd = Math.floor(sahm / 576 + 1e-9);
+      sahm -= fd * 576;
+      const qt = Math.floor(sahm / 24 + 1e-9);
+      sahm = Math.max(0, Math.round((sahm - qt * 24) * 100) / 100);
+      return {
+        results: [
+          engRow(engL("بالفدان", "In feddan"), m2 / FEDDAN_M2, engL("فدان", "feddan"), 6),
+          engRow(engL("بالقيراط", "In qirat"), m2 / (FEDDAN_M2 / 24), engL("قيراط", "qirat"), 4),
+          engRow(engL("بالسهم", "In sahm"), m2 / (FEDDAN_M2 / 576), engL("سهم", "sahm"), 3),
+          engRow(engL("بالمتر المربع", "In square metres"), m2, "m²", 3),
+          engRow(engL("فدان وقيراط وسهم", "Feddan, qirat and sahm"), `${fd} ف ${qt} ط ${sahm} س`),
+        ],
+        note: engL("الفدان = 24 قيراط = 576 سهم = 4200.833 م². القيراط = 24 سهم = 175.035 م². السهم = 7.293 م². (الفدان 333⅓ قصبة مربعة، والقصبة 3.55 م.)",
+          "1 feddan = 24 qirat = 576 sahm = 4,200.833 m². 1 qirat = 24 sahm = 175.035 m². 1 sahm = 7.293 m². (A feddan is 333⅓ square qasaba of 3.55 m.)"),
+      };
+    },
+  },
   {
     id: "h-curve", group: "survey", code: "HC", title: engL("عناصر المنحنى الأفقي", "Horizontal curve elements"),
     fields: [engField("r", engL("نصف القطر R", "Radius R"), "m", { value: "300" }), { key: "delta", label: engL("زاوية الانحراف Δ (درجات أو د د ث)", "Deflection angle Δ (degrees or d m s)"), type: "text", value: "30 00 00" }, engField("pi", engL("محطة نقطة التقاطع PI (اختياري)", "PI chainage (optional)"), "m", { optional: true })],
@@ -8777,7 +8815,7 @@ const TR_EXAMPLES = {
   open: { e: "1150.300", n: "2085.600", az: "98 30 39.7", rows: "Station, Angle, Distance\nP1, , 172.2974\nP2, 130 42 56.2, 184.2073\nP3, ," },
 };
 const TR_FIELDS = ["e", "n", "az", "back", "be", "bn", "ee", "en", "fore", "fe", "fn"];
-const FEDDAN = 4200.83;
+const FEDDAN = (3.55 * 3.55 * 1000) / 3; // 333⅓ square qasaba of 3.55 m
 let trLast = null;
 let trSummary = null; // the last result, for a project note
 const TR_KINDS = { loop: "مقفول على نفسه (Closed loop)", link: "مقفول بين نقطتين معلومتين (Link)", open: "مفتوح (Open)" };
@@ -9238,6 +9276,9 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
     "اكتب القيم دي:": "Fill in:",
     "اكتب قيمتين بس من التلاتة وسيب التالتة فاضية.": "Enter two of the three values and leave the third empty.",
     "اكتب مسافة واحدة بس: على الخريطة أو على الطبيعة.": "Enter one distance only: on the map or on the ground.",
+    "اكتب المساحة في خانة واحدة على الأقل.": "Enter the area in at least one box.",
+    ...Object.fromEntries([["فدان", "Feddan"], ["قيراط", "Qirat"], ["سهم", "Sahm"], ["متر مربع", "Square metres"]]
+      .flatMap(([ar, en]) => [[`${ar}: لازم رقم.`, `${en}: must be a number.`], [`${ar}: لازم 0 أو أكتر.`, `${en}: must be 0 or more.`]])),
   });
 
   const body = $("#dr-body");
@@ -9309,7 +9350,10 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
       // Result labels and notes register their English as they run; hand new ones to the translator.
       const n = Object.keys(ENGINEERING_EN).length;
       if (n !== enCount) { enCount = n; I18N.add(ENGINEERING_EN); }
-      out.innerHTML = `<table><tbody>${res.results.map((x) => `<tr><td>${esc(x.label)}</td><td class="num">${nf(x.value, x.decimals)}${x.unit ? ` <span>${esc(x.unit)}</span>` : ""}</td></tr>`).join("")}</tbody></table>${res.note ? `<p class="dr-note">${esc(res.note)}</p>` : ""}`;
+      // Arabic words in a value (a unit like فدان, or "1 ف 5 ط 12 س") keep their letters joined and
+      // their own reading order inside the left-to-right number cell.
+      const ar = (s) => (/[؀-ۿ]/.test(s) ? `<bdi class="ar">${s}</bdi>` : s);
+      out.innerHTML = `<table><tbody>${res.results.map((x) => `<tr><td>${esc(x.label)}</td><td class="num">${ar(nf(x.value, x.decimals))}${x.unit ? ` <span>${ar(esc(x.unit))}</span>` : ""}</td></tr>`).join("")}</tbody></table>${res.note ? `<p class="dr-note">${esc(res.note)}</p>` : ""}`;
     } catch (e) {
       out.innerHTML = `<p class="dr-err">${esc(e.message)}</p>`;
     }
