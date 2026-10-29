@@ -8,6 +8,10 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- The 3D library (the welcome screen opens on a 3D scene) starts downloading with the page, not
+     after the page's code has run (see THREE_URLS in page-3d.js). -->
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js">
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%84%BF%F0%93%8E%9B%F0%93%85%93%F0%93%82%A7%F0%93%86%91%F0%93%8F%8F%F0%93%8E%9B%F0%93%87%8C%F0%93%80%80&display=swap">
 <script>
@@ -609,7 +613,7 @@ a.pj-file-name { color: var(--accent); }
 .intro { display: none; }
 /* The whole screen is the 3D site; the title block sits over the fade at the bottom. */
 .show-intro .intro { display: grid; justify-items: center; align-items: end; position: fixed; inset: 0; z-index: 50; padding: 16px 16px max(20px, 4vh); overflow-y: auto;
-  background: var(--paper); animation: fade .35s ease-out both; }
+  background: var(--paper); animation: fade .2s ease-out both; }
 .show-intro body { overflow: hidden; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
@@ -630,24 +634,24 @@ a.pj-file-name { color: var(--accent); }
 .get-app-done[hidden] { display: none; }
 /* Total station eyepiece: frame corners and a live readout of the camera's angles. */
 .finder { position: fixed; inset: 10px; pointer-events: none; z-index: 1; }
-.finder .corner { position: absolute; width: 30px; height: 30px; border: 0 solid color-mix(in srgb, var(--gold) 70%, transparent); animation: fade .6s 1.2s both; }
+.finder .corner { position: absolute; width: 30px; height: 30px; border: 0 solid color-mix(in srgb, var(--gold) 70%, transparent); animation: fade .4s .45s both; }
 .finder .corner:nth-child(1) { top: 0; left: 0; border-width: 2px 0 0 2px; }
 .finder .corner:nth-child(2) { top: 0; right: 0; border-width: 2px 2px 0 0; }
 .finder .corner:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
 .finder .corner:nth-child(4) { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
 .hud { position: absolute; top: 12px; inset-inline-start: 14px; direction: ltr; font-family: var(--f-num); font-size: 12px; line-height: 1.7; color: var(--ink);
   padding: 8px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent); background: color-mix(in srgb, var(--paper) 55%, transparent);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .6s 1.4s both; font-variant-numeric: tabular-nums; }
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade .4s .55s both; font-variant-numeric: tabular-nums; }
 .hud p { margin: 0; display: flex; gap: 10px; justify-content: space-between; }
 .hud b { color: var(--gold); font-weight: 600; min-width: 2.2em; }
 .hud .hud-head { font-size: 10px; letter-spacing: .14em; color: var(--muted); justify-content: flex-start; align-items: center; gap: 6px; }
 .hud .hud-head i { width: 7px; height: 7px; border-radius: 50%; background: #ff3a2a; box-shadow: 0 0 8px #ff3a2a; animation: blink 1.6s infinite; }
 @keyframes blink { 50% { opacity: .25; } }
 @media (max-width: 480px) { .hud { font-size: 10.5px; padding: 6px 9px; } }
-.intro-card { position: relative; z-index: 1; width: min(760px, 100%); text-align: center; animation: rise .5s .1s ease-out both; pointer-events: none; }
+.intro-card { position: relative; z-index: 1; width: min(760px, 100%); text-align: center; animation: rise .3s ease-out both; pointer-events: none; }
 .intro-card > * { pointer-events: auto; }
 .intro-top { display: flex; justify-content: center; margin-bottom: 2px; }
-.intro-card .logo { width: 88px; height: 88px; animation: seal .7s .2s ease-out both; }
+.intro-card .logo { width: 88px; height: 88px; animation: seal .4s .05s ease-out both; }
 @keyframes seal { from { opacity: 0; transform: rotate(-25deg) scale(.85); } to { opacity: 1; transform: none; } }
 .intro-card .hello { margin: 6px 0 0; font-family: var(--f-head); font-weight: 700; font-size: clamp(20px, 4.2vw, 28px); color: var(--ink); text-shadow: 0 1px 14px var(--paper); }
 .intro-card h2 { display: block; margin: 0 0 4px; line-height: 1.2; }
@@ -9058,10 +9062,31 @@ const V3 = (() => {
    * Mount a scene into `host`. build(scene, api) adds objects and may return
    * { view: [x,y,z] direction to look from, fit: 0..1 tighter/looser }.
    */
+  // A scene nobody can see yet, in a hidden tab or under the welcome screen, is built when it shows:
+  // each costs a phone the best part of a second (its shaders), and opening the page used to build six
+  // before the welcome screen's own could start.
+  const later = new Map(); // host -> [build, opts]
+  // The welcome screen is checked first: asking for the boxes forces a layout, costly while the page is still opening.
+  const unseen = (host) => (document.documentElement.classList.contains("show-intro") && !host.closest(".intro")) || !host.getClientRects().length;
+  // A little before it scrolls into view, so that it is there when it arrives.
+  const seen = new IntersectionObserver((entries) => { for (const e of entries) if (e.isIntersecting) showLater(e.target); }, { rootMargin: "300px 0px" });
+  function showLater(host) {
+    const job = later.get(host);
+    if (!job || unseen(host)) return;
+    later.delete(host);
+    seen.unobserve(host);
+    if (host.isConnected) mount(host, ...job);
+  }
+
   /** Returns false when there is no WebGL; opts.fail runs if three.js then fails to load. */
   function mount(host, build, opts = {}) {
     unmount(host);
     if (!supported()) return false;
+    if (unseen(host)) {
+      later.set(host, [build, opts]);
+      seen.observe(host);
+      return true;
+    }
     if (threeReady()) return mountNow(host, build, opts);
     waiting.set(host, [build, opts]);
     loadThree().then(() => {
@@ -9157,7 +9182,7 @@ const V3 = (() => {
       const to = camera.position.clone();
       const from = to.clone().sub(target).applyAxisAngle(new THREE.Vector3(0, 1, 0), -0.7).multiplyScalar(1.6).add(target);
       from.y += 90;
-      fly = { from, to, t0: performance.now(), ms: 3200 };
+      fly = { from, to, t0: performance.now(), ms: 1400 };
       camera.position.copy(from);
     }
 
@@ -9212,14 +9237,19 @@ const V3 = (() => {
 
   function unmount(host) {
     waiting.delete(host);
+    if (host) { later.delete(host); seen.unobserve(host); }
     if (host?._v3) { host._v3.dispose(); host._v3 = null; }
     live.delete(host);
   }
+  // Also builds the waiting scenes that can be seen now (the welcome screen just closed).
   function remountAll() {
     for (const host of [...live]) {
       if (!host.isConnected) { unmount(host); continue; }
       const { build, opts } = host._v3;
       mount(host, build, opts);
+    }
+    for (const host of [...later.keys()]) {
+      if (host.isConnected) showLater(host); else unmount(host);
     }
   }
   const paused = () => document.documentElement.classList.contains("drawer-open");
