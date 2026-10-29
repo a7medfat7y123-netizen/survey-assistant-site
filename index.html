@@ -758,6 +758,12 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .readout b.cut, #pf-out tr.is-cut td:nth-child(4) { color: var(--cut); }
 .readout b.fill, #pf-out tr.is-fill td:nth-child(5) { color: var(--fill); }
 #pf-out .mono { font-family: var(--f-num); }
+/* Quantities from files: stepping through the sections. */
+.qf-nav { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.qf-nav select { width: auto; min-width: 140px; font-family: var(--f-num); }
+.qf-nav button { padding: 6px 16px; font-size: 18px; line-height: 1; }
+#qf-out .qf-secs tr.on td { background: var(--accent-soft); }
+#qf-out .qf-secs tbody tr { cursor: pointer; }
 .readout small.pf-at { margin-top: 2px; }
 .readout small.pf-at bdi { font-family: var(--f-num); color: var(--ink); }
 .pf-notes:empty { display: none; }
@@ -1226,6 +1232,75 @@ BM2,,,0.900</textarea>
   </section>
 
   <section id="tab-qty" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">QF</span>الكميات من ملف القطاعات العرضية</h2>
+      <p class="hint">ارفع ملف القطاعات العرضية للأرض الطبيعية، والحفر والردم بيتحسبوا عند كل قطاع والكميات بالمتر المكعب بينهم. التصميم: القطاع النموذجي على منسوب تبويب البروفيل، أو ملف قطاعات التصميم لو عندك.</p>
+      <div class="pf-files">
+        <div class="pf-slot" id="qf-g-slot">
+          <div class="pf-slot-head"><span class="pf-key ground" aria-hidden="true"></span><b>ملف القطاعات العرضية للأرض الطبيعية</b></div>
+          <span class="hint">المحطة والإزاحة (الشمال سالب) والمنسوب لكل نقطة، أو صف لكل محطة وعناوين الأعمدة إزاحات (L10، CL، R10)، أو LandXML من Civil 3D.</span>
+          <div class="actions">
+            <label class="file-btn" for="qf-g-file">اختار ملف القطاعات</label><input type="file" id="qf-g-file" hidden>
+            <button type="button" class="secondary primary" id="qf-sample">جرّب على مثال</button>
+          </div>
+          <p class="pf-got" id="qf-g-got" aria-live="polite"></p>
+        </div>
+        <div class="pf-slot" id="qf-d-slot">
+          <div class="pf-slot-head"><span class="pf-key design" aria-hidden="true"></span><b>التصميم</b></div>
+          <label for="qf-src">مصدر التصميم
+            <select id="qf-src">
+              <option value="template">القطاع النموذجي على منسوب البروفيل</option>
+              <option value="file">ملف قطاعات التصميم</option>
+            </select>
+          </label>
+          <p class="pf-got" id="qf-prof"></p>
+          <div class="actions" id="qf-d-actions" hidden>
+            <label class="file-btn" for="qf-d-file">اختار ملف قطاعات التصميم</label><input type="file" id="qf-d-file" hidden>
+          </div>
+          <p class="pf-got" id="qf-d-got" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="grid" id="qf-template">
+        <label for="qf-wl">عرض الطريق يسار المحور (م)<input id="qf-wl" type="number" step="0.01" value="5" dir="ltr"></label>
+        <label for="qf-wr">عرض الطريق يمين المحور (م)<input id="qf-wr" type="number" step="0.01" value="5" dir="ltr"></label>
+        <label for="qf-cf">الميل العرضي %<input id="qf-cf" type="number" step="0.1" value="2" dir="ltr"></label>
+        <label for="qf-cs">ميل جوانب الحفر (أفقي:1)<input id="qf-cs" type="number" step="0.1" value="1" dir="ltr"></label>
+        <label for="qf-fs">ميل جوانب الردم (أفقي:1)<input id="qf-fs" type="number" step="0.1" value="2" dir="ltr"></label>
+        <label for="qf-th">سمك طبقات الرصف تحت منسوب التصميم (م)<input id="qf-th" type="number" step="0.01" value="0" min="0" dir="ltr"></label>
+      </div>
+      <div class="grid">
+        <label for="qf-method">الطريقة
+          <select id="qf-method"><option value="average_end_area">متوسط المساحات الطرفية</option><option value="prismoidal">المنشوري (Simpson)</option></select>
+        </label>
+        <label for="qf-ff">معامل الردم (حفر لكل م³ ردم مدموك)<input id="qf-ff" type="number" step="0.01" value="1" dir="ltr"></label>
+      </div>
+      <div class="actions">
+        <button id="qf-run" class="primary" type="button">احسب الكميات</button>
+        <button id="qf-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <button id="qf-dxf" class="secondary primary dl" type="button" disabled>تصدير القطاعات DXF</button>
+        <button id="qf-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+      </div>
+      <details class="tr-formats">
+        <summary>الصيغ اللي بيقراها</summary>
+        <ul>
+          <li>صف لكل نقطة: المحطة، الإزاحة عن المحور (الشمال بالسالب)، المنسوب. بعناوين عربي أو إنجليزي أو من غير عناوين.</li>
+          <li>صف لكل محطة: أول عمود المحطة وباقي العناوين إزاحات، زي ‎-10 و‎-5 و0 و5 و10، أو L10 وCL وR10، أو يسار 10 ومحور ويمين 10.</li>
+          <li>LandXML من Civil 3D: قطاعات الـ Sample Lines للأرض (EG) وللتصميم (Corridor أو Datum).</li>
+          <li>منسوب التصميم عند كل قطاع بيتاخد من تبويب البروفيل (ملف التصميم أو نقط الـ VPI اللي هناك)، ومنسوب التأسيس أقل منه بسمك الرصف.</li>
+          <li>ملف الـ DXF: كل القطاعات في لوحة واحدة، كل قطاع فوق خط مقارنة بالأرض والتصميم ومساحة الحفر والردم.</li>
+        </ul>
+      </details>
+    </div>
+    <div id="qf-view" hidden>
+      <div class="qf-nav">
+        <button type="button" class="secondary primary" id="qf-prev" aria-label="القطاع اللي قبله">‹</button>
+        <label for="qf-st" class="vh">القطاع</label><select id="qf-st" dir="ltr"></select>
+        <button type="button" class="secondary primary" id="qf-next" aria-label="القطاع اللي بعده">›</button>
+      </div>
+      <div id="qf-chart"></div>
+    </div>
+    <div id="qf-out" class="out"></div>
+
     <div class="panel">
       <h2><span class="callout">X-S</span>القطاع العرضي: مساحة الحفر والردم</h2>
       <div class="two">
@@ -1872,8 +1947,8 @@ const I18N = (() => {
     [/^(.*)\[(\d+)\]: لازم offset و level أرقام\.$/, "$1[$2]: offset and level must be numbers."],
     [/^(.*): في نقطتين على نفس الـ offset \((.*)\)\.$/, "$1: two points at the same offset ($2)."],
     [/^خط التصميم مش قافل على الأرض عند الأطراف \(فرق يسار (.*) م، يمين (.*) م\) — المساحة محسوبة على العرض المشترك بس\.$/, "The design line doesn't close on the ground at the edges (left gap $1 m, right $2 m) — area computed over the shared width only."],
-    [/^خط الأرض مش واصل لحافة التصميم \((.*)\)\.$/, "The ground line doesn't reach the design edge ($1)."],
-    [/^الميل الجانبي \((.*)\) ما قابلش الأرض جوه مدى خط الأرض — مدّ الرفع لبرّه\.$/, "The side slope ($1) doesn't meet the ground within the surveyed width — extend the survey outwards."],
+    [/^خط الأرض مش واصل لحافة التصميم \((.*)\)\.$/, (m, s) => `The ground line doesn't reach the design edge (${({ "يمين": "right", "يسار": "left" })[s] ?? s}).`],
+    [/^الميل الجانبي \((.*)\) ما قابلش الأرض جوه مدى خط الأرض — مدّ الرفع لبرّه\.$/, (m, s) => `The side slope (${({ "يمين": "right", "يسار": "left" })[s] ?? s}) doesn't meet the ground within the surveyed width — extend the survey outwards.`],
     [/^قطاع (\d+): chainage غير مفهوم\.$/, "Section $1: chainage not understood."],
     [/^القطاعات لازم تكون مترتبة تصاعديًا \(قطاع (\d+)\)\.$/, "Sections must be in increasing order (section $1)."],
     [/^ناقص: (.*)$/, "Missing: $1"],
@@ -1930,6 +2005,11 @@ const I18N = (() => {
     [/^قبل توزيع خطأ القفل \(مكبّر ×(.*)\)$/, "Before the misclosure is shared (exaggerated ×$1)"],
     [/^(\d+) ف (\d+) ط ([\d.]+) س$/, "$1 feddan $2 qirat $3 sahm"],
     [/^([\d.,]+) م$/, "$1 m"],
+    // Quantities from cross-section files (src/engine/quantities.js).
+    [/^قطاعات اتسابت \((\d+)\): (.*)$/, (m, n, list) => `Sections left out (${n}): ${list.replace(/خارج مدى التصميم/g, "outside the design's range").replace(/مفيش قطاع تصميم عند المحطة دي/g, "no design section at this station")}`],
+    [/^القطاع عند (.+) فيه نقطة واحدة بس، اتساب\.$/, "The section at $1 has one point only and was left out."],
+    [/^القطاع العرضي (\d+\+[\d.]+)$/, "Cross section $1"],
+    [/^(\d+\+[\d.]+): (.+)$/, (m, ch, rest) => `${ch}: ${tr(rest) ?? rest}`],
     // Profile from files (src/engine/profile.js).
     [/^الملف فيه إزاحات؛ اتاخد أقرب نقطة للمحور عند كل محطة \((\d+) من (\d+)\)\.$/, "The file has offsets; the point nearest the centre line was taken at each station ($1 of $2)."],
     [/^محطات التصميم اتحسبت بالمسافة على نقط المحور بترتيبها في الملف، من (.+)\.$/, "The design's chainages are the distances along its centre-line points in their order in the file, from $1."],
@@ -3131,6 +3211,211 @@ function gridVolume(input) {
     fillVolume: round(fill, 2),
     net: round(cut - fill, 2),
   };
+}
+
+// ---------- quantities from cross-section files ----------
+// A cross-section survey comes as one row per point (chainage, offset, level) or one row per station
+// with the offsets as column headings; Civil 3D writes LandXML CrossSects. Each ground section is
+// set against the design (the road template on the profile's level, or a design section at the same
+// chainage) and the volumes are taken between them. Offsets: left of the centre line negative.
+
+const qfHead = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()[\]/:'"°#*]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const QF_CH = /^(?:ch|chainage|chain|station|sta|stn|km|kp|pk)$|^(?:محطه|المحطه|الكيلو|كيلو|القطاع|قطاع|رقمالقطاع)$/;
+const QF_OFF = /^(offset|os|off|distance|dist|بعد|البعد|ازاحه|الازاحه|المسافه|مسافه|المسافهمنالمحور)$/;
+const QF_LEVEL = /^(z|h|level|elev|elevation|rl|height|groundlevel|ngl|منسوب|المنسوب|منسوبالارض|المنسوبالطبيعي)$/;
+const qfDigits = (s) => String(s ?? "").replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/٫/g, ".");
+
+/** An offset written as a column heading: "-10", "10", "L10", "R 7.5", "يسار 5", "يمين 5", "CL" or "محور" (0). */
+function sectionOffset(h) {
+  const s = qfDigits(h).trim().toLowerCase();
+  if (/^(cl|c\/l|c\.l\.?|ⅽl|0|0\.0+|محور|المحور|المحورالمركزي)$/.test(s.replace(/\s+/g, ""))) return 0;
+  const m = s.match(/^(l|lt|left|يسار|شمال|r|rt|right|يمين)?\s*([-+]?\d+(?:\.\d+)?)\s*(m|م)?\s*(l|lt|left|r|rt|right)?$/);
+  if (!m) return null;
+  const v = Number(m[2]);
+  const side = m[1] ?? m[4] ?? "";
+  if (/^(l|lt|left|يسار|شمال)$/.test(side)) return -Math.abs(v);
+  if (/^(r|rt|right|يمين)$/.test(side)) return Math.abs(v);
+  return v;
+}
+
+// Sections from chainage → points, sorted, each with two or more points.
+function qfCollect(map, notes) {
+  const out = [];
+  for (const [chainage, pts] of [...map.entries()].sort((a, b) => a[0] - b[0])) {
+    const byOffset = new Map();
+    for (const p of pts) if (!byOffset.has(p.offset)) byOffset.set(p.offset, p.level);
+    const points = [...byOffset.entries()].sort((a, b) => a[0] - b[0]).map(([offset, level]) => ({ offset, level }));
+    if (points.length >= 2) out.push({ chainage, points });
+    else notes.push(`القطاع عند ${formatChainage(chainage)} فيه نقطة واحدة بس، اتساب.`);
+  }
+  return out;
+}
+
+/**
+ * Cross sections from a table (tableFromMatrix's): one row per point (chainage, offset, level), or one
+ * row per station with offsets as the column headings. Returns { sections: [{ chainage, points }], notes }.
+ */
+function sectionsFromTable(t) {
+  const rows = t?.rows ?? [];
+  const keys = t?.columns ?? [];
+  const heads = (t?.originalHeaders ?? keys).map((h, i) => qfHead(h || keys[i]));
+  const at = (canon, re) => {
+    const i = heads.findIndex((h) => re.test(h));
+    return i >= 0 ? keys[i] : keys.includes(canon) ? canon : null;
+  };
+  const notes = [];
+  const map = new Map();
+  const put = (ch, offset, level) => { if (!map.has(ch)) map.set(ch, []); map.get(ch).push({ offset, level }); };
+  let chK = at("chainage", QF_CH);
+  // One row per station: the other headings are offsets.
+  const offCols = t?.hasHeader === false ? [] : keys.map((k, i) => ({ k, o: sectionOffset((t.originalHeaders ?? keys)[i]) })).filter((c) => c.k !== chK && c.o !== null);
+  if (chK && offCols.length >= 3) {
+    for (const r of rows) {
+      const ch = parseChainage(r[chK]);
+      if (ch === null) continue;
+      for (const { k, o } of offCols) { const z = toNumber(r[k]); if (z !== null) put(ch, o, z); }
+    }
+    return { sections: qfCollect(map, notes), notes, layout: "wide" };
+  }
+  let offK = at("offset", QF_OFF);
+  let zK = at("z", QF_LEVEL);
+  // No headers: chainage, offset, level.
+  if (t?.hasHeader === false && keys.length >= 3) {
+    const [a, b, c] = keys;
+    if (rows.every((r) => parseChainage(r[a]) !== null && toNumber(r[b]) !== null && toNumber(r[c]) !== null)) { chK = a; offK = b; zK = c; }
+  }
+  if (!chK || !offK || !zK) fail("مش لاقي أعمدة القطاعات: محتاج المحطة والإزاحة والمنسوب، أو صف لكل محطة وعناوين الأعمدة إزاحات (-10، -5، 0، 5، 10).");
+  for (const r of rows) {
+    const ch = parseChainage(r[chK]), o = toNumber(r[offK]), z = toNumber(r[zK]);
+    if (ch !== null && o !== null && z !== null) put(ch, o, z);
+  }
+  return { sections: qfCollect(map, notes), notes, layout: "long" };
+}
+
+/**
+ * Cross sections in a LandXML (Civil 3D sample lines): every surface's sections by name, from
+ * CrossSectSurf point lists and DesignCrossSectSurf points. Returns [{ name, sections }].
+ */
+function sectionsFromLandXml(text) {
+  const surfaces = new Map();
+  const attr = (tag, name) => tag.match(new RegExp(`\\b${name}="([^"]*)"`))?.[1];
+  const nums = (s) => s.trim().split(/[\s,]+/).map(Number);
+  for (const cs of String(text).matchAll(/<CrossSect\b([^>]*)>([\s\S]*?)<\/CrossSect>/g)) {
+    const ch = parseChainage(attr(cs[1], "sta"));
+    if (ch === null) continue;
+    const add = (name, pts) => {
+      if (pts.length < 2) return;
+      if (!surfaces.has(name)) surfaces.set(name, new Map());
+      surfaces.get(name).set(ch, pts);
+    };
+    for (const s of cs[2].matchAll(/<CrossSectSurf\b([^>]*)>([\s\S]*?)<\/CrossSectSurf>/g)) {
+      const n = nums(s[2].match(/<PntList2D\b[^>]*>([^<]*)<\/PntList2D>/)?.[1] ?? "");
+      const pts = [];
+      for (let i = 0; i + 1 < n.length; i += 2) if (Number.isFinite(n[i]) && Number.isFinite(n[i + 1])) pts.push({ offset: n[i], level: n[i + 1] });
+      add(attr(s[1], "name") ?? "surface", pts);
+    }
+    for (const s of cs[2].matchAll(/<DesignCrossSectSurf\b([^>]*)>([\s\S]*?)<\/DesignCrossSectSurf>/g)) {
+      const pts = [...s[2].matchAll(/<CrossSectPnt\b[^>]*>([^<]*)<\/CrossSectPnt>/g)].map((p) => nums(p[1])).filter((p) => p.length >= 2 && p.every(Number.isFinite)).map(([offset, level]) => ({ offset, level }));
+      add(attr(s[1], "name") ?? "design", pts);
+    }
+  }
+  return [...surfaces.entries()].map(([name, m]) => ({ name, sections: [...m.entries()].sort((a, b) => a[0] - b[0]).map(([chainage, points]) => ({ chainage, points: points.slice().sort((a, b) => a.offset - b.offset) })) }));
+}
+
+/**
+ * Earthwork from cross-section files. Each ground section is set against its design section — the
+ * template (widths, crossfall, side slopes daylighted to the ground) on the formation level, which is
+ * the design profile's level (vpis, as profileDesign takes them) less the pavement `thickness`; or a
+ * design section at the same chainage (designSections) — and the volumes are taken between them.
+ * input: { ground: [{ chainage, points }], designSections?, vpis?, template: { widthLeft, widthRight,
+ *   crossfallPercent, cutSlope, fillSlope }, thickness?, method?, fillFactor? }
+ */
+function sectionQuantities(input) {
+  const ground = requireArray(input?.ground, "ground", 1);
+  const notes = [];
+  const thickness = toNumber(input.thickness) ?? 0;
+  let levels = null;
+  if (!input.designSections) {
+    const vpis = requireArray(input.vpis, "vpis", 2);
+    const pd = profileDesign({ vpis, stations: ground.map((s) => ({ chainage: s.chainage })) });
+    levels = new Map(pd.rows.map((r, i) => [ground[i].chainage, r.designLevel]));
+  }
+  const designAt = (ch) => (input.designSections ?? []).find((d) => Math.abs(d.chainage - ch) < 0.01) ?? null;
+  const t = input.template ?? {};
+  const out = [];
+  const skipped = [];
+  for (const g of ground) {
+    try {
+      const groundCL = levelAtSafe(g.points, 0);
+      if (levels) {
+        const dl = levels.get(g.chainage);
+        if (dl === null || dl === undefined) { skipped.push(`${formatChainage(g.chainage)}: خارج مدى التصميم`); continue; }
+        const r = templateSection({ ground: g.points, formationLevel: dl - thickness, widthLeft: t.widthLeft, widthRight: t.widthRight, crossfallPercent: t.crossfallPercent, cutSlope: t.cutSlope, fillSlope: t.fillSlope });
+        out.push({ chainage: g.chainage, designLevel: round(dl), formationLevel: round(dl - thickness), groundCL, cutArea: r.cutArea, fillArea: r.fillArea, left: r.leftSide, right: r.rightSide, ground: g.points, design: r.design, warnings: r.warnings });
+      } else {
+        const d = designAt(g.chainage);
+        if (!d) { skipped.push(`${formatChainage(g.chainage)}: مفيش قطاع تصميم عند المحطة دي`); continue; }
+        const r = sectionArea({ ground: g.points, design: d.points });
+        out.push({ chainage: g.chainage, designLevel: levelAtSafe(d.points, 0), formationLevel: levelAtSafe(d.points, 0), groundCL, cutArea: r.cutArea, fillArea: r.fillArea, left: "", right: "", ground: g.points, design: d.points, warnings: r.warnings });
+      }
+    } catch (err) {
+      skipped.push(`${formatChainage(g.chainage)}: ${err.message}`);
+    }
+  }
+  if (skipped.length) notes.push(`قطاعات اتسابت (${skipped.length}): ${skipped.slice(0, 6).join(" | ")}${skipped.length > 6 ? " …" : ""}`);
+  if (out.length < 2) fail("لازم قطاعين على الأقل اتحسبوا عشان تطلع الكميات بينهم.");
+  const volumes = earthworkVolumes({ sections: out.map((s) => ({ chainage: s.chainage, cutArea: s.cutArea, fillArea: s.fillArea })), method: input.method, fillFactor: input.fillFactor });
+  return { sections: out.map((s) => ({ ...s, chainageText: formatChainage(s.chainage) })), volumes, notes };
+}
+// The level on a section at an offset, or null off its ends.
+function levelAtSafe(points, x) {
+  const poly = points.slice().sort((a, b) => a.offset - b.offset);
+  const v = levelAt(poly, x);
+  return v === null ? null : round(v);
+}
+
+// DXF texts: ASCII as is, anything else as AutoCAD's \U+XXXX.
+const qfDxfStr = (s) => String(s ?? "").replace(/[^\x20-\x7e]/g, (c) => `\\U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")}`);
+
+/**
+ * Every cross section on one AutoCAD sheet (DXF R12), in rows of `columns` (default 3) down the sheet,
+ * each over its own datum with the centre line, the ground (XS-EG) and the design (XS-DESIGN), and its
+ * chainage, levels and cut and fill areas under it. Levels drawn `exaggeration` times (default 1).
+ */
+function sectionsDxf(sections, { columns = 3, exaggeration = 1 } = {}) {
+  if (!sections?.length) fail("مفيش قطاعات ترسمها.");
+  const ve = toNumber(exaggeration) > 0 ? toNumber(exaggeration) : 1;
+  const all = sections.flatMap((s) => [...s.ground, ...s.design]);
+  const minO = Math.min(...all.map((p) => p.offset)), maxO = Math.max(...all.map((p) => p.offset));
+  const spanZ = Math.max(...sections.map((s) => { const z = [...s.ground, ...s.design].map((p) => p.level); return Math.max(...z) - Math.min(...z); }));
+  const W = maxO - minO, th = Math.min(2.5, Math.max(0.25, Math.round(W / 40 * 4) / 4));
+  const cellW = W + th * 12, cellH = (spanZ + 2) * ve + th * 10;
+  const out = ["0", "SECTION", "2", "HEADER", "9", "$ACADVER", "1", "AC1009", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES"];
+  const f = (v) => v.toFixed(3);
+  const line = (layer, color, x1, y1, x2, y2) => out.push("0", "LINE", "8", layer, "62", String(color), "10", f(x1), "20", f(y1), "30", "0", "11", f(x2), "21", f(y2), "31", "0");
+  const text = (x, y, s, h = th) => out.push("0", "TEXT", "8", "XS-TEXT", "10", f(x), "20", f(y), "30", "0", "40", f(h), "1", qfDxfStr(s));
+  const poly = (layer, color, pts) => {
+    if (pts.length < 2) return;
+    out.push("0", "POLYLINE", "8", layer, "62", String(color), "66", "1", "10", "0", "20", "0", "30", "0", "70", "0");
+    for (const [x, y] of pts) out.push("0", "VERTEX", "8", layer, "10", f(x), "20", f(y), "30", "0");
+    out.push("0", "SEQEND", "8", layer);
+  };
+  const cols = Math.max(1, Math.round(columns));
+  sections.forEach((s, i) => {
+    const col = i % cols, row = Math.floor(i / cols);
+    const ox = col * cellW - minO, oy = -row * cellH;
+    const z0 = Math.floor(Math.min(...[...s.ground, ...s.design].map((p) => p.level))) - 1;
+    const X = (o) => ox + o, Y = (z) => oy + (z - z0) * ve;
+    line("XS-GRID", 8, X(minO), Y(z0), X(maxO), Y(z0));
+    line("XS-GRID", 8, X(0), Y(z0), X(0), Y(z0 + spanZ + 1.5));
+    poly("XS-EG", 3, s.ground.map((p) => [X(p.offset), Y(p.level)]));
+    poly("XS-DESIGN", 1, s.design.map((p) => [X(p.offset), Y(p.level)]));
+    text(X(minO), Y(z0) - th * 2, `${formatChainage(s.chainage)}   DATUM ${z0.toFixed(2)}`, th * 1.2);
+    text(X(minO), Y(z0) - th * 4, `CUT ${s.cutArea.toFixed(2)} m2   FILL ${s.fillArea.toFixed(2)} m2`);
+    if (s.formationLevel !== null && s.formationLevel !== undefined) text(X(minO), Y(z0) - th * 6, `FORMATION ${Number(s.formationLevel).toFixed(3)}   GROUND CL ${s.groundCL === null ? "-" : Number(s.groundCL).toFixed(3)}`);
+  });
+  out.push("0", "ENDSEC", "0", "EOF");
+  return `${out.join("\r\n")}\r\n`;
 }
 
 // ---- src/engine/validation.js
@@ -8398,7 +8683,7 @@ function gisZip(files) {
   return out;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, profileSeries, profileFromSeries, profileSummary, profileDxf, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, profileSeries, profileFromSeries, profileSummary, profileDxf, sectionOffset, sectionsFromTable, sectionsFromLandXml, sectionQuantities, sectionsDxf, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
 })();
 </script>
 <script>
@@ -9976,7 +10261,9 @@ const showError = (el, err) => { el.innerHTML = `<div class="error">${esc(err?.m
 
 function toCsv(columns, rows) {
   const q = (v) => (v === null || v === undefined ? "" : /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
-  return "﻿" + [columns.map((c) => q(c.label)).join(","), ...rows.map((r) => columns.map((c) => q(r[c.key])).join(","))].join("\n");
+  // Column headings in the language on screen.
+  const head = (c) => (I18N.lang === "en" ? I18N.tr(c.label) ?? c.label : c.label);
+  return "﻿" + [columns.map((c) => q(head(c))).join(","), ...rows.map((r) => columns.map((c) => q(r[c.key])).join(","))].join("\n");
 }
 function bindCsv(button, filename, getter) {
   button.onclick = async () => {
@@ -13036,6 +13323,273 @@ $("#vol-file").onchange = async (e) => {
     $("#vol-rows").value = rows.map((r) => [r.chainage ?? "", r.cutArea ?? 0, r.fillArea ?? 0].join(",")).join("\n");
   } catch (err) { showError($("#vol-out"), err); }
 };
+
+// ---------- quantities from cross-section files ----------
+// The ground's cross sections from a file, each set against the design (the road template on the level
+// the Profile tab gives at that station, or a design section from a second file), the cut and fill area
+// of each, and the volumes between them (engine: sectionQuantities).
+I18N.add({
+  "الكميات من ملف القطاعات العرضية": "Quantities from a cross-section file",
+  "ارفع ملف القطاعات العرضية للأرض الطبيعية، والحفر والردم بيتحسبوا عند كل قطاع والكميات بالمتر المكعب بينهم. التصميم: القطاع النموذجي على منسوب تبويب البروفيل، أو ملف قطاعات التصميم لو عندك.":
+    "Upload the natural ground's cross-section file: the cut and fill are worked out at each section and the volumes in cubic metres between them. The design: the typical section on the Profile tab's level, or a file of design sections if you have one.",
+  "ملف القطاعات العرضية للأرض الطبيعية": "Natural ground cross-section file",
+  "المحطة والإزاحة (الشمال سالب) والمنسوب لكل نقطة، أو صف لكل محطة وعناوين الأعمدة إزاحات (L10، CL، R10)، أو LandXML من Civil 3D.":
+    "Chainage, offset (left negative) and level for each point, or a row per station with offsets as the column headings (L10, CL, R10), or LandXML from Civil 3D.",
+  "اختار ملف القطاعات": "Choose the sections file", "التصميم": "Design", "مصدر التصميم": "Design source",
+  "القطاع النموذجي على منسوب البروفيل": "Typical section on the profile's level", "ملف قطاعات التصميم": "A design sections file",
+  "اختار ملف قطاعات التصميم": "Choose the design sections file",
+  "عرض الطريق يسار المحور (م)": "Road width left of the centre line (m)", "عرض الطريق يمين المحور (م)": "Road width right of the centre line (m)",
+  "ميل جوانب الحفر (أفقي:1)": "Cut side slope (horizontal:1)", "ميل جوانب الردم (أفقي:1)": "Fill side slope (horizontal:1)",
+  "سمك طبقات الرصف تحت منسوب التصميم (م)": "Pavement thickness under the design level (m)",
+  "تصدير القطاعات DXF": "Export the sections as DXF",
+  "صف لكل نقطة: المحطة، الإزاحة عن المحور (الشمال بالسالب)، المنسوب. بعناوين عربي أو إنجليزي أو من غير عناوين.":
+    "A row per point: chainage, offset from the centre line (left negative), level. With Arabic or English headings, or none.",
+  "صف لكل محطة: أول عمود المحطة وباقي العناوين إزاحات، زي ‎-10 و‎-5 و0 و5 و10، أو L10 وCL وR10، أو يسار 10 ومحور ويمين 10.":
+    "A row per station: the chainage first and the other headings offsets, such as -10, -5, 0, 5, 10, or L10, CL, R10.",
+  "LandXML من Civil 3D: قطاعات الـ Sample Lines للأرض (EG) وللتصميم (Corridor أو Datum).": "LandXML from Civil 3D: the sample lines' sections of the ground (EG) and of the design (Corridor or Datum).",
+  "منسوب التصميم عند كل قطاع بيتاخد من تبويب البروفيل (ملف التصميم أو نقط الـ VPI اللي هناك)، ومنسوب التأسيس أقل منه بسمك الرصف.":
+    "The design level at each section comes from the Profile tab (its design file or VPIs), and the formation is lower by the pavement thickness.",
+  "ملف الـ DXF: كل القطاعات في لوحة واحدة، كل قطاع فوق خط مقارنة بالأرض والتصميم ومساحة الحفر والردم.": "The DXF: every section on one sheet, each over a datum with the ground, the design and its cut and fill areas.",
+  "القطاع": "Section", "القطاع اللي قبله": "Previous section", "القطاع اللي بعده": "Next section",
+  "قطاعات": "Sections", "منسوب التصميم من تبويب البروفيل": "Design level from the Profile tab", "افتح البروفيل": "Open the profile",
+  "مفيش تصميم في تبويب البروفيل؛ اكتب نقط الـ VPI هناك أو ارفع ملف التصميم.": "There is no design in the Profile tab; enter the VPIs there or upload the design file.",
+  "ملخص الكميات": "Quantities summary", "إجمالي الحفر (م³)": "Total cut (m³)", "إجمالي الردم (م³)": "Total fill (m³)",
+  "الفرق (حفر − ردم×معامل) (م³)": "Balance (cut − fill × factor) (m³)", "عدد القطاعات": "Sections",
+  "مساحات القطاعات": "Section areas", "الكميات بين القطاعات": "Volumes between sections",
+  "منسوب الأرض عند المحور": "Ground level at the centre line", "منسوب التصميم": "Design level", "منسوب التأسيس": "Formation level",
+  "حفر م²": "Cut m²", "ردم م²": "Fill m²", "الجنب الشمال": "Left side", "الجنب اليمين": "Right side",
+  "اضغط على أي قطاع في الجدول تشوف رسمته فوق.": "Click any section in the table to see its drawing above.",
+  "ملف الأرض": "Ground file", "ملف قطاعات التصميم:": "Design sections file:",
+  "الملف ده مش جدول ولا نص. ارفع Excel أو CSV أو TXT أو LandXML.": "This file is neither a table nor text. Upload Excel, CSV, TXT or LandXML.",
+  "مفيش قطاعات في الملف.": "No sections in the file.",
+  "حفر": "Cut", "ردم": "Fill", "على الأرض": "On the ground", "غير معروف": "Unknown", "جداول الكميات": "Quantity tables",
+  "مش لاقي أعمدة القطاعات: محتاج المحطة والإزاحة والمنسوب، أو صف لكل محطة وعناوين الأعمدة إزاحات (-10، -5، 0، 5، 10).":
+    "No cross-section columns found: it needs chainage, offset and level, or a row per station with offsets as the column headings (-10, -5, 0, 5, 10).",
+  "لازم قطاعين على الأقل اتحسبوا عشان تطلع الكميات بينهم.": "At least two sections must be worked out to give the volumes between them.",
+  "مفيش قطاعات ترسمها.": "There are no sections to draw.",
+  "ارفع ملف قطاعات التصميم، أو اختار القطاع النموذجي على منسوب البروفيل.": "Upload the design sections file, or choose the typical section on the profile's level.",
+});
+
+const qf = { ground: null, gName: "", design: null, dName: "", res: null, at: 0 };
+const qfCh = (m) => E.formatChainage(m, 2);
+
+// The cross sections a file holds; a LandXML may hold the design's too.
+async function qfRead(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const ext = extOf(file.name);
+  if (SHEET_EXT.has(ext)) {
+    await needLib("xlsx");
+    const wb = XLSX.read(bytes, { type: "array" });
+    const filled = (r) => r.filter((c) => c !== null && String(c).trim() !== "").length;
+    for (const s of wb.SheetNames) {
+      const m = XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false });
+      const top = m.findIndex((r) => filled(r) >= 2);
+      try { return { ground: E.sectionsFromTable(E.tableFromMatrix(top > 0 ? m.slice(top) : m, s)) }; } catch { /* the next sheet */ }
+    }
+    throw new Error("مفيش قطاعات في الملف.");
+  }
+  const text = decodeText(bytes);
+  if (text === null) throw new Error("الملف ده مش جدول ولا نص. ارفع Excel أو CSV أو TXT أو LandXML.");
+  if (/<LandXML\b/i.test(text.slice(0, 5000))) {
+    const surf = E.sectionsFromLandXml(text);
+    if (!surf.length) throw new Error("مفيش قطاعات في الملف.");
+    const isGround = (n) => /(^|[^a-z])(eg|ex|exist|existing|ground|natural|og|ngl)([^a-z]|$)|طبيعي|ارض|أرض/i.test(n);
+    const g = surf.find((s) => isGround(s.name)) ?? surf[0];
+    const d = surf.find((s) => s !== g && !isGround(s.name));
+    return { ground: { sections: g.sections, notes: [] }, design: d ? { sections: d.sections, notes: [] } : null, surfaces: [g.name, d?.name].filter(Boolean) };
+  }
+  return { ground: E.sectionsFromTable(E.parseDelimited(text, file.name)) };
+}
+
+// The design the Profile tab holds now: its VPIs, as runProfile reads them.
+function qfVpis() {
+  const vpis = dropHeader(parsePaste($("#pf-vpi").value), [1]).map((c) => ({ chainage: c[0], level: numOrUndef(c[1]), curveLength: numOrUndef(c[2]) }))
+    .filter((v) => E.parseChainage(v.chainage) !== null && Number.isFinite(v.level));
+  return vpis.length >= 2 ? vpis : null;
+}
+function qfShow() {
+  const tpl = $("#qf-src").value === "template";
+  $("#qf-template").hidden = !tpl;
+  $("#qf-d-actions").hidden = tpl;
+  $("#qf-d-got").hidden = tpl;
+  const vpis = qfVpis();
+  if (tpl) {
+    const ch = vpis ? vpis.map((v) => E.parseChainage(v.chainage)) : [];
+    $("#qf-prof").innerHTML = vpis
+      ? `<span>منسوب التصميم من تبويب البروفيل</span>: ${pfFiles.design ? `<bdi data-no-i18n>${esc(pfFiles.design.name)}</bdi> · ` : ""}<bdi dir="ltr">${esc(qfCh(Math.min(...ch)))} → ${esc(qfCh(Math.max(...ch)))}</bdi> <button type="button" class="link" id="qf-open-pf">افتح البروفيل</button>`
+      : `<span class="bad">مفيش تصميم في تبويب البروفيل؛ اكتب نقط الـ VPI هناك أو ارفع ملف التصميم.</span> <button type="button" class="link" id="qf-open-pf">افتح البروفيل</button>`;
+  } else $("#qf-prof").innerHTML = "";
+  for (const [k, part, name] of [["g", qf.ground, qf.gName], ["d", qf.design, qf.dName]]) {
+    $(`#qf-${k}-slot`).classList.toggle("has", Boolean(part) || (k === "d" && tpl && Boolean(vpis)));
+    if (!part) continue;
+    const s = part.sections;
+    $(`#qf-${k}-got`).innerHTML = `<bdi data-no-i18n>${esc(name)}</bdi>: <span>قطاعات</span> <bdi>${s.length}</bdi> · <bdi dir="ltr">${esc(qfCh(s[0].chainage))} → ${esc(qfCh(s[s.length - 1].chainage))}</bdi>`;
+  }
+}
+
+const qfSecCols = [
+  { key: "chainageText", label: "المحطة" }, { key: "groundCL", label: "منسوب الأرض عند المحور", num: 1 }, { key: "designLevel", label: "منسوب التصميم", num: 1 },
+  { key: "formationLevel", label: "منسوب التأسيس", num: 1 }, { key: "cutArea", label: "حفر م²", num: 1, d: 2 }, { key: "fillArea", label: "ردم م²", num: 1, d: 2 },
+  { key: "left", label: "الجنب الشمال" }, { key: "right", label: "الجنب اليمين" },
+];
+function runQf() {
+  const out = $("#qf-out");
+  qfShow();
+  if (!qf.ground) return;
+  try {
+    const tpl = $("#qf-src").value === "template";
+    const vpis = qfVpis();
+    if (tpl && !vpis) throw new Error("مفيش تصميم في تبويب البروفيل؛ اكتب نقط الـ VPI هناك أو ارفع ملف التصميم.");
+    if (!tpl && !qf.design) throw new Error("ارفع ملف قطاعات التصميم، أو اختار القطاع النموذجي على منسوب البروفيل.");
+    const r = E.sectionQuantities({
+      ground: qf.ground.sections,
+      ...(tpl ? { vpis } : { designSections: qf.design.sections }),
+      template: { widthLeft: numOrUndef($("#qf-wl").value), widthRight: numOrUndef($("#qf-wr").value), crossfallPercent: numOrUndef($("#qf-cf").value), cutSlope: numOrUndef($("#qf-cs").value), fillSlope: numOrUndef($("#qf-fs").value) },
+      thickness: tpl ? numOrUndef($("#qf-th").value) : 0,
+      method: $("#qf-method").value,
+      fillFactor: numOrUndef($("#qf-ff").value),
+    });
+    qf.res = r;
+    qf.at = Math.min(qf.at, r.sections.length - 1);
+    const v = r.volumes;
+    const notes = [...(qf.ground.notes ?? []), ...(qf.design?.notes ?? []), ...r.notes];
+    const warn = r.sections.filter((s) => s.warnings.length).slice(0, 5).map((s) => `${s.chainageText}: ${s.warnings[0]}`);
+    let html = notes.length || warn.length ? `<div class="notice">${[...notes, ...warn].map((n) => `<p>${esc(n)}</p>`).join("")}</div>` : "";
+    html += "<h3>ملخص الكميات</h3>" + readouts([
+      ["إجمالي الحفر (م³)", v.totalCut.toFixed(2), "cut"], ["إجمالي الردم (م³)", v.totalFill.toFixed(2), "fill"],
+      ["الفرق (حفر − ردم×معامل) (م³)", v.netBalance.toFixed(2)], ["عدد القطاعات", String(r.sections.length)],
+      ["من محطة", qfCh(r.sections[0].chainage)], ["لمحطة", qfCh(r.sections[r.sections.length - 1].chainage)],
+    ]);
+    html += `<p class="hint">${esc(v.method)}. ${esc(v.balanceNote)}</p>`;
+    html += `<h3>مساحات القطاعات</h3><p class="hint">اضغط على أي قطاع في الجدول تشوف رسمته فوق.</p><div class="qf-secs">${table(qfSecCols, r.sections)}</div>`;
+    html += "<h3>الكميات بين القطاعات</h3>" + table(volCols, v.rows);
+    out.innerHTML = panel("QF", "جداول الكميات", html);
+    const sel = $("#qf-st");
+    sel.innerHTML = r.sections.map((s, i) => `<option value="${i}">${esc(s.chainageText)}</option>`).join("");
+    $("#qf-view").hidden = false;
+    qfDraw();
+    for (const b of ["#qf-csv", "#qf-dxf", "#qf-note"]) $(b).disabled = false;
+  } catch (err) {
+    qf.res = null;
+    $("#qf-view").hidden = true;
+    for (const b of ["#qf-csv", "#qf-dxf", "#qf-note"]) $(b).disabled = true;
+    showError(out, err);
+  }
+}
+// The section stepped to, drawn as the single-section tool draws one.
+function qfDraw() {
+  const s = qf.res?.sections[qf.at];
+  if (!s) return;
+  $("#qf-st").value = String(qf.at);
+  $("#qf-prev").disabled = qf.at === 0;
+  $("#qf-next").disabled = qf.at === qf.res.sections.length - 1;
+  document.querySelectorAll("#qf-out .qf-secs tbody tr").forEach((tr, i) => tr.classList.toggle("on", i === qf.at));
+  const sd = sectionData(s.ground, s.design);
+  viz($("#qf-chart"), {
+    title: `القطاع العرضي ${s.chainageText}`,
+    sheet: sectionDrawing(sd, s.cutArea, s.fillArea),
+    build: sd && sectionScene({ ...sd, cutArea: s.cutArea, fillArea: s.fillArea }),
+    note: "القطاع ممدود بطول الطريق عشان يبان كمجسم. المساحات المكتوبة هي مساحة القطاع نفسه.",
+  });
+}
+function qfStep(i) {
+  if (!qf.res) return;
+  qf.at = Math.max(0, Math.min(qf.res.sections.length - 1, i));
+  qfDraw();
+}
+
+// The quantities as a project note, in the language on screen.
+function qfNoteText() {
+  const r = qf.res, v = r.volumes, en = I18N.lang === "en";
+  const ltr = (x) => (en ? x : `⁦${x}⁩`);
+  const a = qfCh(r.sections[0].chainage), b = qfCh(r.sections[r.sections.length - 1].chainage);
+  const lines = [en ? `Earthwork ${a} to ${b}: ${r.sections.length} cross sections (${qf.gName}).` : `كميات من ${ltr(a)} لـ ${ltr(b)}: ${r.sections.length} قطاع عرضي (${qf.gName}).`];
+  lines.push(en ? `Total cut ${v.totalCut.toFixed(2)} m³, total fill ${v.totalFill.toFixed(2)} m³, balance ${v.netBalance.toFixed(2)} m³.` : `إجمالي الحفر ${ltr(v.totalCut.toFixed(2))} م³، إجمالي الردم ${ltr(v.totalFill.toFixed(2))} م³، الفرق ${ltr(v.netBalance.toFixed(2))} م³.`);
+  if ($("#qf-src").value === "template") {
+    lines.push(en
+      ? `Template: ${$("#qf-wl").value} m left, ${$("#qf-wr").value} m right, crossfall ${$("#qf-cf").value}%, side slopes cut ${$("#qf-cs").value}:1 fill ${$("#qf-fs").value}:1, pavement ${$("#qf-th").value} m.`
+      : `القطاع النموذجي: ${ltr($("#qf-wl").value)} م يسار و${ltr($("#qf-wr").value)} م يمين، ميل عرضي ${ltr($("#qf-cf").value)}%، ميول الجوانب حفر ${ltr(`${$("#qf-cs").value}:1`)} وردم ${ltr(`${$("#qf-fs").value}:1`)}، سمك الرصف ${ltr($("#qf-th").value)} م.`);
+  }
+  lines.push(en ? `Method: ${I18N.tr(v.method) ?? v.method}.` : `الطريقة: ${v.method}.`);
+  return lines.join("\n");
+}
+
+$("#qf-g-file").onchange = async (e) => {
+  const f = e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  $("#qf-g-got").innerHTML = `<span class="hint">بيقرا الملف…</span>`;
+  try {
+    const got = await qfRead(f);
+    if (!got.ground.sections.length) throw new Error("مفيش قطاعات في الملف.");
+    qf.ground = got.ground;
+    qf.gName = f.name;
+    if (got.design) {
+      qf.design = got.design;
+      qf.dName = `${f.name} › ${got.surfaces[1]}`;
+      $("#qf-src").value = "file";
+    }
+    qf.at = 0;
+    runQf();
+  } catch (err) { $("#qf-g-got").innerHTML = `<span class="bad">${esc(err.message)}</span>`; }
+};
+$("#qf-d-file").onchange = async (e) => {
+  const f = e.target.files[0];
+  e.target.value = "";
+  if (!f) return;
+  $("#qf-d-got").innerHTML = `<span class="hint">بيقرا الملف…</span>`;
+  try {
+    const got = await qfRead(f);
+    qf.design = got.design ?? got.ground;
+    qf.dName = f.name;
+    runQf();
+  } catch (err) { $("#qf-d-got").innerHTML = `<span class="bad">${esc(err.message)}</span>`; }
+};
+// An example: sections every 20 m along the Profile tab's example, the ground falling to the right.
+$("#qf-sample").onclick = () => {
+  const groundAt = (ch) => {
+    const g = [[0, 99], [25, 100.2], [50, 101.1], [75, 102], [100, 101.5], [125, 101.75], [150, 101.3], [175, 100.9], [200, 100.4]];
+    for (let i = 1; i < g.length; i++) if (ch <= g[i][0]) return g[i - 1][1] + ((g[i][1] - g[i - 1][1]) * (ch - g[i - 1][0])) / (g[i][0] - g[i - 1][0]);
+    return g[g.length - 1][1];
+  };
+  const lines = ["Station,Offset,Level"];
+  for (let ch = 0; ch <= 200; ch += 20) for (const o of [-20, -15, -10, -5, 0, 5, 10, 15, 20]) lines.push(`${E.formatChainage(ch, 0)},${o},${(groundAt(ch) - o * 0.03 + (o % 10 ? 0.05 : 0)).toFixed(3)}`);
+  qf.ground = E.sectionsFromTable(E.parseDelimited(lines.join("\n")));
+  qf.gName = I18N.lang === "en" ? "example-sections.csv" : "مثال-قطاعات.csv";
+  $("#qf-src").value = "template";
+  qf.at = 0;
+  runQf();
+};
+$("#qf-run").onclick = runQf;
+for (const id of ["#qf-src", "#qf-wl", "#qf-wr", "#qf-cf", "#qf-cs", "#qf-fs", "#qf-th", "#qf-method", "#qf-ff"]) $(id).addEventListener("change", runQf);
+$("#qf-prev").onclick = () => qfStep(qf.at - 1);
+$("#qf-next").onclick = () => qfStep(qf.at + 1);
+$("#qf-st").addEventListener("change", (e) => qfStep(Number(e.target.value)));
+$("#qf-out").addEventListener("click", (e) => {
+  const tr = e.target.closest(".qf-secs tbody tr");
+  if (!tr) return;
+  qfStep([...tr.parentElement.children].indexOf(tr));
+  $("#qf-view").scrollIntoView({ block: "nearest", behavior: "smooth" });
+});
+$("#qf-prof").addEventListener("click", (e) => { if (e.target.id === "qf-open-pf") { showTab("profile"); $("#tab-profile").scrollIntoView({ block: "start" }); } });
+// The table as a quantities sheet: each section's areas, and the volumes from the section before it.
+$("#qf-csv").onclick = async () => {
+  if (!qf.res || !downloads) return;
+  const byTo = new Map(qf.res.volumes.rows.map((v) => [v.to, v]));
+  const cols = [...qfSecCols, ...volCols.slice(3)];
+  const rows = qf.res.sections.map((s) => ({ ...s, ...(byTo.get(E.formatChainage(s.chainage)) ?? {}) }));
+  try { await downloads.save({ filename: "quantities.csv", data: toCsv(cols, rows) }); }
+  catch (err) { if (err?.code !== "declined") showError($("#qf-out"), err); }
+};
+$("#qf-dxf").onclick = async () => {
+  if (!qf.res || !downloads) return;
+  try { await downloads.save({ filename: "cross-sections.dxf", data: E.sectionsDxf(qf.res.sections, { columns: 3 }) }); }
+  catch (err) { if (err?.code !== "declined") showError($("#qf-out"), err); }
+};
+$("#qf-note").onclick = () => { if (qf.res) pjCompose(qfNoteText()); };
+// The design may have changed in the Profile tab: show its range, and work the quantities again.
+for (const b of document.querySelectorAll('[data-tab="qty"], [data-go="qty"]')) b.addEventListener("click", () => (qf.ground ? runQf() : qfShow()));
+qfShow();
 
 // ---------- data review ----------
 let rvLast = null;
