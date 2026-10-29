@@ -7,7 +7,7 @@
 
 الموقع منشور على:
 
-- Cloudflare Pages: https://survey-assistant.pages.dev
+- Cloudflare Pages: https://geox-survey.pages.dev (وكمان https://survey-assistant.pages.dev)
 - GitHub Pages: https://a7medfat7y123-netizen.github.io/survey-assistant-site/
 - Netlify: https://enchanting-kheer-f015f3.netlify.app
 
