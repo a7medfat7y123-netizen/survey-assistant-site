@@ -742,6 +742,28 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .gs-tablebox td { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 /* The narrowest phones: eight tabs still across, in smaller type. */
 @media (max-width: 340px) { nav { gap: 2px; } nav button { font-size: 10px; } }
+/* Profile tab: a slot for each file, the ground's colour and the design's beside its name. */
+.pf-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.pf-slot { display: grid; gap: 4px; align-content: start; padding: 14px; border: 1.5px dashed color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--accent) 4%, var(--sheet-2)); transition: border-color .15s, background .15s; }
+.pf-slot.over { border-color: var(--accent); background: var(--accent-soft); }
+.pf-slot.has { border-style: solid; border-color: color-mix(in srgb, var(--fill) 50%, var(--line)); }
+.pf-slot .hint { margin: 0; }
+.pf-slot .actions { margin-top: 8px; }
+.pf-slot-head { display: flex; align-items: center; gap: 8px; font-family: var(--f-head); font-size: 14.5px; }
+.pf-key { width: 22px; height: 0; border-top: 3px solid var(--ground); border-radius: 2px; flex: none; }
+.pf-key.design { border-top-color: var(--design); }
+.pf-got { margin: 6px 0 0; font-size: 12.5px; color: var(--ink); min-height: 1em; overflow-wrap: anywhere; }
+.pf-got:empty { display: none; }
+.pf-got bdi[dir="ltr"] { font-family: var(--f-num); }
+.readout b.cut, #pf-out tr.is-cut td:nth-child(4) { color: var(--cut); }
+.readout b.fill, #pf-out tr.is-fill td:nth-child(5) { color: var(--fill); }
+#pf-out .mono { font-family: var(--f-num); }
+.readout small.pf-at { margin-top: 2px; }
+.readout small.pf-at bdi { font-family: var(--f-num); color: var(--ink); }
+.pf-notes:empty { display: none; }
+.pf-notes { margin-bottom: 12px; }
+.pf-notes p { margin: 0; }
+.pf-notes p + p { margin-top: 4px; }
 .readout b.txt { font-family: var(--f-body); font-size: 15px; line-height: 1.45; direction: inherit; text-align: start; overflow-wrap: normal; }
 @media (max-width: 760px) {
   .gs-map { height: clamp(300px, 58vh, 520px); }
@@ -1135,13 +1157,41 @@ BM2,,,0.900</textarea>
   <section id="tab-profile" class="tab" hidden>
     <div class="panel">
       <h2><span class="callout">PR</span>القطاع الطولي والمناسيب التصميمية</h2>
+      <p class="hint">ارفع ملف الأرض الطبيعية وملف التصميم النهائي، والبروفيل بيترسم لوحده بالحفر والردم عند كل محطة.</p>
+      <div class="pf-files">
+        <div class="pf-slot" id="pf-g-slot">
+          <div class="pf-slot-head"><span class="pf-key ground" aria-hidden="true"></span><b>ملف الأرض الطبيعية</b></div>
+          <span class="hint">محطات ومناسيب من دفتر الميزانية، أو نقط رفع (رقم، شرقي، شمالي، منسوب) على المحور.</span>
+          <div class="actions">
+            <label class="file-btn" for="pf-g-file">اختار ملف الأرض</label><input type="file" id="pf-g-file" hidden>
+            <button type="button" class="secondary primary" id="pf-g-clear" hidden>شيل الملف</button>
+          </div>
+          <p class="pf-got" id="pf-g-got" aria-live="polite"></p>
+        </div>
+        <div class="pf-slot" id="pf-d-slot">
+          <div class="pf-slot-head"><span class="pf-key design" aria-hidden="true"></span><b>ملف التصميم النهائي</b></div>
+          <span class="hint">نقط VPI بطول المنحنى الرأسي، أو المنسوب التصميمي عند كل محطة، أو LandXML من Civil 3D، أو نقط المحور التصميمي بمنسوبها.</span>
+          <div class="actions">
+            <label class="file-btn" for="pf-d-file">اختار ملف التصميم</label><input type="file" id="pf-d-file" hidden>
+            <button type="button" class="secondary primary" id="pf-d-clear" hidden>شيل الملف</button>
+          </div>
+          <p class="pf-got" id="pf-d-got" aria-live="polite"></p>
+        </div>
+      </div>
+      <div id="pf-notes" class="pf-notes"></div>
+      <div class="grid">
+        <label for="pf-start">محطة أول نقطة في ملف النقط (فاضي = بداية التصميم)<input id="pf-start" dir="ltr" placeholder="0+000" autocomplete="off"></label>
+        <label for="pf-off">أقصى بعد لنقط الأرض عن محور التصميم (م)<input id="pf-off" type="number" value="5" min="0" step="0.5" dir="ltr"></label>
+        <label for="pf-int">لو مفيش أرض: محطة كل (م)<input id="pf-int" type="number" value="25" dir="ltr"></label>
+      </div>
+      <h3>البيانات (من الملفات، أو اكتبها بإيدك)</h3>
       <div class="two">
-        <label class="block" for="pf-vpi">نقاط تقاطع الميول VPI: المحطة، المنسوب، طول المنحنى الرأسي (اختياري)
+        <label class="block" for="pf-vpi">التصميم: نقط VPI (المحطة، المنسوب، طول المنحنى الرأسي) أو المنسوب التصميمي عند كل محطة
           <textarea id="pf-vpi" class="data" rows="7">0+000,100.000
 0+100,102.000,50
 0+200,101.000</textarea>
         </label>
-        <label class="block" for="pf-st">المحطات ومنسوب الأرض الطبيعية (اختياري)
+        <label class="block" for="pf-st">الأرض الطبيعية: المحطة ومنسوب الأرض
           <textarea id="pf-st" class="data" rows="7">0+000,99.000
 0+025,100.200
 0+050,101.100
@@ -1153,12 +1203,23 @@ BM2,,,0.900</textarea>
 0+200,100.400</textarea>
         </label>
       </div>
-      <div class="grid"><label for="pf-int">لو مفيش محطات: كل (م)<input id="pf-int" type="number" value="25"></label></div>
       <div class="actions">
-        <button id="pf-run" class="primary" type="button">احسب</button>
-        <label class="file-btn secondary" for="pf-file">تحميل المحطات من ملف</label><input type="file" id="pf-file" hidden>
+        <button id="pf-run" class="primary" type="button">ارسم البروفيل</button>
         <button id="pf-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <button id="pf-dxf" class="secondary primary dl" type="button" disabled>تصدير DXF للأوتوكاد</button>
+        <button id="pf-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
       </div>
+      <details class="tr-formats">
+        <summary>الصيغ اللي بيقراها</summary>
+        <ul>
+          <li>Excel (xlsx وxls وods) أو CSV أو TXT: المحطة والمنسوب، بعناوين عربي أو إنجليزي أو من غير عناوين. لو الملف فيه منسوب الأرض والمنسوب التصميمي مع بعض، ملف واحد بيكفي.</li>
+          <li>نقط رفع (رقم، شرقي، شمالي، منسوب) من التوتال ستيشن أو الـ GPS، أو Leica GSI: المحطات بتتحسب بالمسافة بين النقط بترتيبها في الملف، ولو التصميم نقط كمان بتتسقط على محوره.</li>
+          <li>LandXML من Civil 3D: بروفيل الأرض (ProfSurf) والتصميم (ProfAlign) بمنحنياته الرأسية.</li>
+          <li>DXF وDWG: النقط اللي ليها منسوب، أو بولي لاين 3D على المحور.</li>
+          <li>جداول القطاعات العرضية (المحطة، الإزاحة، المنسوب): بتتاخد منها نقط المحور.</li>
+          <li>ملف الـ DXF اللي بيطلع: الأرض والتصميم فوق خط مقارنة، والمناسيب متكبّرة 10 مرات، وتحت كل محطة المحطة والمنسوبين والحفر أو الردم.</li>
+        </ul>
+      </details>
     </div>
     <div id="pf-chart"></div>
     <div id="pf-out" class="out"></div>
@@ -1869,6 +1930,16 @@ const I18N = (() => {
     [/^قبل توزيع خطأ القفل \(مكبّر ×(.*)\)$/, "Before the misclosure is shared (exaggerated ×$1)"],
     [/^(\d+) ف (\d+) ط ([\d.]+) س$/, "$1 feddan $2 qirat $3 sahm"],
     [/^([\d.,]+) م$/, "$1 m"],
+    // Profile from files (src/engine/profile.js).
+    [/^الملف فيه إزاحات؛ اتاخد أقرب نقطة للمحور عند كل محطة \((\d+) من (\d+)\)\.$/, "The file has offsets; the point nearest the centre line was taken at each station ($1 of $2)."],
+    [/^محطات التصميم اتحسبت بالمسافة على نقط المحور بترتيبها في الملف، من (.+)\.$/, "The design's chainages are the distances along its centre-line points in their order in the file, from $1."],
+    [/^محطات الأرض اتحسبت بالمسافة بين النقط بترتيبها في الملف، من (.+)\.$/, "The ground's chainages are the distances between its points in their order in the file, from $1."],
+    [/^محطات الأرض اتحسبت بإسقاط كل نقطة على محور التصميم \(أقصى بعد (.+) م\)\.$/, "The ground's chainages come from projecting each point onto the design centre line (at most $1 m off)."],
+    [/^(\d+) نقطة أرض أبعد من (.+) م عن محور التصميم اتسابت\.$/, "$1 ground points more than $2 m off the design centre line were left out."],
+    [/^نقط الأرض الطبيعية كلها بعيدة عن محور التصميم \(أكتر من (.+) م\)\. اتأكد إن الملفين على نفس نظام الإحداثيات\.$/, "All the natural ground points lie far from the design centre line (more than $1 m). Check both files are in the same coordinate system."],
+    [/^(التصميم|الأرض الطبيعية): (\d+) محطة متكررة اتشالت\.$/, (m, w, n) => `${w === "التصميم" ? "Design" : "Natural ground"}: ${n} repeated stations were removed.`],
+    [/^الأرض \((.+) لـ (.+)\) والتصميم \((.+) لـ (.+)\) مش على نفس المحطات\.$/, "The ground ($1 to $2) and the design ($3 to $4) do not share their chainages."],
+    [/^محطة البداية "(.*)" مش مفهومة\. اكتبها 0\+000 أو بالمتر\.$/, "The start chainage \"$1\" is not understood. Write it as 0+000 or in metres."],
     // GIS: a file's name, then what happened to it; layers' systems; what a reader left out.
     [/^"([^"]+)": (.+)$/, (m, name, rest) => `"${name}": ${tr(rest) ?? rest}`],
     [/^UTM زون (\d+) (شمال|جنوب) \(WGS 84\)$/, (m, z, h) => `UTM zone ${z}${h === "شمال" ? "N" : "S"} (WGS 84)`],
@@ -2504,6 +2575,291 @@ function profileDesign(input) {
     rows,
     warnings,
   };
+}
+
+// ---------- a profile from two files: the natural ground and the final design ----------
+// A file gives levels by chainage (a level book, a designer's table, a LandXML profile) or points by
+// E and N with their levels (a total station's or GPS's centre line, a CAD 3D polyline). Points get
+// their chainage along the design's own centre line when it comes as points, else along their order.
+
+const pfHead = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()[\]/:'"°#*]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+// Civil 3D and other programs put "PVI" before a column's name ("PVI Station", "PVI Elevation").
+const PF_CH = /^(?:pvi|vpi|pi|ip)?(?:ch|chainage|chain|station|sta|stn|km|kp|pk)$|^(?:محطه|المحطه|الكيلو|كيلو|كيلومتر|الكيلومتر|المسافه|مسافه)$/;
+const PF_GROUND = /^(ngl|egl|ogl|eg|ng|nl|gl|ground|groundlevel|groundrl|existing|existinglevel|existingground|existinggroundlevel|natural|naturallevel|naturalground|naturalgroundlevel|منسوبالارض|الارض|ارض|الارضالطبيعيه|منسوبالارضالطبيعيه|طبيعي|الطبيعي|منسوبطبيعي|المنسوبالطبيعي)$/;
+const PF_DESIGN = /^(design|designlevel|designrl|designelevation|dl|fgl|fg|fl|finished|finishedlevel|finishedgrade|finishedgradelevel|proposed|proposedlevel|gradelevel|gradeelevation|gradeline|formation|formationlevel|tcl|pgl|redlevel|تصميمي|التصميمي|منسوبتصميمي|المنسوبالتصميمي|منسوبالتصميم|التصميم|نهائي|النهائي|منسوبنهائي|المنسوبالنهائي)$/;
+const PF_LEVEL = /^(?:pvi|vpi|pi|ip)?(?:z|h|level|levels|elev|elevation|rl|height)$|^(?:منسوب|المنسوب|ارتفاع|الارتفاع)$/;
+const PF_CURVE = /^(l|vcl|lvc|curvelength|curve|طولالمنحني|طولالمنحنى|المنحني|المنحنى)$/;
+const PF_OFFSET = /^(offset|os|off|بعد|البعد|ازاحه|الازاحه)$/;
+const PF_E = /^(x|e|east|easting|شرقي|الشرقي|شرق)$/;
+const PF_N = /^(y|n|north|northing|شمالي|الشمالي|شمال)$/;
+
+/**
+ * What a table (from tableFromMatrix, parseDelimited, parseLandXml or parseGsi) holds for a profile:
+ * { ground, design, level } — each null or { kind: "chainage", rows: [{ chainage, level, curveLength? }] }
+ * or { kind: "points", rows: [{ e, n, level }] }. "level" is a level the headers do not say is ground
+ * or design (the slot the file was put in decides). LandXML's ProfSurf is ground, its ProfAlign design.
+ */
+function profileSeries(t) {
+  const rows = t?.rows ?? [];
+  const keys = t?.columns ?? [];
+  const heads = (t?.originalHeaders ?? keys).map((h, i) => pfHead(h || keys[i]));
+  const col = (canon, re) => {
+    const i = canon && keys.includes(canon) && re.test(heads[keys.indexOf(canon)]) ? keys.indexOf(canon) : heads.findIndex((h) => re.test(h));
+    return i < 0 ? (canon && keys.includes(canon) ? canon : null) : keys[i];
+  };
+  let chK = col("chainage", PF_CH);
+  const gK = keys[heads.findIndex((h) => PF_GROUND.test(h))] ?? null;
+  const dK = col("designLevel", PF_DESIGN);
+  let lK = col("z", PF_LEVEL);
+  if (lK === gK || lK === dK) lK = null;
+  let cK = col("curveLength", PF_CURVE);
+  const oK = col("offset", PF_OFFSET);
+  let eK = col("x", PF_E), nK = col("y", PF_N);
+  const notes = [];
+  // No headers: "chainage, level[, curve length]" when the first column runs up like chainages
+  // (a 3-column file of numbers is otherwise taken for E, N, Z).
+  if (t?.hasHeader === false && !chK) {
+    const first = keys[0], second = keys[1];
+    const ch = rows.map((r) => parseChainage(r[first]));
+    const lv = rows.map((r) => toNumber(r[second]));
+    const rising = ch.every((c, i) => c !== null && (i === 0 || c >= ch[i - 1]));
+    const levels = lv.every((v) => v !== null && Math.abs(v) < 10000);
+    const coords = ch.some((c) => Math.abs(c) >= 100000);
+    if (rows.length >= 2 && rising && levels && !coords && (keys.length < 4 || !eK)) {
+      chK = first;
+      lK = second;
+      eK = nK = null;
+      cK = keys.length >= 3 && rows.some((r) => toNumber(r[keys[2]]) > 0) ? keys[2] : null;
+    }
+  }
+  // Centre-line rows only, when the file has offsets (a cross-section survey).
+  let use = rows;
+  if (oK && chK) {
+    const best = new Map();
+    for (const r of rows) {
+      const ch = parseChainage(r[chK]), o = Math.abs(toNumber(r[oK]) ?? 0);
+      if (ch === null) continue;
+      const b = best.get(ch);
+      if (!b || o < b.o) best.set(ch, { r, o });
+    }
+    use = [...best.values()].map((b) => b.r);
+    if (use.length < rows.length) notes.push(`الملف فيه إزاحات؛ اتاخد أقرب نقطة للمحور عند كل محطة (${use.length} من ${rows.length}).`);
+  }
+  const byChainage = (levelKey, withCurve) => {
+    if (!chK || !levelKey) return null;
+    const out = [];
+    for (const r of use) {
+      const ch = parseChainage(r[chK]), level = toNumber(r[levelKey]);
+      if (ch === null || level === null) continue;
+      out.push(withCurve && cK ? { chainage: ch, level, curveLength: toNumber(r[cK]) ?? 0 } : { chainage: ch, level });
+    }
+    return out.length >= 2 ? { kind: "chainage", rows: out } : null;
+  };
+  const byPoints = (levelKey) => {
+    if (!eK || !nK || !levelKey) return null;
+    const out = [];
+    for (const r of use) {
+      const e = toNumber(r[eK]), n = toNumber(r[nK]), level = toNumber(r[levelKey]);
+      if (e !== null && n !== null && level !== null) out.push({ e, n, level, id: r.id ?? null });
+    }
+    return out.length >= 2 ? { kind: "points", rows: out } : null;
+  };
+  const sheet = String(t?.sheet ?? "");
+  const series = (key, design) => byChainage(key, design) ?? byPoints(key);
+  let ground = gK ? series(gK, false) : null;
+  let design = dK ? series(dK, true) : null;
+  let level = lK ? series(lK, true) : null;
+  if (level && /^ProfSurf\b/.test(sheet)) { ground = ground ?? level; level = null; }
+  else if (level && /^Profile\b/.test(sheet)) { design = design ?? level; level = null; }
+  return { ground, design, level, notes };
+}
+
+// Points chained along their order: [{ chainage, e, n, level }].
+function pfChain(rows, start) {
+  let ch = start;
+  return rows.map((p, i) => {
+    if (i) ch += Math.hypot(p.e - rows[i - 1].e, p.n - rows[i - 1].n);
+    return { ...p, chainage: ch };
+  });
+}
+// A point's chainage and offset (right of the line positive) on a chained centre line.
+function pfProject(line, p) {
+  let best = { d: Infinity, chainage: line[0].chainage, offset: 0 };
+  for (let i = 1; i < line.length; i++) {
+    const a = line[i - 1], b = line[i];
+    const dx = b.e - a.e, dy = b.n - a.n, L2 = dx * dx + dy * dy;
+    const t = L2 ? Math.max(0, Math.min(1, ((p.e - a.e) * dx + (p.n - a.n) * dy) / L2)) : 0;
+    const qe = a.e + t * dx, qn = a.n + t * dy;
+    const d = Math.hypot(p.e - qe, p.n - qn);
+    if (d < best.d) {
+      const side = Math.sign(dx * (p.n - a.n) - dy * (p.e - a.e)) || 1; // left of the direction is positive
+      best = { d, chainage: a.chainage + t * Math.sqrt(L2), offset: -side * d };
+    }
+  }
+  return best;
+}
+// How many times a line of points turns back on itself (points not in order along a road).
+function pfReversals(rows) {
+  let n = 0;
+  for (let i = 2; i < rows.length; i++) {
+    const ax = rows[i - 1].e - rows[i - 2].e, ay = rows[i - 1].n - rows[i - 2].n, bx = rows[i].e - rows[i - 1].e, by = rows[i].n - rows[i - 1].n;
+    if (ax * bx + ay * by < 0) n++;
+  }
+  return n;
+}
+// Sorted by chainage, a chainage given twice kept once.
+function pfTidy(list, what, notes) {
+  const sorted = list.slice().sort((a, b) => a.chainage - b.chainage);
+  const out = sorted.filter((r, i) => i === 0 || r.chainage - sorted[i - 1].chainage > 1e-6);
+  if (out.length < sorted.length) notes.push(`${what}: ${sorted.length - out.length} محطة متكررة اتشالت.`);
+  return out;
+}
+
+/**
+ * The natural ground and the final design brought to one chainage, as profileDesign's input.
+ * ground, design: series from profileSeries (either may be missing). options.start: the chainage of
+ * the first point of a points file (default: the design's start, else 0); options.maxOffset: how far
+ * (m) a ground point may lie off a design centre line given by points (default 5).
+ * Returns { vpis, stations, notes }.
+ */
+function profileFromSeries(ground, design, options = {}) {
+  const notes = [];
+  const given = options.start !== undefined && options.start !== null && String(options.start).trim() !== "";
+  const start = given ? parseChainage(options.start) : null;
+  if (given && start === null) fail(`محطة البداية "${options.start}" مش مفهومة. اكتبها 0+000 أو بالمتر.`);
+  const maxOffset = toNumber(options.maxOffset) ?? 5;
+  let vpis = null, line = null;
+  if (design?.kind === "points") {
+    line = pfChain(design.rows, start ?? 0);
+    vpis = line.map((p) => ({ chainage: p.chainage, level: p.level }));
+    notes.push(`محطات التصميم اتحسبت بالمسافة على نقط المحور بترتيبها في الملف، من ${formatChainage(start ?? 0)}.`);
+    if (pfReversals(design.rows) > design.rows.length * 0.1) notes.push("نقط التصميم مش مترتبة على المحور (الخط بيرجع على نفسه)؛ رتّبها بالترتيب من أول الطريق لآخره.");
+  } else if (design) vpis = design.rows.map((r) => ({ chainage: r.chainage, level: r.level, ...(r.curveLength ? { curveLength: r.curveLength } : {}) }));
+  if (vpis) vpis = pfTidy(vpis, "التصميم", notes);
+
+  let stations = null;
+  if (ground?.kind === "chainage") stations = ground.rows.map((r) => ({ chainage: r.chainage, groundLevel: r.level }));
+  else if (ground && line) {
+    const proj = ground.rows.map((p) => ({ ...pfProject(line, p), level: p.level }));
+    const near = proj.filter((p) => p.d <= maxOffset);
+    if (near.length < proj.length) notes.push(`${proj.length - near.length} نقطة أرض أبعد من ${maxOffset} م عن محور التصميم اتسابت.`);
+    if (near.length < 2) fail(`نقط الأرض الطبيعية كلها بعيدة عن محور التصميم (أكتر من ${maxOffset} م). اتأكد إن الملفين على نفس نظام الإحداثيات.`);
+    stations = near.map((p) => ({ chainage: p.chainage, groundLevel: p.level }));
+    notes.push(`محطات الأرض اتحسبت بإسقاط كل نقطة على محور التصميم (أقصى بعد ${maxOffset} م).`);
+  } else if (ground) {
+    const s0 = start ?? vpis?.[0]?.chainage ?? 0;
+    stations = pfChain(ground.rows, s0).map((p) => ({ chainage: p.chainage, groundLevel: p.level }));
+    notes.push(`محطات الأرض اتحسبت بالمسافة بين النقط بترتيبها في الملف، من ${formatChainage(s0)}.`);
+    if (pfReversals(ground.rows) > ground.rows.length * 0.1) notes.push("نقط الأرض مش مترتبة على المحور (الخط بيرجع على نفسه)؛ رتّبها بالترتيب من أول الطريق لآخره.");
+  }
+  if (stations) stations = pfTidy(stations, "الأرض الطبيعية", notes);
+  if (vpis && stations) {
+    const a = Math.max(vpis[0].chainage, stations[0].chainage), b = Math.min(vpis[vpis.length - 1].chainage, stations[stations.length - 1].chainage);
+    if (a > b) notes.push(`الأرض (${formatChainage(stations[0].chainage)} لـ ${formatChainage(stations[stations.length - 1].chainage)}) والتصميم (${formatChainage(vpis[0].chainage)} لـ ${formatChainage(vpis[vpis.length - 1].chainage)}) مش على نفس المحطات.`);
+  }
+  return { vpis, stations, notes };
+}
+
+/**
+ * Cut and fill along a profile's rows (profileDesign's): the deepest cut and fill, the longitudinal
+ * areas between the ground and the design lines, and the chainages where they cross (zero points).
+ */
+function profileSummary(rows) {
+  const pts = (rows ?? []).filter((r) => r.groundLevel !== null && r.designLevel !== null && r.groundLevel !== undefined && r.designLevel !== undefined)
+    .map((r) => ({ x: r.chainage, d: r.groundLevel - r.designLevel }));
+  let cutArea = 0, fillArea = 0;
+  const zeros = [];
+  let maxCut = null, maxFill = null;
+  pts.forEach((p) => {
+    if (p.d > 0 && (!maxCut || p.d > maxCut.depth)) maxCut = { depth: round(p.d), chainage: p.x };
+    if (p.d < 0 && (!maxFill || -p.d > maxFill.depth)) maxFill = { depth: round(-p.d), chainage: p.x };
+  });
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i], w = b.x - a.x;
+    if (!(w > 0)) continue;
+    if (a.d >= 0 && b.d >= 0) cutArea += ((a.d + b.d) / 2) * w;
+    else if (a.d <= 0 && b.d <= 0) fillArea -= ((a.d + b.d) / 2) * w;
+    else {
+      const x0 = a.x + (w * a.d) / (a.d - b.d);
+      const w1 = x0 - a.x, w2 = b.x - x0;
+      if (a.d > 0) { cutArea += (a.d * w1) / 2; fillArea -= (b.d * w2) / 2; } else { fillArea -= (a.d * w1) / 2; cutArea += (b.d * w2) / 2; }
+      zeros.push(round(x0, 3));
+    }
+  }
+  // A station exactly on the design between cut and fill is a zero point too.
+  for (let i = 1; i + 1 < pts.length; i++) if (pts[i].d === 0 && pts[i - 1].d * pts[i + 1].d < 0) zeros.push(pts[i].x);
+  zeros.sort((x, y) => x - y);
+  return {
+    stations: pts.length,
+    from: pts.length ? pts[0].x : null,
+    to: pts.length ? pts[pts.length - 1].x : null,
+    cutArea: round(cutArea, 2),
+    fillArea: round(fillArea, 2),
+    maxCut,
+    maxFill,
+    zeros,
+  };
+}
+
+// DXF texts: ASCII as is, anything else as AutoCAD's \U+XXXX.
+const pfDxfStr = (s) => String(s ?? "").replace(/[^\x20-\x7e]/g, (c) => `\\U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")}`);
+
+/**
+ * The profile as an AutoCAD drawing (DXF R12): the ground and design lines over a datum, levels
+ * exaggerated `exaggeration` times (default 10), and under each station its chainage, ground and
+ * design levels and the cut or fill, as on a profile sheet. designLine: [{ chainage, designLevel }]
+ * dense along the design (vertical curves drawn as curves); the stations' own levels are used without it.
+ */
+function profileDxf(rows, designLine = [], { exaggeration = 10 } = {}) {
+  const st = (rows ?? []).filter((r) => Number.isFinite(r.chainage));
+  if (st.length < 2) fail("لازم محطتين على الأقل عشان يترسم البروفيل.");
+  const ve = toNumber(exaggeration) > 0 ? toNumber(exaggeration) : 10;
+  const levels = st.flatMap((r) => [r.groundLevel, r.designLevel]).concat(designLine.map((r) => r.designLevel)).filter(Number.isFinite);
+  if (!levels.length) fail("مفيش مناسيب في البروفيل.");
+  const ch0 = st[0].chainage, ch1 = st[st.length - 1].chainage, len = ch1 - ch0 || 1;
+  const datum = Math.floor(Math.min(...levels)) - 1;
+  const th = Math.min(5, Math.max(0.5, Math.round((len / 400) * 2) / 2));
+  const X = (ch) => (ch - ch0).toFixed(3), Y = (z) => ((z - datum) * ve).toFixed(3);
+  const out = ["0", "SECTION", "2", "HEADER", "9", "$ACADVER", "1", "AC1009", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES"];
+  const line = (layer, color, x1, y1, x2, y2) => out.push("0", "LINE", "8", layer, "62", String(color), "10", x1, "20", y1, "30", "0", "11", x2, "21", y2, "31", "0");
+  const text = (layer, x, y, s, rot = 0, h = th) => out.push("0", "TEXT", "8", layer, "10", String(x), "20", String(y), "30", "0", "40", String(h), "1", pfDxfStr(s), ...(rot ? ["50", String(rot)] : []));
+  const poly = (layer, color, pts) => {
+    if (pts.length < 2) return;
+    out.push("0", "POLYLINE", "8", layer, "62", String(color), "66", "1", "10", "0", "20", "0", "30", "0", "70", "0");
+    for (const [x, y] of pts) out.push("0", "VERTEX", "8", layer, "10", x, "20", y, "30", "0");
+    out.push("0", "SEQEND", "8", layer);
+  };
+  const top = Math.max(...levels);
+  // The frame: datum line, the level scale on the left, a tick and line up to the ground at each station.
+  line("PROFILE-GRID", 8, X(ch0), Y(datum), X(ch1), Y(datum));
+  for (let z = datum; z <= Math.ceil(top) + 1e-9; z += 1) {
+    line("PROFILE-GRID", 8, String(-th), Y(z), "0", Y(z));
+    text("PROFILE-TEXT", -th * 6, +Y(z) - th / 2, z.toFixed(2));
+  }
+  const ground = st.filter((r) => Number.isFinite(r.groundLevel));
+  const design = (designLine.length >= 2 ? designLine : st).filter((r) => Number.isFinite(r.designLevel) && r.chainage >= ch0 - 1e-9 && r.chainage <= ch1 + 1e-9);
+  poly("NGL", 3, ground.map((r) => [X(r.chainage), Y(r.groundLevel)]));
+  poly("DESIGN", 1, design.map((r) => [X(r.chainage), Y(r.designLevel)]));
+  // Bands under the datum: chainage, ground level, design level, cut (+) or fill (−).
+  const band = th * 9;
+  const labels = ["CHAINAGE", "NGL", "DESIGN", "CUT(+)/FILL(-)"];
+  labels.forEach((lab, i) => {
+    const y = -band * (i + 1);
+    line("PROFILE-GRID", 8, String(-th * 16), y.toFixed(3), X(ch1), y.toFixed(3));
+    text("PROFILE-TEXT", -th * 15, y + band / 2 - th / 2, lab);
+  });
+  for (const r of st) {
+    const x = +X(r.chainage);
+    const zTop = Math.max(r.groundLevel ?? -Infinity, r.designLevel ?? -Infinity);
+    if (Number.isFinite(zTop)) line("PROFILE-GRID", 8, x.toFixed(3), Y(datum), x.toFixed(3), Y(zTop));
+    line("PROFILE-GRID", 8, x.toFixed(3), "0", x.toFixed(3), (-band * 4).toFixed(3));
+    const depth = Number.isFinite(r.groundLevel) && Number.isFinite(r.designLevel) ? r.groundLevel - r.designLevel : null;
+    const vals = [formatChainage(r.chainage), Number.isFinite(r.groundLevel) ? r.groundLevel.toFixed(3) : "", Number.isFinite(r.designLevel) ? r.designLevel.toFixed(3) : "", depth === null ? "" : `${depth >= 0 ? "+" : ""}${depth.toFixed(3)}`];
+    vals.forEach((v, i) => { if (v) text("PROFILE-TEXT", x - th * 0.35, -band * (i + 1) + th * 0.6, v, 90, th * 0.8); });
+  }
+  text("PROFILE-TEXT", 0, +Y(top) + th * 4, `LONGITUDINAL PROFILE  ${formatChainage(ch0)} - ${formatChainage(ch1)}   DATUM ${datum.toFixed(2)}   VERTICAL x${ve}`, 0, th * 1.4);
+  out.push("0", "ENDSEC", "0", "EOF");
+  return `${out.join("\r\n")}\r\n`;
 }
 
 // ---- src/engine/quantities.js
@@ -5995,6 +6351,16 @@ function parseLandXml(text) {
   }
   if (surf.length) tables.push({ sheet: "SurfacePoints", columns: ["id", "x", "y", "z", "code"], mapping: {}, hasHeader: true, rows: surf });
 
+  // A ground profile along the alignment (Civil 3D's "existing ground"): station elevation pairs.
+  for (const surf of text.matchAll(/<ProfSurf\b([^>]*)>([\s\S]*?)<\/ProfSurf>/g)) {
+    const list = surf[2].match(/<PntList2D\b[^>]*>([^<]*)<\/PntList2D>/)?.[1];
+    if (!list) continue;
+    const n = nums(list);
+    const rows = [];
+    for (let i = 0; i + 1 < n.length; i += 2) if (Number.isFinite(n[i]) && Number.isFinite(n[i + 1])) rows.push({ chainage: n[i], z: n[i + 1] });
+    if (rows.length) tables.push({ sheet: `ProfSurf ${attr(surf[1], "name") ?? ""}`.trim(), columns: ["chainage", "z"], mapping: {}, hasHeader: true, rows });
+  }
+
   for (const prof of text.matchAll(/<ProfAlign\b([^>]*)>([\s\S]*?)<\/ProfAlign>/g)) {
     const rows = [];
     for (const m of prof[2].matchAll(/<(PVI|ParaCurve|CircCurve|UnsymParaCurve)\b([^>]*)>([^<]*)<\/\1>/g)) {
@@ -8032,7 +8398,7 @@ function gisZip(files) {
   return out;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, profileSeries, profileFromSeries, profileSummary, profileDxf, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
 })();
 </script>
 <script>
@@ -12326,11 +12692,178 @@ trFill("loop");
 trShowFields();
 
 // ---------- profile ----------
-let pfLast = null;
+// The natural ground and the final design, each from a file (or typed in), drawn as a profile with the
+// cut and fill at every station. A file's levels by chainage go in as they are; points by E and N get
+// their chainage along the design's own centre line, or along their order (engine: profileFromSeries).
+I18N.add({
+  "ارفع ملف الأرض الطبيعية وملف التصميم النهائي، والبروفيل بيترسم لوحده بالحفر والردم عند كل محطة.": "Upload the natural ground file and the final design file, and the profile draws itself with the cut and fill at every station.",
+  "ملف الأرض الطبيعية": "Natural ground file", "ملف التصميم النهائي": "Final design file",
+  "محطات ومناسيب من دفتر الميزانية، أو نقط رفع (رقم، شرقي، شمالي، منسوب) على المحور.": "Stations and levels from the level book, or survey points (number, easting, northing, level) along the centre line.",
+  "نقط VPI بطول المنحنى الرأسي، أو المنسوب التصميمي عند كل محطة، أو LandXML من Civil 3D، أو نقط المحور التصميمي بمنسوبها.": "VPIs with their vertical curve lengths, the design level at each station, LandXML from Civil 3D, or the design centre line's points with their levels.",
+  "اختار ملف الأرض": "Choose the ground file", "اختار ملف التصميم": "Choose the design file", "شيل الملف": "Remove the file",
+  "محطة أول نقطة في ملف النقط (فاضي = بداية التصميم)": "Chainage of a points file's first point (blank = the design's start)",
+  "أقصى بعد لنقط الأرض عن محور التصميم (م)": "Furthest a ground point may lie off the design centre line (m)",
+  "لو مفيش أرض: محطة كل (م)": "With no ground: a station every (m)",
+  "البيانات (من الملفات، أو اكتبها بإيدك)": "The data (from the files, or typed in)",
+  "التصميم: نقط VPI (المحطة، المنسوب، طول المنحنى الرأسي) أو المنسوب التصميمي عند كل محطة": "Design: VPIs (chainage, level, vertical curve length) or the design level at each station",
+  "الأرض الطبيعية: المحطة ومنسوب الأرض": "Natural ground: chainage and ground level",
+  "ارسم البروفيل": "Draw the profile", "تصدير DXF للأوتوكاد": "Export DXF for AutoCAD",
+  "Excel (xlsx وxls وods) أو CSV أو TXT: المحطة والمنسوب، بعناوين عربي أو إنجليزي أو من غير عناوين. لو الملف فيه منسوب الأرض والمنسوب التصميمي مع بعض، ملف واحد بيكفي.":
+    "Excel (xlsx, xls, ods), CSV or TXT: chainage and level, with Arabic or English headings or none. A file holding both the ground and the design levels is enough on its own.",
+  "نقط رفع (رقم، شرقي، شمالي، منسوب) من التوتال ستيشن أو الـ GPS، أو Leica GSI: المحطات بتتحسب بالمسافة بين النقط بترتيبها في الملف، ولو التصميم نقط كمان بتتسقط على محوره.":
+    "Survey points (number, easting, northing, level) from a total station or GPS, or Leica GSI: chainages are the distances along the points in their order in the file, or, when the design is points too, their projection onto its centre line.",
+  "LandXML من Civil 3D: بروفيل الأرض (ProfSurf) والتصميم (ProfAlign) بمنحنياته الرأسية.": "LandXML from Civil 3D: the ground profile (ProfSurf) and the design (ProfAlign) with its vertical curves.",
+  "DXF وDWG: النقط اللي ليها منسوب، أو بولي لاين 3D على المحور.": "DXF and DWG: points with levels, or a 3D polyline along the centre line.",
+  "جداول القطاعات العرضية (المحطة، الإزاحة، المنسوب): بتتاخد منها نقط المحور.": "Cross-section tables (chainage, offset, level): their centre-line points are taken.",
+  "ملف الـ DXF اللي بيطلع: الأرض والتصميم فوق خط مقارنة، والمناسيب متكبّرة 10 مرات، وتحت كل محطة المحطة والمنسوبين والحفر أو الردم.":
+    "The DXF it writes: the ground and the design over a datum line, levels exaggerated 10 times, and under each station its chainage, both levels and the cut or fill.",
+  "بيقرا الملف…": "Reading the file…", "محطات": "Stations", "نقط": "Points", "نقط VPI": "VPIs", "منحنيات رأسية": "Vertical curves",
+  "من نفس ملف الأرض": "from the ground file", "من نفس ملف التصميم": "from the design file",
+  "مش لاقي في الملف مناسيب أرض: محتاج المحطة والمنسوب، أو شرقي وشمالي ومنسوب.": "No ground levels found in the file: it needs chainage and level, or easting, northing and level.",
+  "مش لاقي في الملف تصميم: محتاج المحطة والمنسوب التصميمي (أو نقط VPI)، أو نقط المحور بمنسوبها.": "No design found in the file: it needs chainage and design level (or VPIs), or the centre line's points with their levels.",
+  "الملف ده مش جدول ولا نص. ارفع Excel أو CSV أو TXT أو LandXML أو DXF.": "This file is neither a table nor text. Upload Excel, CSV, TXT, LandXML or DXF.",
+  "ملخص الحفر والردم": "Cut and fill summary", "من محطة": "From", "لمحطة": "To", "عدد المحطات": "Stations",
+  "أكبر حفر (م)": "Deepest cut (m)", "أكبر ردم (م)": "Deepest fill (m)", "عند": "at",
+  "مساحة الحفر في القطاع الطولي (م²)": "Cut area along the profile (m²)", "مساحة الردم في القطاع الطولي (م²)": "Fill area along the profile (m²)",
+  "نقط التقاطع (الأرض = التصميم)": "Zero points (ground = design)", "مفيش": "None",
+  "المساحات دي بين خط الأرض وخط التصميم في القطاع الطولي بس؛ الكميات بالمتر المكعب محتاجة القطاعات العرضية (تبويب الكميات).":
+    "These areas lie between the ground and design lines on the profile only; volumes in cubic metres need the cross sections (Quantities tab).",
+  "نقط التصميم مش مترتبة على المحور (الخط بيرجع على نفسه)؛ رتّبها بالترتيب من أول الطريق لآخره.": "The design points are not in order along the centre line (the line turns back on itself); sort them from the start of the road to its end.",
+  "نقط الأرض مش مترتبة على المحور (الخط بيرجع على نفسه)؛ رتّبها بالترتيب من أول الطريق لآخره.": "The ground points are not in order along the centre line (the line turns back on itself); sort them from the start of the road to its end.",
+  "لازم محطتين على الأقل عشان يترسم البروفيل.": "Drawing a profile needs at least two stations.",
+  "مفيش مناسيب في البروفيل.": "The profile has no levels.",
+});
+
+let pfLast = null; // the stations table, for the CSV
+let pfRes = null; // the last profile: { r, dense, sum }
+const pfFiles = { ground: null, design: null }; // { name, series, notes, from? }
+const pfBusy = { ground: false, design: false }; // a file still being read
 const pfCols = [
   { key: "chainageText", label: "المحطة" }, { key: "groundLevel", label: "منسوب الأرض", num: 1 }, { key: "designLevel", label: "المنسوب التصميمي", num: 1 },
   { key: "cut", label: "حفر", num: 1 }, { key: "fill", label: "ردم", num: 1 },
 ];
+const pfCh = (m) => E.formatChainage(m, 3);
+
+// A drawing's or a GIS file's shapes as tables of points with levels, on a grid in metres: points with
+// a level, and each 3D polyline's vertices (the longest first for a design, after the points for ground).
+function pfLayerTables(l, role) {
+  let grid = l.crs;
+  if (!E.gisGridCrs(l.crs) && l.crs !== "local") {
+    const b = E.gisBbox(l.features), ll = b && E.gisTransform(l.crs, "wgs84")?.([(b[0] + b[2]) / 2, (b[1] + b[3]) / 2]);
+    if (ll) grid = E.gisUtmFor(ll[0], ll[1]);
+  }
+  const to = E.gisTransform(l.crs, grid) ?? ((c) => c);
+  const LEVEL = /^(z|level|elev|elevation|rl|height|منسوب|المنسوب)$/i;
+  const pts = [], lines = [];
+  for (const f of l.features) {
+    const g = f.geometry, p = f.properties ?? {};
+    if (g.type === "Point") {
+      const attr = Object.entries(p).find(([k, v]) => LEVEL.test(k) && typeof v === "number")?.[1];
+      const z = g.coordinates[2] || attr || p.elevation;
+      if (!Number.isFinite(z) || z === 0) continue;
+      const q = to(g.coordinates);
+      pts.push({ id: p.name ?? p.PNO ?? p.text ?? null, x: q[0], y: q[1], z });
+    } else if (g.type === "LineString" && g.coordinates.some((c) => c[2])) {
+      lines.push(g.coordinates.map((c) => { const q = to(c); return { x: q[0], y: q[1], z: c[2] ?? 0 }; }));
+    }
+  }
+  const tPts = pts.length >= 2 ? [{ sheet: "points", columns: ["id", "x", "y", "z"], hasHeader: true, rows: pts }] : [];
+  const tLines = lines.sort((a, b) => b.length - a.length).map((rows, i) => ({ sheet: `3D polyline ${i + 1}`, columns: ["x", "y", "z"], hasHeader: true, rows }));
+  return role === "design" ? [...tLines, ...tPts] : [...tPts, ...tLines];
+}
+
+// The tables a file holds, whatever it is.
+async function pfTables(name, bytes, role) {
+  const ext = extOf(name);
+  const head = latin1(bytes.subarray(0, 16));
+  if (SHEET_EXT.has(ext)) {
+    await needLib("xlsx");
+    const wb = XLSX.read(bytes, { type: "array" });
+    // A title over the table (one cell on its own row) is not its header.
+    const filled = (r) => r.filter((c) => c !== null && String(c).trim() !== "").length;
+    return wb.SheetNames.map((s) => {
+      const m = XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false });
+      const top = m.findIndex((r) => filled(r) >= 2);
+      return E.tableFromMatrix(top > 0 ? m.slice(top) : m, s);
+    }).filter((t) => t.rows.length);
+  }
+  if (ext === ".dwg" || /^AC10\d\d/.test(head)) return pfLayerTables(E.gisFromCad((await dwgDatabase(bytes)).entities, name, "DWG"), role);
+  const text = decodeText(bytes);
+  if (text === null) throw new Error("الملف ده مش جدول ولا نص. ارفع Excel أو CSV أو TXT أو LandXML أو DXF.");
+  if (/<LandXML\b/i.test(text.slice(0, 5000))) return E.parseLandXml(text);
+  if (ext === ".gsi" || /^\*?11[0-9.]{4}[+-]/.test(text.trimStart())) {
+    const t = E.parseGsi(text);
+    if (t) return [t];
+  }
+  if (ext === ".dxf" || /^\s*0\s*\r?\n\s*SECTION/.test(text) || /<kml\b|<gpx\b|<osm\b/i.test(text.slice(0, 3000)) || /^\s*[{[]/.test(text)) {
+    return E.gisFromText(text, name).flatMap((l) => pfLayerTables(l, role));
+  }
+  return [E.parseDelimited(text, name)];
+}
+
+// What a file gives the slot it was put in, and what it gives the other slot (a file with both).
+function pfPick(tables, role) {
+  const found = tables.map((t) => E.profileSeries(t));
+  const own = found.map((s) => (role === "ground" ? s.ground : s.design)).find(Boolean);
+  const main = own ?? found.map((s) => s.level).find(Boolean) ?? null;
+  const extra = found.map((s) => (role === "ground" ? s.design : s.ground)).find(Boolean) ?? null;
+  return { main, extra, notes: found.flatMap((s) => s.notes) };
+}
+
+function pfShowFiles() {
+  for (const role of ["ground", "design"]) {
+    const k = role[0], f = pfFiles[role];
+    $(`#pf-${k}-slot`).classList.toggle("has", Boolean(f));
+    $(`#pf-${k}-clear`).hidden = !f;
+    if (!f) { if (!pfBusy[role]) $(`#pf-${k}-got`).innerHTML = ""; continue; }
+    const s = f.series, rows = s.rows;
+    const curves = rows.filter((r) => r.curveLength > 0).length;
+    const span = s.kind === "points" ? "" : ` · <bdi dir="ltr">${esc(pfCh(rows[0].chainage))} → ${esc(pfCh(rows[rows.length - 1].chainage))}</bdi>`;
+    const what = s.kind === "points" ? `<span>نقط</span> <bdi>${rows.length}</bdi>`
+      : curves ? `<span>نقط VPI</span> <bdi>${rows.length}</bdi> · <span>منحنيات رأسية</span> <bdi>${curves}</bdi>`
+      : `<span>محطات</span> <bdi>${rows.length}</bdi>`;
+    const from = f.from ? ` <span class="hint">(<span>${f.from === "ground" ? "من نفس ملف الأرض" : "من نفس ملف التصميم"}</span>)</span>` : "";
+    $(`#pf-${k}-got`).innerHTML = `<bdi data-no-i18n>${esc(f.name)}</bdi>${from}: ${what}${span}`;
+  }
+}
+
+// The two files brought to one chainage, written into the boxes, and the profile drawn.
+function pfApply() {
+  const g = pfFiles.ground?.series ?? null, d = pfFiles.design?.series ?? null;
+  const notes = [...(pfFiles.ground?.notes ?? []), ...(pfFiles.design?.notes ?? [])];
+  try {
+    const r = E.profileFromSeries(g, d, { start: $("#pf-start").value, maxOffset: numOrUndef($("#pf-off").value) });
+    if (r.vpis) $("#pf-vpi").value = r.vpis.map((v) => [pfCh(v.chainage), v.level.toFixed(3), ...(v.curveLength ? [+v.curveLength.toFixed(3)] : [])].join(",")).join("\n");
+    if (r.stations) $("#pf-st").value = r.stations.map((s) => [pfCh(s.chainage), s.groundLevel.toFixed(3)].join(",")).join("\n");
+    $("#pf-notes").innerHTML = [...notes, ...r.notes].length ? `<div class="notice">${[...notes, ...r.notes].map((n) => `<p>${esc(n)}</p>`).join("")}</div>` : "";
+    runProfile();
+  } catch (err) {
+    $("#pf-notes").innerHTML = "";
+    showError($("#pf-out"), err);
+  }
+}
+
+async function pfLoad(file, role) {
+  const k = role[0];
+  const got = $(`#pf-${k}-got`);
+  got.innerHTML = `<span class="hint">بيقرا الملف…</span>`;
+  pfBusy[role] = true;
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const { main, extra, notes } = pfPick(await pfTables(file.name, bytes, role), role);
+    if (!main) throw new Error(role === "ground" ? "مش لاقي في الملف مناسيب أرض: محتاج المحطة والمنسوب، أو شرقي وشمالي ومنسوب." : "مش لاقي في الملف تصميم: محتاج المحطة والمنسوب التصميمي (أو نقط VPI)، أو نقط المحور بمنسوبها.");
+    pfFiles[role] = { name: file.name, series: main, notes };
+    const other = role === "ground" ? "design" : "ground";
+    if (extra && (!pfFiles[other] || pfFiles[other].from)) pfFiles[other] = { name: file.name, series: extra, notes: [], from: role };
+    pfBusy[role] = false;
+    pfShowFiles();
+    pfApply();
+  } catch (err) {
+    pfBusy[role] = false;
+    got.innerHTML = `<span class="bad">${esc(err?.message || err)}</span>`;
+  }
+}
+
 function runProfile() {
   const out = $("#pf-out");
   try {
@@ -12338,8 +12871,28 @@ function runProfile() {
     const stations = dropHeader(parsePaste($("#pf-st").value), [1]).map((c) => ({ chainage: c[0], groundLevel: numOrUndef(c[1]) }));
     const r = calc("profile_design", { vpis, stations, interval: numOrUndef($("#pf-int").value) });
     pfLast = { columns: pfCols, rows: r.rows };
+    const sum = E.profileSummary(r.rows);
     let html = r.warnings.length ? `<div class="notice">${r.warnings.map(esc).join("<br>")}</div>` : "";
-    html += "<h3>جدول الميول</h3>" + table([{ key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 }, { key: "gradePercent", label: "الميل %", num: 1, d: 4 }], r.segments);
+    if (sum.stations >= 2) {
+      // The deepest cut and fill with the station they are at, on a line of their own under the depth.
+      const ro = (label, value, cls = "", sub = "") => `<div class="readout"><small>${esc(label)}</small><b class="${cls}">${esc(value)}</b>${sub}</div>`;
+      const at = (m) => (m ? `<small class="pf-at"><span>عند</span> <bdi dir="ltr">${esc(E.formatChainage(m.chainage, 2))}</bdi></small>` : "");
+      html += `<h3>ملخص الحفر والردم</h3><div class="readouts">${[
+        ro("من محطة", E.formatChainage(sum.from, 2)), ro("لمحطة", E.formatChainage(sum.to, 2)), ro("عدد المحطات", String(sum.stations)),
+        ro("أكبر حفر (م)", sum.maxCut ? sum.maxCut.depth.toFixed(3) : "—", "cut", at(sum.maxCut)),
+        ro("أكبر ردم (م)", sum.maxFill ? sum.maxFill.depth.toFixed(3) : "—", "fill", at(sum.maxFill)),
+        ro("مساحة الحفر في القطاع الطولي (م²)", sum.cutArea.toFixed(2), "cut"), ro("مساحة الردم في القطاع الطولي (م²)", sum.fillArea.toFixed(2), "fill"),
+      ].join("")}</div>`;
+      html += `<p class="hint"><span>نقط التقاطع (الأرض = التصميم)</span>: ${sum.zeros.length ? `<bdi dir="ltr" class="mono">${sum.zeros.map((z) => esc(E.formatChainage(z, 2))).join("  ·  ")}</bdi>` : "<span>مفيش</span>"}</p>`;
+      html += `<p class="hint">المساحات دي بين خط الأرض وخط التصميم في القطاع الطولي بس؛ الكميات بالمتر المكعب محتاجة القطاعات العرضية (تبويب الكميات).</p>`;
+    }
+    // A design given as levels at every station has a grade break at each: runs of one grade shown as one.
+    const segs = r.segments.reduce((a, s) => {
+      const last = a[a.length - 1];
+      if (last && Math.abs(last.gradePercent - s.gradePercent) < 1e-4) { last.to = s.to; last.length = Math.round((last.length + s.length) * 1000) / 1000; } else a.push({ ...s });
+      return a;
+    }, []);
+    html += "<h3>جدول الميول</h3>" + table([{ key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 }, { key: "gradePercent", label: "الميل %", num: 1, d: 4 }], segs);
     if (r.verticalCurves.length) {
       html += "<h3>المنحنيات الرأسية</h3>" + table(
         [{ key: "atVPI", label: "VPI" }, { key: "type", label: "النوع" }, { key: "length", label: "L", num: 1, d: 2 }, { key: "A", label: "A %", num: 1, d: 3 }, { key: "K", label: "K", num: 1, d: 2 },
@@ -12347,29 +12900,79 @@ function runProfile() {
         r.verticalCurves,
       );
     }
-    html += "<h3>جدول المحطات</h3>" + table(pfCols, r.rows);
+    html += "<h3>جدول المحطات</h3>" + table(pfCols, r.rows, (row) => (row.cut ? "is-cut" : row.fill ? "is-fill" : ""));
     out.innerHTML = panel("PR", "جداول القطاع الطولي", html);
     const vpiPts = vpis.map((v) => ({ chainage: E.parseChainage(v.chainage), level: v.level })).filter((v) => Number.isFinite(v.chainage) && Number.isFinite(v.level));
     const span = vpiPts.length >= 2 ? vpiPts[vpiPts.length - 1].chainage - vpiPts[0].chainage : 0;
     const dense = span > 0 ? calc("profile_design", { vpis, interval: span / 240 }).rows : [];
-    const pd = profileData(r.rows, vpiPts, dense);
+    // VPI marks only for a real grade line, not for a design level at every station.
+    const marks = vpiPts.length <= 15 || vpis.some((v) => v.curveLength) ? vpiPts : [];
+    const pd = profileData(r.rows, marks, dense);
     viz($("#pf-chart"), {
       title: "القطاع الطولي",
       sheet: profileDrawing(pd),
       build: pd && profileScene(pd),
       note: "في الـ 3D المناسيب متكبّرة رأسيًا عشان الفرق يبان. للقراية المظبوطة افتح 2D أو الجداول.",
     });
-    $("#pf-csv").disabled = false;
-  } catch (err) { showError(out, err); }
+    pfRes = { r, dense, sum };
+    for (const b of ["#pf-csv", "#pf-dxf", "#pf-note"]) $(b).disabled = false;
+  } catch (err) {
+    pfRes = null;
+    for (const b of ["#pf-dxf", "#pf-note"]) $(b).disabled = true;
+    showError(out, err);
+  }
 }
+
+// The profile as a project note, in the language on screen.
+function pfNoteText() {
+  const { r, sum } = pfRes, en = I18N.lang === "en";
+  const ltr = (x) => (en ? x : `⁦${x}⁩`);
+  const ch = (m) => ltr(E.formatChainage(m, 2));
+  const lines = [en ? `Profile ${ch(sum.from)} to ${ch(sum.to)}: ${sum.stations} stations.` : `بروفيل من ${ch(sum.from)} لـ ${ch(sum.to)}: ${sum.stations} محطة.`];
+  if (pfFiles.ground || pfFiles.design) lines.push(en ? `Files: ground ${pfFiles.ground?.name ?? "—"}, design ${pfFiles.design?.name ?? "—"}.` : `الملفات: الأرض ${pfFiles.ground?.name ?? "—"}، التصميم ${pfFiles.design?.name ?? "—"}.`);
+  if (sum.maxCut) lines.push(en ? `Deepest cut ${sum.maxCut.depth.toFixed(3)} m at ${ch(sum.maxCut.chainage)}.` : `أكبر حفر ${ltr(sum.maxCut.depth.toFixed(3))} م عند ${ch(sum.maxCut.chainage)}.`);
+  if (sum.maxFill) lines.push(en ? `Deepest fill ${sum.maxFill.depth.toFixed(3)} m at ${ch(sum.maxFill.chainage)}.` : `أكبر ردم ${ltr(sum.maxFill.depth.toFixed(3))} م عند ${ch(sum.maxFill.chainage)}.`);
+  lines.push(en ? `Areas along the profile: cut ${sum.cutArea.toFixed(2)} m², fill ${sum.fillArea.toFixed(2)} m².` : `مساحات القطاع الطولي: حفر ${ltr(sum.cutArea.toFixed(2))} م²، ردم ${ltr(sum.fillArea.toFixed(2))} م².`);
+  if (sum.zeros.length) lines.push(en ? `Zero points: ${sum.zeros.map(ch).join(", ")}.` : `نقط التقاطع: ${sum.zeros.map(ch).join("، ")}.`);
+  if (r.verticalCurves.length) lines.push(en ? `${r.verticalCurves.length} vertical curve(s).` : `${r.verticalCurves.length} منحنى رأسي.`);
+  return lines.join("\n");
+}
+
 $("#pf-run").onclick = runProfile;
 bindCsv($("#pf-csv"), "profile.csv", () => pfLast);
-$("#pf-file").onchange = async (e) => {
-  try {
-    const rows = await loadRows(e.target);
-    $("#pf-st").value = rows.map((r) => [r.chainage ?? "", r.z ?? ""].join(",")).join("\n");
-  } catch (err) { showError($("#pf-out"), err); }
+$("#pf-dxf").onclick = async () => {
+  if (!pfRes || !downloads) return;
+  try { await downloads.save({ filename: "profile.dxf", data: E.profileDxf(pfRes.r.rows, pfRes.dense, { exaggeration: 10 }) }); }
+  catch (err) { if (err?.code !== "declined") showError($("#pf-out"), err); }
 };
+$("#pf-note").onclick = () => { if (pfRes) pjCompose(pfNoteText()); };
+for (const role of ["ground", "design"]) {
+  const k = role[0];
+  const slot = $(`#pf-${k}-slot`);
+  $(`#pf-${k}-file`).onchange = (e) => {
+    const f = e.target.files[0];
+    e.target.value = "";
+    if (f) pfLoad(f, role);
+  };
+  $(`#pf-${k}-clear`).onclick = () => {
+    pfFiles[role] = null;
+    const other = role === "ground" ? "design" : "ground";
+    if (pfFiles[other]?.from === role) pfFiles[other] = null;
+    pfShowFiles();
+    $("#pf-notes").innerHTML = "";
+  };
+  // A file dropped on its slot.
+  slot.addEventListener("dragover", (e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); slot.classList.add("over"); } });
+  slot.addEventListener("dragleave", () => slot.classList.remove("over"));
+  slot.addEventListener("drop", (e) => {
+    const f = e.dataTransfer?.files?.[0];
+    slot.classList.remove("over");
+    if (!f) return;
+    e.preventDefault();
+    pfLoad(f, role);
+  });
+}
+for (const id of ["#pf-start", "#pf-off"]) $(id).addEventListener("change", () => { if (pfFiles.ground || pfFiles.design) pfApply(); });
 
 // ---------- cross section ----------
 function runSection() {
