@@ -1,0 +1,14 @@
+# Render Blueprint: the GeoX website as a static site, served as it is from this repository (the page is
+# built in survey-assistant and pushed here by scripts/deploy-site.sh). Every push deploys it again.
+# Deploy link: https://render.com/deploy?repo=https://github.com/a7medfat7y123-netizen/survey-assistant-site
+services:
+  - type: web
+    runtime: static
+    name: geox
+    buildCommand: echo "GeoX is built in survey-assistant; nothing to build here."
+    staticPublishPath: .
+    headers:
+      # Always check for a newer page and service worker, so an update shows on the next visit.
+      - path: /*
+        name: Cache-Control
+        value: no-cache
