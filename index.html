@@ -465,6 +465,31 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .pj-act.bad { color: var(--cut); }
 .pj-note-text { margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.75; unicode-bidi: plaintext; }
 .pj-edit { margin-top: 8px; }
+/* My projects: saved results, files, share link; the save dialog and the shared-project view. */
+.pj-sec { margin-top: 20px; border-top: 1px solid var(--line); }
+.pj-results, .pj-files { list-style: none; margin: 10px 0 4px; padding: 0; display: grid; gap: 8px; }
+.pj-res, .pj-file { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; border: 1px solid var(--line); background: var(--sheet-2); border-radius: 12px; padding: 8px 12px; min-width: 0; }
+.pj-res-tool { font-size: 11.5px; font-weight: 500; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 999px; padding: 1px 9px; white-space: nowrap; vertical-align: middle; }
+.pj-res-title, .pj-file-name { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+a.pj-file-name { color: var(--accent); }
+.pj-res time, .pj-file small { color: var(--muted); font-size: 12px; font-family: var(--f-num); }
+.pj-file .pj-wait { color: var(--warn); font-family: inherit; }
+.pj-res-text { flex-basis: 100%; margin: 4px 0 2px; padding: 8px 10px; border-radius: 8px; background: var(--sheet); font: inherit; font-size: 13px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+.pj-share-out { display: flex; gap: 8px; margin-top: 10px; }
+.pj-share-out input { flex: 1; min-width: 0; font-family: var(--f-num); font-size: 12.5px; }
+.cloud-dlg { width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); border: 1px solid var(--line); border-radius: 16px; background: var(--sheet); color: var(--ink); padding: 18px; }
+.cloud-dlg::backdrop { background: color-mix(in srgb, var(--paper) 70%, transparent); }
+.cloud-dlg h3 { margin: 0; color: var(--ink); font-size: 16px; }
+.cloud-dlg form { display: grid; gap: 12px; margin: 0; }
+.cloud-dlg .actions { margin-top: 2px; }
+.share-dlg { width: min(720px, calc(100vw - 32px)); }
+.share-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.share-dlg h4 { margin: 18px 0 4px; font-size: 13.5px; color: var(--muted); }
+.share-name { font-size: 18px; margin: 4px 0 0; }
+.cloud-toast { position: fixed; inset-inline: 16px; bottom: 16px; z-index: 44; width: fit-content; max-width: calc(100vw - 32px); margin-inline: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 12px 10px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--fill) 45%, var(--line)); background: var(--sheet); color: var(--ink); box-shadow: 0 10px 30px rgba(0, 0, 0, .35); font-size: 13.5px; }
+.cloud-toast bdi { font-weight: 600; }
+.cloud-toast button { padding: 6px 14px; font-size: 12.5px; }
 /* GeoX wordmark (see the inline SVG): the dark "cut" strokes are drawn in the page colour. */
 .geox { display: block; height: 1em; width: auto; overflow: visible; }
 .geox .cut { stroke: var(--paper); }
@@ -848,7 +873,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <button role="tab" data-tab="profile" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5h18"/><path d="M3 16c2.5-.5 3.5-5 6.5-5s4 3.5 6.5 2.5 3.5-5 5-6"/><path d="M3 12.5 21 8" stroke-dasharray="2.2 2.2"/></svg><span class="code">PR</span>البروفيل</button>
         <button role="tab" data-tab="qty" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span class="code">QT</span>الكميات</button>
         <button role="tab" data-tab="review" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 5.1 5.1"/><path d="m7.6 10.7 2 2 3.7-4"/></svg><span class="code">QC</span>مراجعة الداتا</button>
-        <button role="tab" data-tab="proj" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h3.5l2 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 12.5h8M8 15.5h5"/></svg><span class="code">PJ</span>المشاريع</button>
+        <button role="tab" data-tab="proj" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h3.5l2 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 12.5h8M8 15.5h5"/></svg><span class="code">PJ</span>مشاريعي</button>
       </nav>
     </div>
   </div>
@@ -888,6 +913,30 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
     <form method="dialog"><button class="secondary" type="submit">تمام</button></form>
   </div>
 </dialog>
+<dialog id="save-dlg" class="cloud-dlg" aria-labelledby="save-h">
+  <form id="save-form">
+    <h3 id="save-h">احفظ في المشروع <small id="save-tool" class="pj-res-tool"></small></h3>
+    <p class="hint">النتيجة بمدخلاتها، عشان تفتحها تاني في أداتها وتكمّل عليها من أي جهاز.</p>
+    <label for="save-proj">المشروع<select id="save-proj" data-no-i18n></select></label>
+    <label for="save-new" id="save-new-l" hidden>اسم المشروع الجديد<input id="save-new" maxlength="80" autocomplete="off" dir="auto"></label>
+    <label for="save-title">اسم النتيجة<input id="save-title" maxlength="200" autocomplete="off" dir="auto"></label>
+    <label class="check" for="save-note"><input id="save-note" type="checkbox"> اكتب ملخصها في ملاحظات المشروع كمان</label>
+    <p id="save-big" class="notice" hidden>المدخلات أكبر من المساحة المسموحة للنتيجة، فهيتحفظ الملخص بس، ومش هتقدر تفتحها تاني في الأداة.</p>
+    <p id="save-msg" class="hint pj-bad" hidden></p>
+    <div class="actions">
+      <button class="primary" type="submit">احفظ</button>
+      <button id="save-cancel" class="secondary primary" type="button">إلغاء</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="share-dlg" class="cloud-dlg share-dlg" aria-labelledby="share-h">
+  <div class="share-top"><h3 id="share-h">مشروع متشارك</h3><button id="share-close" class="secondary primary" type="button">قفل</button></div>
+  <div id="share-body"></div>
+</dialog>
+<div id="cloud-toast" class="cloud-toast" role="status" hidden>
+  <span><span>اتحفظ في</span> <bdi data-no-i18n></bdi></span>
+  <button id="cloud-toast-go" class="secondary primary" type="button">افتح مشاريعي</button>
+</div>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" aria-label="أدوات وحسابات وتعريفات" inert>
   <div class="dr-head">
@@ -962,6 +1011,7 @@ BM2,,,0.900</textarea>
         <button id="lv-run" class="primary" type="button">احسب</button>
         <label class="file-btn secondary" for="lv-file">تحميل من ملف</label><input type="file" id="lv-file" hidden>
         <button id="lv-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
+        <button id="lv-note" class="secondary primary" type="button" disabled>احفظ في المشروع</button>
         <span class="hint">مثال محلول جاهز؛ امسحه وحط قراءاتك.</span>
       </div>
     </div>
@@ -1010,7 +1060,7 @@ BM2,,,0.900</textarea>
         <label class="file-btn secondary" for="gp-file">تحميل من ملف</label><input type="file" id="gp-file" accept=".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.txt,.nmea,.nma,.log,.gpx,.kml,.kmz,.geojson,.json" hidden>
         <button id="gp-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
         <button id="gp-penz" class="secondary primary" type="button" disabled>تصدير نقط P,E,N,Z</button>
-        <button id="gp-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+        <button id="gp-note" class="secondary primary" type="button" disabled>احفظ في المشروع</button>
         <span class="hint">المثال كل سطر فيه مكتوب بشكل مختلف عشان تشوف الأشكال اللي بيفهمها؛ امسحه وحط نقطك.</span>
       </div>
       <details class="tr-formats">
@@ -1154,7 +1204,7 @@ BM2,,,0.900</textarea>
         <button id="tr-run" class="primary" type="button">احسب وصحّح</button>
         <label class="file-btn secondary" for="tr-file">تحميل من ملف</label><input type="file" id="tr-file" accept=".xlsx,.xlsm,.xls,.ods,.csv,.tsv,.txt,.prn,.dat" hidden>
         <button id="tr-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
-        <button id="tr-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+        <button id="tr-note" class="secondary primary" type="button" disabled>احفظ في المشروع</button>
         <span class="hint">مثال محلول جاهز بأخطاء صغيرة؛ امسحه وحط قراءاتك، أو حمّل الشيت وهو يقراه ويحله لوحده.</span>
       </div>
       <details class="tr-formats">
@@ -1227,7 +1277,7 @@ BM2,,,0.900</textarea>
         <button id="pf-run" class="primary" type="button">ارسم البروفيل</button>
         <button id="pf-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
         <button id="pf-dxf" class="secondary primary dl" type="button" disabled>تصدير DXF للأوتوكاد</button>
-        <button id="pf-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+        <button id="pf-note" class="secondary primary" type="button" disabled>احفظ في المشروع</button>
       </div>
       <details class="tr-formats">
         <summary>الصيغ اللي بيقراها</summary>
@@ -1292,7 +1342,7 @@ BM2,,,0.900</textarea>
         <button id="qf-run" class="primary" type="button">احسب الكميات</button>
         <button id="qf-csv" class="secondary primary dl" type="button" disabled>تصدير CSV</button>
         <button id="qf-dxf" class="secondary primary dl" type="button" disabled>تصدير القطاعات DXF</button>
-        <button id="qf-note" class="secondary primary" type="button" disabled>حفظ في ملاحظات المشروع</button>
+        <button id="qf-note" class="secondary primary" type="button" disabled>احفظ في المشروع</button>
       </div>
       <details class="tr-formats">
         <summary>الصيغ اللي بيقراها</summary>
@@ -1390,8 +1440,8 @@ BM2,,,0.900</textarea>
 
   <section id="tab-proj" class="tab" hidden>
     <div class="panel">
-      <h2><span class="callout">PJ</span>ملاحظات المشاريع</h2>
-      <p class="hint">لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.</p>
+      <h2><span class="callout">PJ</span>مشاريعي</h2>
+      <p class="hint">لكل مشروع ملاحظاته بتاريخها ووقتها، والنتايج اللي حفظتها من الأدوات عشان تفتحها تاني وتكمّل عليها، وملفاته، ولينك تشاركه بيه للقراية بس.</p>
       <div id="pj-cloud" class="pj-cloud" data-state="wait" aria-live="polite">
         <svg class="pj-cloud-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.96A5.5 5.5 0 0 0 7.4 9.06 4.75 4.75 0 0 0 7 18.5z"/><path class="ok-mark" d="m9.5 13.8 2 2 3.6-3.8"/></svg>
         <span class="pj-cloud-msg"><span id="pj-cloud-text">بيجهّز الحفظ على حسابك…</span> <small id="pj-cloud-at" hidden><span>آخر مزامنة</span> <bdi dir="ltr"></bdi></small></span>
@@ -1415,6 +1465,7 @@ BM2,,,0.900</textarea>
       <p id="pj-msg" class="hint pj-bad" hidden></p>
       <p id="pj-empty" class="pj-none" hidden>لسه مفيش مشاريع. اضغط «مشروع جديد» واكتب اسمه، وبعدين اكتب ملاحظاته.</p>
       <div data-needs-project>
+        <h3>ملاحظات المشروع</h3>
         <label class="block" for="pj-text">ملاحظة جديدة
           <textarea id="pj-text" class="pj-text" rows="4" dir="auto" placeholder="اللي اتعمل النهارده، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، المطلوب بكرة…"></textarea>
         </label>
@@ -1424,6 +1475,32 @@ BM2,,,0.900</textarea>
         </div>
         <ol id="pj-notes" class="pj-notes"></ol>
       </div>
+      <section class="pj-sec" data-needs-project aria-labelledby="pj-results-h">
+        <h3 id="pj-results-h">النتايج المحفوظة</h3>
+        <ol id="pj-results" class="pj-results"></ol>
+      </section>
+      <section class="pj-sec" data-needs-project aria-labelledby="pj-files-h">
+        <h3 id="pj-files-h">ملفات المشروع</h3>
+        <p class="hint">DXF وDWG وCSV وKML وShapefile وأي ملف تاني، لحد 20 ميجا للملف. الملفات بتتحفظ على حسابك، فلازم تكون مسجّل دخول.</p>
+        <div class="actions">
+          <label class="file-btn secondary" for="pj-file">ارفع ملفات للمشروع</label><input type="file" id="pj-file" multiple hidden>
+        </div>
+        <p id="pj-files-msg" class="hint pj-bad" hidden></p>
+        <ol id="pj-files" class="pj-files"></ol>
+      </section>
+      <section class="pj-sec" data-needs-project aria-labelledby="pj-share-h">
+        <h3 id="pj-share-h">مشاركة المشروع</h3>
+        <p class="hint">لينك يفتح المشروع ده للقراية بس: ملاحظاته ونتايجه وملفاته. أي حد معاه اللينك يقدر يشوفه لحد ما توقف المشاركة.</p>
+        <div class="actions">
+          <button id="pj-share" class="secondary primary" type="button">اعمل لينك مشاركة</button>
+          <button id="pj-unshare" class="secondary primary" type="button" hidden>وقّف المشاركة</button>
+        </div>
+        <div id="pj-share-out" class="pj-share-out" hidden>
+          <input id="pj-share-url" readonly dir="ltr" aria-label="لينك المشاركة">
+          <button id="pj-share-copy" class="secondary primary" type="button">انسخ اللينك</button>
+        </div>
+        <p id="pj-share-msg" class="hint" hidden></p>
+      </section>
       <div id="pj-warn" class="notice" hidden></div>
       <div class="actions">
         <button id="pj-export" class="secondary primary" type="button" data-needs-project>تصدير ملاحظات المشروع (TXT)</button>
@@ -1547,8 +1624,62 @@ const I18N = (() => {
     "الروبيرات على خط واحد تقريبًا، فاتعمل إزاحة ثابتة بدل المستوى المايل.": "The benchmarks are nearly on one line, so a constant shift was used instead of an inclined plane.",
     "روبيرين: الإزاحة متوسط الفرقين، والفرق بينهم بيبان في البواقي.": "Two benchmarks: the shift is the mean of the two differences, and their disagreement shows in the residuals.",
     "المشاريع": "Projects",
-    "ملاحظات المشاريع": "Project notes",
-    "لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.": "Each project keeps its own notes, each with its date and time: what was done, benchmarks and approved coordinates, site problems, and what comes next.",
+    "مشاريعي": "My projects",
+    "لكل مشروع ملاحظاته بتاريخها ووقتها، والنتايج اللي حفظتها من الأدوات عشان تفتحها تاني وتكمّل عليها، وملفاته، ولينك تشاركه بيه للقراية بس.":
+      "Each project keeps its dated notes, the results you saved from the tools so you can open them again and carry on, its files, and a read-only link to share it.",
+    "ملاحظات المشروع": "Project notes",
+    "النتايج المحفوظة": "Saved results",
+    "ملفات المشروع": "Project files",
+    "DXF وDWG وCSV وKML وShapefile وأي ملف تاني، لحد 20 ميجا للملف. الملفات بتتحفظ على حسابك، فلازم تكون مسجّل دخول.":
+      "DXF, DWG, CSV, KML, Shapefile or any other file, up to 20 MB each. Files are kept on your account, so you need to be signed in.",
+    "ارفع ملفات للمشروع": "Upload files to the project",
+    "مشاركة المشروع": "Share the project",
+    "لينك يفتح المشروع ده للقراية بس: ملاحظاته ونتايجه وملفاته. أي حد معاه اللينك يقدر يشوفه لحد ما توقف المشاركة.":
+      "A link that opens this project read-only: its notes, results and files. Anyone with the link can see it until you stop sharing.",
+    "اعمل لينك مشاركة": "Create a share link",
+    "وقّف المشاركة": "Stop sharing",
+    "لينك المشاركة": "Share link",
+    "انسخ اللينك": "Copy link",
+    "احفظ في المشروع": "Save to project",
+    "النتيجة بمدخلاتها، عشان تفتحها تاني في أداتها وتكمّل عليها من أي جهاز.": "The result with its inputs, so you can open it again in its tool and carry on from any device.",
+    "اسم المشروع الجديد": "New project name",
+    "اسم النتيجة": "Result name",
+    "اكتب ملخصها في ملاحظات المشروع كمان": "Also add its summary to the project notes",
+    "المدخلات أكبر من المساحة المسموحة للنتيجة، فهيتحفظ الملخص بس، ومش هتقدر تفتحها تاني في الأداة.":
+      "The inputs are larger than a saved result can hold, so only the summary is saved and it can't be reopened in its tool.",
+    "احفظ": "Save",
+    "مشروع متشارك": "Shared project",
+    "قفل": "Close",
+    "اتحفظ في": "Saved in",
+    "افتح مشاريعي": "Open my projects",
+    "ما قدرتش أحفظ على الجهاز: مساحة المتصفح ممكن تكون خلصت.": "Couldn't save on this device: the browser's storage may be full.",
+    "افتح وعدّل": "Open and edit",
+    "الملخص": "Summary",
+    "مفيش نتايج محفوظة في المشروع ده. من أي أداة، بعد ما تحسب، اضغط «احفظ في المشروع».": "No saved results in this project. In any tool, after calculating, press “Save to project”.",
+    "لسه هيترفع": "Waiting to upload",
+    "تنزيل": "Download",
+    "مفيش ملفات في المشروع ده.": "No files in this project.",
+    "رفع الملفات للي مسجّل دخول بس، عشان بتتحفظ على حسابك: سجّل دخول الأول.": "Uploading files needs you to be signed in, as they are kept on your account: sign in first.",
+    "ما قدرتش أحفظ الملف على الجهاز لحد ما يترفع: مساحة المتصفح ممكن تكون خلصت.": "Couldn't keep the file on this device until it uploads: the browser's storage may be full.",
+    "سجّل دخول الأول.": "Sign in first.",
+    "مفيش نت دلوقتي؛ جرّب تاني لما النت يرجع.": "No connection right now; try again when it's back.",
+    "مش لاقيه على حسابك لسه؛ استنى المزامنة ثواني وجرّب تاني.": "It isn't on your account yet; wait a few seconds for the sync and try again.",
+    "ما قدرتش أوصل لحسابك دلوقتي؛ جرّب تاني كمان شوية.": "Couldn't reach your account just now; try again in a little while.",
+    "سجّل دخول الأول: اللينك بيفتح المشروع من على حسابك.": "Sign in first: the link opens the project from your account.",
+    "اللينك جاهز: انسخه وابعته. اللي يفتحه هيشوف المشروع زي ما هو على حسابك، من غير ما يقدر يعدّل فيه.":
+      "The link is ready: copy it and send it. Whoever opens it sees the project as it is on your account, without being able to change it.",
+    "اتنسخ اللينك.": "Link copied.",
+    "علّم على اللينك وانسخه.": "Select the link and copy it.",
+    "المشاركة وقفت: اللينك مبقاش بيفتح.": "Sharing stopped: the link no longer opens.",
+    "بيفتح المشروع…": "Opening the project…",
+    "مفيش نت دلوقتي؛ افتح اللينك تاني لما النت يرجع.": "No connection right now; open the link again when it's back.",
+    "اللينك ده مبقاش شغال: صاحب المشروع وقف المشاركة أو مسح المشروع.": "This link no longer works: the owner stopped sharing or deleted the project.",
+    "ما قدرتش أفتح المشروع دلوقتي؛ جرّب تاني كمان شوية.": "Couldn't open the project just now; try again in a little while.",
+    "للقراية بس": "Read only",
+    "آخر تعديل": "Last changed",
+    "مفيش نتايج.": "No results.",
+    "مفيش ملاحظات.": "No notes.",
+    "مفيش ملفات.": "No files.",
     "المشروع": "Project",
     "مشروع جديد": "New project",
     "تغيير الاسم": "Rename",
@@ -1587,7 +1718,6 @@ const I18N = (() => {
     "اكتب اسم المشروع.": "Enter the project name.",
     "فيه مشروع بنفس الاسم.": "A project with that name already exists.",
     "الملف ده مش نسخة احتياطية من ملاحظات GeoX.": "This file is not a GeoX notes backup.",
-    "حفظ في ملاحظات المشروع": "Save to project notes",
     "المحطات": "Stations",
     "الترافيرس": "Traverse",
     "الترافيرس (Traverse)": "Traverse",
@@ -2005,6 +2135,9 @@ const I18N = (() => {
     [/^(.*) محتاجة (\d+) قيمة\.$/, "$1 needs $2 value(s)."],
     // Project notes.
     [/^\(اتعدلت (.*)\)$/, "(edited $1)"],
+    // My projects: files and saved results.
+    [/^دول أكبر من 20 ميجا ومش هيترفعوا: (.*)$/, "These are over 20 MB and won't be uploaded: $1"],
+    [/^الملف «(.*)» ما اترفعش: أكبر من 20 ميجا، أو مساحة حسابك \(200 ميجا\) خلصت\.$/, "“$1” wasn't uploaded: it is over 20 MB, or your account's space (200 MB) is full."],
     [/^اتسترجعت النسخة: مشاريع جديدة (\d+)، ملاحظات جديدة أو أحدث (\d+)\.$/, "Backup restored: $1 new projects, $2 new or newer notes."],
     // GPS.
     [/^(\d+) جملة NMEA اتشالت لأن الـ checksum بتاعها غلط\.$/, "$1 NMEA sentence(s) dropped for a wrong checksum."],
@@ -10659,12 +10792,15 @@ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => show
 // A #calc-<id> link opens that calculator in the tools menu once the menu is ready (the tab
 // below replaces the address, so it is read first).
 const START_CALC = /^#calc-([\w-]+)$/.exec(location.hash)?.[1] ?? null;
+// A #share-<token> link opens a project someone shared, read only (page-cloud.js).
+const START_SHARE = /^#share-([\w-]+)$/.exec(location.hash)?.[1] ?? null;
 {
   // A #link to a tab opens that tab; otherwise the last one used.
   let t = location.hash.slice(1);
   if (!t || !$(`#tab-${t}`)) { try { t = localStorage.getItem("tab"); } catch { t = null; } }
   if (!inViewer && (!t || t === "chat")) t = "level";
-  if (t && $(`#tab-${t}`)) showTab(t, "replace");
+  // A share link keeps its address, so the shared project opens again on a reload.
+  if (t && $(`#tab-${t}`)) showTab(t, START_SHARE ? "none" : "replace");
 }
 
 // ---------- reading files in the browser ----------
@@ -11177,6 +11313,7 @@ $("#chat-reset").onclick = () => {
 
 // ---------- level book ----------
 let lvLast = null;
+let lvRes = null; // the last result, for the project
 const lvCols = [
   { key: "station", label: "المحطة" }, { key: "bs", label: "BS", num: 1 }, { key: "is", label: "IS", num: 1 }, { key: "fs", label: "FS", num: 1 },
   { key: "hi", label: "HI", num: 1 }, { key: "rise", label: "Rise", num: 1 }, { key: "fall", label: "Fall", num: 1 }, { key: "rl", label: "RL", num: 1 },
@@ -11209,9 +11346,32 @@ function runLevel() {
       note: "المحطات متساوية المسافات في الرسم لأن الدفتر مفيهوش مسافات. المناسيب بمقياسها الحقيقي.",
     });
     $("#lv-csv").disabled = false;
-  } catch (err) { showError(out, err); }
+    lvRes = r;
+    $("#lv-note").disabled = false;
+  } catch (err) {
+    lvRes = null;
+    $("#lv-note").disabled = true;
+    showError(out, err);
+  }
+}
+// The last result as a project note, in the language on screen.
+function lvNoteText() {
+  const r = lvRes, c = r.checks, en = I18N.lang === "en";
+  const ltr = (x) => (en ? x : `⁦${x}⁩`);
+  const rows = r.rows.filter((x) => Number.isFinite(x.rl));
+  const lines = en
+    ? [`Level book: ${rows.length} stations, ${rows[0]?.station ?? ""} to ${rows[rows.length - 1]?.station ?? ""}.`, `Arithmetic check ${c.arithmeticOk ? "OK" : "failed"}: ΣBS − ΣFS = ${c.bsMinusFs.toFixed(3)}.`]
+    : [`دفتر الميزانية: ${rows.length} محطة، من ${rows[0]?.station ?? ""} لـ ${rows[rows.length - 1]?.station ?? ""}.`, `التحقق الحسابي ${c.arithmeticOk ? "سليم" : "فيه خطأ"}: ${ltr(`ΣBS − ΣFS = ${c.bsMinusFs.toFixed(3)}`)}.`];
+  const k = r.closing;
+  if (k) lines.push(en
+    ? `Misclosure ${k.misclosureMm.toFixed(1)} mm, allowed ±${k.allowableMm.toFixed(1)} mm: ${k.accepted ? "accepted" : "re-level required"}.`
+    : `خطأ القفل ${ltr(k.misclosureMm.toFixed(1))} مم، والمسموح ± ${ltr(k.allowableMm.toFixed(1))} مم: ${k.accepted ? "مقبول" : "مرفوض، لازم تعيد الميزانية"}.`);
+  const list = rows.slice(0, 30).map((x) => `${x.station}: RL ${ltr((k ? x.adjustedRL ?? x.rl : x.rl).toFixed(3))}`);
+  if (rows.length > 30) list.push(en ? `… and ${rows.length - 30} more.` : `… و${rows.length - 30} محطة كمان.`);
+  return [...lines, ...list].join("\n");
 }
 $("#lv-run").onclick = runLevel;
+$("#lv-note").onclick = () => openSave("level");
 bindCsv($("#lv-csv"), "level-book.csv", () => lvLast);
 $("#lv-file").onchange = async (e) => {
   try {
@@ -11228,6 +11388,9 @@ const PJ_KEY = "geox-projects";
 // owner: the account this copy was last kept with (a copy made signed out joins the first account).
 let pj = { current: null, projects: [], gone: {}, owner: null };
 let pjNaming = null; // "new" or "rename" while the name box is open
+// A project's saved results and files (page-cloud.js) go with its notes: shown with them, synced
+// with the account after them, deleted with the project.
+const pjMore = { render: () => {}, sync: async () => {}, drop: () => {} };
 const pjId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const pjCurrent = () => pj.projects.find((p) => p.id === pj.current) ?? null;
 const pjPlain = (s) => String(s ?? "").toLowerCase().replace(/[ًٌٍَُِّْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
@@ -11280,6 +11443,7 @@ function pjRender() {
   for (const el of document.querySelectorAll("#tab-proj [data-needs-project]")) el.hidden = !list.length;
   $("#pj-empty").hidden = list.length > 0 || !$("#pj-name-form").hidden;
   pjRenderNotes();
+  pjMore.render();
 }
 function pjRenderNotes() {
   const p = pjCurrent();
@@ -11317,15 +11481,6 @@ function pjAdd() {
   pjSave();
   pjRender();
 }
-// Text from another tab (a traverse result) goes into the new note, to be filed under a project.
-function pjCompose(text) {
-  showTab("proj");
-  const box = $("#pj-text");
-  box.value = box.value.trim() ? `${box.value.trim()}\n\n${text}` : text;
-  if (!pjCurrent()) { pjAskName("new"); return; }
-  box.focus();
-  box.scrollIntoView({ block: "center" });
-}
 async function pjDownload(filename, data) {
   if (!downloads) return;
   try { await downloads.save({ filename, data }); }
@@ -11355,9 +11510,9 @@ $("#pj-name-form").onsubmit = (e) => {
   pjRender();
   $("#pj-text").focus();
 };
-$("#pj-select").onchange = (e) => { pj.current = e.target.value; $("#pj-q").value = ""; pjSave(); pjRenderNotes(); };
+$("#pj-select").onchange = (e) => { pj.current = e.target.value; $("#pj-q").value = ""; pjSave(); pjRenderNotes(); pjMore.render(); };
 $("#pj-delete").onclick = (e) => pjArm(e.currentTarget, () => {
-  if (pj.current) pj.gone[pj.current] = Date.now();
+  if (pj.current) { pj.gone[pj.current] = Date.now(); pjMore.drop(pj.current); }
   pj.projects = pj.projects.filter((p) => p.id !== pj.current);
   pj.current = null;
   pjSave();
@@ -11420,11 +11575,13 @@ $("#pj-restore").onchange = async (e) => {
   pjShow("#pj-status", `اتسترجعت النسخة: مشاريع جديدة ${projects}، ملاحظات جديدة أو أحدث ${notes}.`);
 };
 // ---- the account copy ----
-// Signed in, the notes are kept on the account as well (the server part: cloud/lib/projects-api.js),
-// so every device signed in to it has the same projects. A change here is merged with the account's
-// copy (E.mergeProjects) and sent back; this device's copy stays the one the page works from, offline
+// Signed in, the notes are kept on the account as well (the server part: cloud/lib/api.js), so every
+// device signed in to it has the same projects. A change here is merged with the account's copy
+// (E.mergeProjects) and sent back; this device's copy stays the one the page works from, offline
 // too. Another account signing in on this device gets its own projects: the last one's are set aside.
-const PJ_CLOUD = "https://geox-survey.pages.dev/api/projects";
+// The server is the same for every copy of the site.
+const CLOUD_API = "https://geox-survey.pages.dev/api";
+const PJ_CLOUD = `${CLOUD_API}/projects`;
 const pjCloud = { state: CLERK_PUBLISHABLE_KEY ? "wait" : "off", at: 0, busy: false, again: false, timer: 0 };
 const pjData = () => ({ projects: pj.projects, gone: pj.gone });
 // The same projects and notes whatever their order, to tell whether the account's copy differs.
@@ -11494,6 +11651,7 @@ async function pjCloudSync() {
       if (!put.ok) throw new Error(`PUT ${put.status}`);
       break;
     }
+    await pjMore.sync(C);
     pjCloud.state = "ok";
     pjCloud.at = Date.now();
   } catch {
@@ -11664,7 +11822,7 @@ $("#gp-penz").onclick = async () => {
   try { await downloads.save({ filename: "gps-PENZD.csv", data }); }
   catch (err) { if (err?.code !== "declined") showError($("#gp-out"), err); }
 };
-$("#gp-note").onclick = () => { if (gpRes) pjCompose(gpNoteText()); };
+$("#gp-note").onclick = () => openSave("gps");
 $("#gp-file").onchange = async (e) => {
   const file = e.target.files[0];
   e.target.value = "";
@@ -12544,7 +12702,7 @@ function gsDetail() {
     <div class="actions">
       ${pts ? `<button type="button" class="secondary primary" id="gs-line">وصّل النقط خط</button><button type="button" class="secondary primary" id="gs-poly">اقفل النقط مضلع</button>` : ""}
       <button type="button" class="secondary primary" id="gs-swap">بدّل E وN</button>
-      <button type="button" class="secondary primary" id="gs-note">حفظ في ملاحظات المشروع</button>
+      <button type="button" class="secondary primary" id="gs-note">احفظ في المشروع</button>
     </div>
     <h3>تصدير</h3>
     <p id="gs-fnote" class="hint"${l.match ? "" : " hidden"}>البحث شغال: التصدير والحفظ هيكونوا للعناصر اللي ظاهرة في البحث بس.</p>
@@ -12739,7 +12897,7 @@ $("#gs-detail").addEventListener("click", (e) => {
   if (!t) return;
   if (t.dataset.x) { gsExport(t.dataset.x); return; }
   if (t.id === "gs-more") { l.shown += GS_ROWS; gsTable(); return; }
-  if (t.id === "gs-note") { pjCompose(gsNoteText(l)); return; }
+  if (t.id === "gs-note") { openSave("gis"); return; }
   try {
     if (t.id === "gs-line" || t.id === "gs-poly") {
       const made = E.gisConnect(gsOut(l), t.id === "gs-poly");
@@ -13147,7 +13305,7 @@ $("#tr-kind").onchange = () => {
 for (const k of TR_FIELDS) $(`#tr-${k}`).addEventListener("input", () => (trExample = false));
 $("#tr-rows").addEventListener("input", () => { trExample = false; trFileNotes = null; });
 bindCsv($("#tr-csv"), "traverse.csv", () => trLast);
-$("#tr-note").onclick = () => { if (trSummary) pjCompose(trNoteText()); };
+$("#tr-note").onclick = () => openSave("trav");
 $("#tr-file").onchange = async (e) => {
   const file = e.target.files[0];
   e.target.value = "";
@@ -13434,7 +13592,7 @@ $("#pf-dxf").onclick = async () => {
   try { await downloads.save({ filename: "profile.dxf", data: E.profileDxf(pfRes.r.rows, pfRes.dense, { exaggeration: 10 }) }); }
   catch (err) { if (err?.code !== "declined") showError($("#pf-out"), err); }
 };
-$("#pf-note").onclick = () => { if (pfRes) pjCompose(pfNoteText()); };
+$("#pf-note").onclick = () => openSave("profile");
 for (const role of ["ground", "design"]) {
   const k = role[0];
   const slot = $(`#pf-${k}-slot`);
@@ -13788,7 +13946,7 @@ $("#qf-dxf").onclick = async () => {
   try { await downloads.save({ filename: "cross-sections.dxf", data: E.sectionsDxf(qf.res.sections, { columns: 3 }) }); }
   catch (err) { if (err?.code !== "declined") showError($("#qf-out"), err); }
 };
-$("#qf-note").onclick = () => { if (qf.res) pjCompose(qfNoteText()); };
+$("#qf-note").onclick = () => openSave("qty");
 // The design may have changed in the Profile tab: show its range, and work the quantities again.
 for (const b of document.querySelectorAll('[data-tab="qty"], [data-go="qty"]')) b.addEventListener("click", () => (qf.ground ? runQf() : qfShow()));
 qfShow();
@@ -14230,6 +14388,491 @@ runTraverse();
 runGps();
 if (START_CALC && Engine.CALCULATORS.some((c) => c.id === START_CALC)) openDrawerAt({ type: "calc", id: START_CALC });
 I18N.start();
+
+// ---------- my projects on the account: saved results, files, settings, share links ----------
+// What the account keeps besides the notes (those are synced in page-app.js, pjCloudSync): a tool's
+// result saved into a project with its inputs, to open again and go on editing; files uploaded to a
+// project; the settings; read-only links to a project. Everything is saved on the device first
+// (IndexedDB) and goes to the account when signed in and online (cloudSyncRest, after the notes).
+// The server part is cloud/lib/api.js.
+const CLOUD_MAX_FILE = 20 * 1024 * 1024;
+const CLOUD_MAX_RESULT = 1_400_000; // bytes of a result's inputs; the server takes 1.5 MB in all
+
+// ---- the device's store: IndexedDB, or the page's memory when the browser allows none ----
+const cloudDb = (() => {
+  const mem = { results: new Map(), files: new Map(), kv: new Map() };
+  let open = null;
+  const db = () => (open ??= new Promise((ok, bad) => {
+    const req = indexedDB.open("geox", 1);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      d.createObjectStore("results", { keyPath: "id" });
+      d.createObjectStore("files", { keyPath: "id" });
+      d.createObjectStore("kv");
+    };
+    req.onsuccess = () => ok(req.result);
+    req.onerror = () => bad(req.error);
+  }).catch(() => null));
+  const run = async (store, mode, idb, map) => {
+    const d = await db();
+    if (!d) return map(mem[store]);
+    return new Promise((ok, bad) => {
+      const tx = d.transaction(store, mode);
+      const req = idb(tx.objectStore(store));
+      tx.oncomplete = () => ok(req.result);
+      tx.onerror = tx.onabort = () => bad(tx.error);
+    });
+  };
+  return {
+    all: (store) => run(store, "readonly", (s) => s.getAll(), (m) => [...m.values()]),
+    get: (store, key) => run(store, "readonly", (s) => s.get(key), (m) => m.get(key)),
+    put: (store, value, key) => run(store, "readwrite", (s) => (key === undefined ? s.put(value) : s.put(value, key)), (m) => m.set(key ?? value.id, value)),
+    del: (store, key) => run(store, "readwrite", (s) => s.delete(key), (m) => m.delete(key)),
+  };
+})();
+const cloudSize = (n) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : n >= 1024 ? `${Math.round(n / 1024)} KB` : `${n} B`);
+const cloudLs = (k, v) => {
+  try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { /* storage blocked */ }
+  return null;
+};
+// The value when it fits a saved result as JSON, or null. A big map layer is not walked to its end.
+function cloudFit(v) {
+  let n = 0;
+  const stop = {};
+  try {
+    const s = JSON.stringify(v, (k, x) => {
+      n += k.length + (typeof x === "string" ? x.length : 4);
+      if (n > CLOUD_MAX_RESULT) throw stop;
+      return x;
+    });
+    return new Blob([s]).size <= CLOUD_MAX_RESULT ? v : null;
+  } catch (err) {
+    if (err === stop) return null;
+    throw err;
+  }
+}
+
+// ---- the tools: what a saved result keeps of each, and how it is opened again ----
+// A tool keeps every field of its first panel; the profile, quantities and GIS keep their files too.
+const fieldsOf = (tab) => Object.fromEntries([...document.querySelectorAll(`#tab-${tab} > .panel:first-of-type :is(input, select, textarea)[id]`)]
+  .filter((el) => el.type !== "file").map((el) => [el.id, el.type === "checkbox" ? el.checked : el.value]));
+// The fields written back, then each list told it changed so the boxes it shows or hides follow.
+function setFields(fields) {
+  const els = Object.entries(fields ?? {}).map(([id, v]) => [document.getElementById(id), v]).filter(([el]) => el && el.type !== "file");
+  for (const [el, v] of els) { if (el.type === "checkbox") el.checked = !!v; else el.value = v; }
+  for (const [el] of els) if (el.tagName === "SELECT") el.dispatchEvent(new Event("change", { bubbles: true }));
+}
+const CLOUD_TOOLS = {
+  level: { label: "الميزانية", out: "#lv-out", ready: () => lvRes, text: lvNoteText, input: () => ({ fields: fieldsOf("level") }), open: (i) => { setFields(i.fields); runLevel(); } },
+  gps: { label: "تحويل GPS", out: "#gp-out", ready: () => gpRes, text: gpNoteText, input: () => ({ fields: fieldsOf("gps") }), open: (i) => { setFields(i.fields); runGps(); } },
+  trav: {
+    label: "الترافيرس", out: "#tr-out", ready: () => trSummary, text: trNoteText, input: () => ({ fields: fieldsOf("trav") }),
+    open: (i) => { trExample = false; trFileNotes = null; setFields(i.fields); runTraverse(); },
+  },
+  profile: {
+    label: "البروفيل", out: "#pf-out", ready: () => pfRes, text: pfNoteText,
+    input: () => ({ fields: fieldsOf("profile"), files: { ground: pfFiles.ground, design: pfFiles.design } }),
+    lite: () => ({ fields: fieldsOf("profile") }), // the boxes alone draw the same profile
+    open: (i) => {
+      pfFiles.ground = i.files?.ground ?? null;
+      pfFiles.design = i.files?.design ?? null;
+      pfShowFiles();
+      $("#pf-notes").innerHTML = "";
+      setFields(i.fields);
+      runProfile();
+    },
+  },
+  qty: {
+    label: "الكميات", out: "#qf-out", ready: () => qf.res, text: qfNoteText,
+    // With the typical section, the design levels come from the profile tab's VPI box.
+    input: () => ({ fields: fieldsOf("qty"), ground: qf.ground, gName: qf.gName, design: qf.design, dName: qf.dName, ...($("#qf-src").value === "template" ? { vpi: $("#pf-vpi").value } : {}) }),
+    open: (i) => {
+      Object.assign(qf, { ground: i.ground ?? null, gName: i.gName ?? "", design: i.design ?? null, dName: i.dName ?? "", res: null, at: 0 });
+      if (typeof i.vpi === "string") $("#pf-vpi").value = i.vpi;
+      setFields(i.fields);
+      runQf();
+    },
+  },
+  gis: {
+    label: "GIS", out: "#gs-status", ready: () => gsSel_(), text: () => gsNoteText(gsSel_()),
+    input: () => ({ grid: gsGrid, layers: gsLayers.map((l) => ({ name: l.name, source: l.source, format: l.format, crs: l.crs, crsFrom: l.crsFrom, features: l.features, fields: l.fields, notes: l.notes })) }),
+    // The saved layers join the ones on the map.
+    open: (i) => {
+      const got = (i.layers ?? []).map((l) => gsAdd(l, l.source ?? l.name));
+      if (i.grid) {
+        const sel = $("#gs-grid");
+        sel.value = i.grid;
+        if (!sel.value) sel.value = "auto";
+        gsGrid = sel.value;
+      }
+      if (!got.length) return;
+      gsSel = got[got.length - 1].id;
+      gsPick = null;
+      gsRender();
+      gsMap.fit(got);
+    },
+  },
+};
+const cloudLabel = (tool) => {
+  const a = CLOUD_TOOLS[tool]?.label ?? tool;
+  return I18N.lang === "en" ? I18N.tr(a) ?? a : a;
+};
+
+// ---- the save dialog: which project, what name ----
+let cloudSaving = null;
+function openSave(tool) {
+  const t = CLOUD_TOOLS[tool];
+  if (!t.ready()) return;
+  const text = t.text();
+  let input = cloudFit(t.input());
+  if (!input && t.lite) input = cloudFit(t.lite());
+  cloudSaving = { tool, text, input };
+  const list = [...pj.projects].sort((a, b) => b.updated - a.updated);
+  const sel = $("#save-proj");
+  sel.innerHTML = `${list.map((p) => `<option value="${esc(p.id)}">⁨${esc(p.name)}⁩</option>`).join("")}<option value="">${esc(I18N.lang === "en" ? "+ New project" : "+ مشروع جديد")}</option>`;
+  sel.value = pjCurrent()?.id ?? "";
+  $("#save-new-l").hidden = sel.value !== "";
+  $("#save-new").value = "";
+  $("#save-title").value = text.split("\n")[0].replace(/[.:،,]+$/, "").slice(0, 120) || `${cloudLabel(tool)} ${pjDate(Date.now())}`;
+  $("#save-tool").textContent = t.label;
+  $("#save-note").checked = cloudLs("save-note") === "1";
+  $("#save-big").hidden = Boolean(input);
+  pjShow("#save-msg", "");
+  $("#save-dlg").showModal();
+  (sel.value ? $("#save-title") : $("#save-new")).focus();
+}
+$("#save-proj").addEventListener("change", (e) => {
+  $("#save-new-l").hidden = e.target.value !== "";
+  if (!e.target.value) $("#save-new").focus();
+});
+$("#save-cancel").onclick = () => $("#save-dlg").close();
+$("#save-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const s = cloudSaving;
+  if (!s) return;
+  const now = Date.now();
+  let p = pj.projects.find((x) => x.id === $("#save-proj").value);
+  if (!p) {
+    const name = $("#save-new").value.trim().replace(/\s+/g, " ").slice(0, 80);
+    if (!name) { pjShow("#save-msg", "اكتب اسم المشروع."); $("#save-new").focus(); return; }
+    p = pj.projects.find((x) => x.name === name);
+    if (!p) {
+      p = { id: pjId(), name, created: now, updated: now, notes: [] };
+      pj.projects.push(p);
+    }
+  }
+  const title = $("#save-title").value.trim().replace(/\s+/g, " ").slice(0, 200) || cloudLabel(s.tool);
+  const note = $("#save-note").checked;
+  cloudLs("save-note", note ? "1" : "0");
+  try {
+    await cloudDb.put("results", { id: pjId(), project: p.id, tool: s.tool, title, input: s.input, output: { text: s.text }, created: now, updated: now, deleted: false, dirty: 1, owner: pj.owner });
+  } catch {
+    pjShow("#save-msg", "ما قدرتش أحفظ على الجهاز: مساحة المتصفح ممكن تكون خلصت.");
+    return;
+  }
+  if (note && s.text) p.notes.push({ id: pjId(), text: `${title}\n${s.text}`.slice(0, 20000), created: now, updated: now });
+  p.updated = now;
+  pj.current = p.id;
+  cloudSaving = null;
+  pjSave();
+  pjRender();
+  $("#save-dlg").close();
+  cloudToast(p.name);
+};
+// "Saved in <project>", with the way to it.
+function cloudToast(name) {
+  const box = $("#cloud-toast");
+  box.querySelector("bdi").textContent = name;
+  box.hidden = false;
+  clearTimeout(cloudToast.timer);
+  cloudToast.timer = setTimeout(() => (box.hidden = true), 6000);
+}
+$("#cloud-toast-go").onclick = () => {
+  $("#cloud-toast").hidden = true;
+  showTab("proj");
+  $("#tab-proj").scrollIntoView({ block: "start" });
+};
+
+// ---- my projects: the saved results, the files and the share link of the project on screen ----
+const cloudShareUrl = (token) => `https://geox-survey.pages.dev/#share-${token}`;
+let cloudSeq = 0;
+let cloudShown = null; // the project last shown, to clear its messages when another one is
+async function cloudRenderProject() {
+  const p = pjCurrent();
+  const seq = ++cloudSeq;
+  if (!p) { $("#pj-results").innerHTML = $("#pj-files").innerHTML = ""; return; }
+  const [results, files, shares] = await Promise.all([cloudDb.all("results"), cloudDb.all("files"), cloudDb.get("kv", `shares:${pj.owner}`)]);
+  if (seq !== cloudSeq) return; // a newer render is on its way
+  if (cloudShown !== p.id) {
+    cloudShown = p.id;
+    pjShow("#pj-files-msg", "");
+    pjShow("#pj-share-msg", "");
+  }
+  const rs = results.filter((r) => r.project === p.id && !r.deleted).sort((a, b) => b.updated - a.updated);
+  $("#pj-results").innerHTML = rs.length ? rs.map((r) => `<li class="pj-res" data-id="${esc(r.id)}">
+      <span class="pj-res-tool">${esc(CLOUD_TOOLS[r.tool]?.label ?? r.tool)}</span>
+      <span class="pj-res-title" dir="auto" data-no-i18n>${esc(r.title)}</span>
+      <time dir="ltr">${pjDate(r.updated)}</time>
+      <span class="pj-note-tools">${r.input && CLOUD_TOOLS[r.tool] ? `<button type="button" class="pj-act" data-act="open">افتح وعدّل</button>` : ""}<button type="button" class="pj-act" data-act="show" aria-expanded="false">الملخص</button><button type="button" class="pj-act bad" data-act="del" data-label="حذف" data-confirm="أكيد؟ احذف">حذف</button></span>
+      <pre class="pj-res-text" dir="auto" data-no-i18n hidden>${esc(r.output?.text ?? "")}</pre></li>`).join("")
+    : `<li class="pj-none">مفيش نتايج محفوظة في المشروع ده. من أي أداة، بعد ما تحسب، اضغط «احفظ في المشروع».</li>`;
+  const fs = files.filter((f) => f.project === p.id && f.state !== "delete").sort((a, b) => b.created - a.created);
+  $("#pj-files").innerHTML = fs.length ? fs.map((f) => `<li class="pj-file" data-id="${esc(f.id)}">
+      <span class="pj-file-name" dir="auto" data-no-i18n>${esc(f.name)}</span>
+      <small dir="ltr">${cloudSize(f.size)}</small>${f.state === "pending" ? `<small class="pj-wait">لسه هيترفع</small>` : ""}
+      <span class="pj-note-tools"><button type="button" class="pj-act" data-act="get">تنزيل</button><button type="button" class="pj-act bad" data-act="del" data-label="حذف" data-confirm="أكيد؟ احذف">حذف</button></span></li>`).join("")
+    : `<li class="pj-none">مفيش ملفات في المشروع ده.</li>`;
+  const token = shares?.[p.id];
+  $("#pj-share").hidden = Boolean(token);
+  $("#pj-unshare").hidden = !token;
+  $("#pj-share-out").hidden = !token;
+  if (token) $("#pj-share-url").value = cloudShareUrl(token);
+}
+$("#pj-results").onclick = async (e) => {
+  const b = e.target.closest("button[data-act]"), li = e.target.closest(".pj-res");
+  if (!b || !li) return;
+  const r = await cloudDb.get("results", li.dataset.id);
+  if (!r) return;
+  if (b.dataset.act === "show") {
+    const pre = li.querySelector(".pj-res-text");
+    pre.hidden = !pre.hidden;
+    b.setAttribute("aria-expanded", String(!pre.hidden));
+  } else if (b.dataset.act === "open") {
+    const tool = CLOUD_TOOLS[r.tool];
+    showTab(r.tool);
+    try { tool.open(r.input); } catch (err) { showError($(tool.out), err); }
+    $(`#tab-${r.tool}`).scrollIntoView({ block: "start" });
+  } else if (b.dataset.act === "del") {
+    pjArm(b, async () => {
+      await cloudDb.put("results", { ...r, deleted: true, input: null, output: null, updated: Date.now(), dirty: 1 });
+      cloudRenderProject();
+      pjCloudSoon();
+    });
+  }
+};
+
+// ---- files: kept on the account, so for the signed in only ----
+$("#pj-file").onchange = async (e) => {
+  const list = [...e.target.files];
+  e.target.value = "";
+  const p = pjCurrent();
+  if (!p || !list.length) return;
+  if (!(await authReady())?.user) { pjShow("#pj-files-msg", "رفع الملفات للي مسجّل دخول بس، عشان بتتحفظ على حسابك: سجّل دخول الأول."); return; }
+  const big = list.filter((f) => f.size > CLOUD_MAX_FILE);
+  try {
+    for (const f of list.filter((x) => x.size <= CLOUD_MAX_FILE)) {
+      await cloudDb.put("files", { id: pjId(), project: p.id, name: f.name, type: f.type || "application/octet-stream", size: f.size, created: Date.now(), blob: f, state: "pending", owner: pj.owner });
+    }
+    pjShow("#pj-files-msg", big.length ? `دول أكبر من 20 ميجا ومش هيترفعوا: ${big.map((f) => f.name).join("، ")}` : "");
+  } catch {
+    pjShow("#pj-files-msg", "ما قدرتش أحفظ الملف على الجهاز لحد ما يترفع: مساحة المتصفح ممكن تكون خلصت.");
+  }
+  cloudRenderProject();
+  pjCloudSoon(0);
+};
+$("#pj-files").onclick = async (e) => {
+  const b = e.target.closest("button[data-act]"), li = e.target.closest(".pj-file");
+  if (!b || !li) return;
+  const f = await cloudDb.get("files", li.dataset.id);
+  if (!f) return;
+  if (b.dataset.act === "get") {
+    try {
+      const blob = f.blob ?? (await (await cloudAuthed(`files/${encodeURIComponent(f.id)}`)).blob());
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = f.name;
+      document.body.append(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    } catch (err) { pjShow("#pj-files-msg", err.message); }
+  } else if (b.dataset.act === "del") {
+    pjArm(b, async () => {
+      if (f.state === "pending") await cloudDb.del("files", f.id);
+      else await cloudDb.put("files", { ...f, state: "delete", blob: null });
+      cloudRenderProject();
+      pjCloudSoon(0);
+    });
+  }
+};
+
+// ---- share: a read-only link to the project on screen ----
+// A request to the account, or an error to show as it is.
+async function cloudAuthed(path, init = {}) {
+  const C = await authReady();
+  if (!C?.user) throw new Error("سجّل دخول الأول.");
+  let r;
+  try { r = await fetch(`${CLOUD_API}/${path}`, { ...init, headers: { ...init.headers, authorization: `Bearer ${await C.session.getToken()}` } }); }
+  catch { throw new Error("مفيش نت دلوقتي؛ جرّب تاني لما النت يرجع."); }
+  if (!r.ok) throw new Error(r.status === 404 ? "مش لاقيه على حسابك لسه؛ استنى المزامنة ثواني وجرّب تاني." : "ما قدرتش أوصل لحسابك دلوقتي؛ جرّب تاني كمان شوية.");
+  return r;
+}
+async function cloudSetShare(project, token) {
+  const key = `shares:${pj.owner}`;
+  const shares = { ...(await cloudDb.get("kv", key)) };
+  if (token) shares[project] = token; else delete shares[project];
+  await cloudDb.put("kv", shares, key);
+}
+$("#pj-share").onclick = async () => {
+  const p = pjCurrent();
+  if (!p) return;
+  pjShow("#pj-share-msg", "");
+  try {
+    if (!(await authReady())?.user) throw new Error("سجّل دخول الأول: اللينك بيفتح المشروع من على حسابك.");
+    clearTimeout(pjCloud.timer);
+    await pjCloudSync(); // the project has to be on the account first
+    const { token } = await (await cloudAuthed("shares", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ project: p.id }) })).json();
+    await cloudSetShare(p.id, token);
+    await cloudRenderProject();
+    pjShow("#pj-share-msg", "اللينك جاهز: انسخه وابعته. اللي يفتحه هيشوف المشروع زي ما هو على حسابك، من غير ما يقدر يعدّل فيه.");
+  } catch (err) { pjShow("#pj-share-msg", err.message); }
+};
+$("#pj-share-copy").onclick = async () => {
+  const box = $("#pj-share-url");
+  try { await navigator.clipboard.writeText(box.value); pjShow("#pj-share-msg", "اتنسخ اللينك."); }
+  catch { box.select(); pjShow("#pj-share-msg", "علّم على اللينك وانسخه."); }
+};
+$("#pj-unshare").onclick = async () => {
+  const p = pjCurrent();
+  const token = p && (await cloudDb.get("kv", `shares:${pj.owner}`))?.[p.id];
+  if (!token) return;
+  try {
+    await cloudAuthed(`shares/${encodeURIComponent(token)}`, { method: "DELETE" });
+    await cloudSetShare(p.id, null);
+    await cloudRenderProject();
+    pjShow("#pj-share-msg", "المشاركة وقفت: اللينك مبقاش بيفتح.");
+  } catch (err) { pjShow("#pj-share-msg", err.message); }
+};
+
+// ---- a shared project, opened from its link: read only ----
+async function cloudOpenShare(token) {
+  const body = $("#share-body");
+  body.innerHTML = `<p class="hint">بيفتح المشروع…</p>`;
+  $("#share-dlg").showModal();
+  try {
+    let r;
+    try { r = await fetch(`${CLOUD_API}/share/${encodeURIComponent(token)}`); } catch { throw new Error("مفيش نت دلوقتي؛ افتح اللينك تاني لما النت يرجع."); }
+    if (!r.ok) throw new Error(r.status === 404 ? "اللينك ده مبقاش شغال: صاحب المشروع وقف المشاركة أو مسح المشروع." : "ما قدرتش أفتح المشروع دلوقتي؛ جرّب تاني كمان شوية.");
+    const s = await r.json();
+    const notes = [...s.project.notes].sort((a, b) => b.created - a.created);
+    const file = (f) => `${CLOUD_API}/share/${encodeURIComponent(token)}/files/${encodeURIComponent(f.id)}`;
+    body.innerHTML = `<p class="share-name" dir="auto" data-no-i18n>${esc(s.project.name)}</p>
+      <p class="hint"><span>للقراية بس</span> · <span>آخر تعديل</span> <bdi dir="ltr">${pjDate(s.project.updated)}</bdi></p>
+      <h4>النتايج المحفوظة</h4>${s.results.length ? `<ol class="pj-results">${s.results.map((x) => `<li class="pj-res"><span class="pj-res-tool">${esc(CLOUD_TOOLS[x.tool]?.label ?? x.tool)}</span><span class="pj-res-title" dir="auto" data-no-i18n>${esc(x.title)}</span><time dir="ltr">${pjDate(x.updated)}</time><pre class="pj-res-text" dir="auto" data-no-i18n>${esc(x.output?.text ?? "")}</pre></li>`).join("")}</ol>` : `<p class="pj-none">مفيش نتايج.</p>`}
+      <h4>ملاحظات المشروع</h4>${notes.length ? `<ol class="pj-notes">${notes.map((n) => `<li class="pj-note"><div class="pj-note-head"><time dir="ltr">${pjDate(n.created)}</time></div><div class="pj-note-text" dir="auto" data-no-i18n>${esc(n.text)}</div></li>`).join("")}</ol>` : `<p class="pj-none">مفيش ملاحظات.</p>`}
+      <h4>ملفات المشروع</h4>${s.files.length ? `<ol class="pj-files">${s.files.map((f) => `<li class="pj-file"><a class="pj-file-name" dir="auto" data-no-i18n href="${esc(file(f))}" download="${esc(f.name)}">${esc(f.name)}</a><small dir="ltr">${cloudSize(f.size)}</small></li>`).join("")}</ol>` : `<p class="pj-none">مفيش ملفات.</p>`}`;
+  } catch (err) {
+    body.innerHTML = `<p class="error">${esc(err.message)}</p>`;
+  }
+}
+$("#share-close").onclick = () => $("#share-dlg").close();
+
+// ---- settings: the language, the theme, the map background, the welcome card ----
+// A change here is stamped (settings-at); the newer of this device's and the account's wins.
+const CLOUD_SETTINGS = ["lang", "theme", "gs-base", "welcome-hidden"];
+let cloudApplying = false; // the account's settings being put on the page: not a change of the engineer's
+const cloudSettingsTouched = () => { cloudLs("settings-at", String(Date.now())); pjCloudSoon(); };
+document.addEventListener("click", (e) => { if (!cloudApplying && e.target.closest("[data-lang], #theme-btn, #welcome-close, #welcome-open")) cloudSettingsTouched(); });
+$("#gs-base").addEventListener("change", () => { if (!cloudApplying) cloudSettingsTouched(); });
+function cloudApplySettings(data) {
+  cloudApplying = true;
+  try {
+    for (const k of CLOUD_SETTINGS) if (typeof data[k] === "string") cloudLs(k, data[k]);
+    if ((data.lang === "en" || data.lang === "ar") && I18N.lang !== data.lang) I18N.set(data.lang);
+    const light = document.documentElement.dataset.theme === "light";
+    if ((data.theme === "light" && !light) || (data.theme === "dark" && light)) $("#theme-btn").click();
+    if ([...$("#gs-base").options].some((o) => o.value === data["gs-base"]) && $("#gs-base").value !== data["gs-base"]) {
+      $("#gs-base").value = data["gs-base"];
+      gsMap.setBase(data["gs-base"]);
+    }
+  } finally {
+    cloudApplying = false;
+  }
+}
+
+// ---- after the notes: results, files, settings and share links with the account ----
+async function cloudSyncRest(C) {
+  const me = C.user.id;
+  const auth = async (json) => ({ authorization: `Bearer ${await C.session.getToken()}`, ...(json ? { "content-type": "application/json" } : {}) });
+  const ok = (r) => { if (!r.ok) throw new Error(`${r.status}`); return r; };
+  const get = async (path) => (await ok(await fetch(`${CLOUD_API}/${path}`, { headers: await auth() }))).json();
+  // Projects deleted here: the account drops their results, files and share links too.
+  const drops = (await cloudDb.get("kv", "drops")) ?? [];
+  for (const id of drops) ok(await fetch(`${CLOUD_API}/projects/${encodeURIComponent(id)}`, { method: "DELETE", headers: await auth() }));
+  if (drops.length) await cloudDb.put("kv", [], "drops");
+  // Results saved or deleted here go up; the account's changes since the last time come down.
+  for (const r of await cloudDb.all("results")) {
+    if (!r.dirty || (r.owner && r.owner !== me)) continue;
+    const { project, tool, title, input, output, created, updated, deleted } = r;
+    ok(await fetch(`${CLOUD_API}/results/${encodeURIComponent(r.id)}`, { method: "PUT", headers: await auth(true), body: JSON.stringify({ project, tool, title, input, output, created, updated, deleted }) }));
+    const now = await cloudDb.get("results", r.id);
+    if (now?.updated === r.updated) await cloudDb.put("results", { ...now, dirty: 0, owner: me }); // unless changed meanwhile
+  }
+  let since = (await cloudDb.get("kv", `results:${me}`)) ?? 0;
+  for (let more = true; more;) {
+    const got = await get(`results?since=${since}`);
+    for (const s of got.results) {
+      const here = await cloudDb.get("results", s.id);
+      if (here?.dirty && here.updated > s.updated) continue;
+      const { id, project, tool, title, input, output, created, updated, deleted } = s;
+      await cloudDb.put("results", { id, project, tool, title, input, output, created, updated, deleted, dirty: 0, owner: me });
+    }
+    ({ now: since, more } = got);
+  }
+  await cloudDb.put("kv", since, `results:${me}`);
+  // Files: the waiting ones uploaded, the deleted ones deleted, the account's list brought down.
+  for (const f of await cloudDb.all("files")) {
+    if (f.owner && f.owner !== me) continue;
+    if (f.state === "pending") {
+      const q = new URLSearchParams({ id: f.id, project: f.project, name: f.name });
+      const r = await fetch(`${CLOUD_API}/files?${q}`, { method: "POST", headers: { ...(await auth()), "content-type": f.type }, body: f.blob });
+      if (r.status === 413) {
+        await cloudDb.del("files", f.id);
+        pjShow("#pj-files-msg", `الملف «${f.name}» ما اترفعش: أكبر من 20 ميجا، أو مساحة حسابك (200 ميجا) خلصت.`);
+        continue;
+      }
+      ok(r);
+      await cloudDb.put("files", { ...f, blob: null, state: "up", owner: me });
+    } else if (f.state === "delete") {
+      ok(await fetch(`${CLOUD_API}/files/${encodeURIComponent(f.id)}`, { method: "DELETE", headers: await auth() }));
+      await cloudDb.del("files", f.id);
+    }
+  }
+  let fsince = (await cloudDb.get("kv", `files:${me}`)) ?? 0;
+  for (let more = true; more;) {
+    const got = await get(`files?since=${fsince}`);
+    for (const s of got.files) {
+      if (s.deleted) await cloudDb.del("files", s.id);
+      else await cloudDb.put("files", { id: s.id, project: s.project, name: s.name, type: s.type, size: s.size, created: s.created, blob: null, state: "up", owner: me });
+    }
+    ({ now: fsince, more } = got);
+  }
+  await cloudDb.put("kv", fsince, `files:${me}`);
+  // Share links, to show which projects have one.
+  const { shares } = await get("shares");
+  await cloudDb.put("kv", Object.fromEntries(shares.map((s) => [s.project, s.token])), `shares:${me}`);
+  // Settings: the newer of this device's and the account's.
+  const local = Number(cloudLs("settings-at")) || 0;
+  const remote = await get("settings");
+  if (remote.data && remote.updated > local) {
+    cloudApplySettings(remote.data);
+    cloudLs("settings-at", String(remote.updated));
+  } else if (local > remote.updated) {
+    const data = Object.fromEntries(CLOUD_SETTINGS.map((k) => [k, cloudLs(k)]).filter(([, v]) => v !== null));
+    ok(await fetch(`${CLOUD_API}/settings`, { method: "PUT", headers: await auth(true), body: JSON.stringify({ data, updated: local }) }));
+  }
+  cloudRenderProject();
+}
+
+// A project deleted here takes its saved results and files with it, here and on the account.
+async function cloudDropProject(id) {
+  for (const r of await cloudDb.all("results")) if (r.project === id && !r.deleted) await cloudDb.put("results", { ...r, deleted: true, input: null, output: null, updated: Date.now(), dirty: 1 });
+  for (const f of await cloudDb.all("files")) if (f.project === id) await cloudDb.del("files", f.id);
+  await cloudDb.put("kv", [...((await cloudDb.get("kv", "drops")) ?? []), id], "drops");
+}
+
+Object.assign(pjMore, { render: cloudRenderProject, sync: cloudSyncRest, drop: cloudDropProject });
+cloudRenderProject();
+if (START_SHARE) cloudOpenShare(START_SHARE);
 
 </script>
 

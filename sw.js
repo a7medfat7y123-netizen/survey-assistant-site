@@ -2,8 +2,10 @@
 // The page is network-first with a short wait: an update shows as soon as there is a connection,
 // and a slow or missing one still opens the stored copy at once. Libraries, fonts and the DWG reader
 // are cache-first. The app's build stores its libraries at install, so it works offline from then on.
-// Anything else (sign-in, the assistant's API) always goes to the network.
-const CACHE = "almohandes-v2";
+// Anything else (sign-in, the assistant's API, the account's /api/) always goes to the network; the
+// page keeps its own copy of the account's data for offline use.
+// v3: drops the account answers v2 could have stored on geox-survey.pages.dev.
+const CACHE = "almohandes-v3";
 const PRECACHE = ["./","icons/icon-192.png","icons/icon-512.png"];
 const LIBS = /^(cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)$/;
 const WAIT_MS = 3000;
@@ -45,6 +47,7 @@ self.addEventListener("fetch", (e) => {
   }
 
   if (url.origin !== self.location.origin && !LIBS.test(url.hostname)) return;
+  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) return; // the account: never stored
   if (url.pathname.endsWith(".apk")) return; // a download, not part of the app
   e.respondWith(
     caches.match(req).then((hit) => hit || fetch(req).then((res) => {
