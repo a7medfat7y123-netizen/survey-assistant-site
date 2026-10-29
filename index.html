@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&family=Aref+Ruqaa:wght@700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Egyptian+Hieroglyphs&text=%F0%93%84%BF%F0%93%8E%9B%F0%93%85%93%F0%93%82%A7%F0%93%86%91%F0%93%8F%8F%F0%93%8E%9B%F0%93%87%8C%F0%93%80%80&display=swap">
 <script>
-  // Before first paint: saved theme and language, and the welcome screen once per visit.
+  // Before first paint: saved theme and language, and the welcome screen on every load.
   (function (h) {
     try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") h.dataset.theme = t; } catch (e) {}
     var en = true;
@@ -20,9 +20,8 @@
     h.dir = en ? "ltr" : "rtl";
     // The markup is Arabic: keep it hidden until the English pass has run (with a fallback).
     if (en) { h.classList.add("i18n-wait"); setTimeout(function () { h.classList.remove("i18n-wait"); }, 3000); }
-    var seen = false;
-    try { seen = sessionStorage.getItem("intro-seen") === "1"; } catch (e) {}
-    if (!seen) h.classList.add("show-intro");
+    // Reloading shows it again; a share link opens the shared project instead.
+    if (!/^#share-/.test(location.hash)) h.classList.add("show-intro");
   })(document.documentElement);
 </script>
 <meta name="theme-color" content="#090e13">
@@ -771,8 +770,12 @@ a.pj-file-name { color: var(--accent); }
 @media (min-width: 761px) and (max-width: 900px) {
   nav button { flex-direction: column; gap: 5px; padding: 10px 6px 8px; font-size: 13px; line-height: 1.2; white-space: normal; text-align: center; }
 }
-/* The narrowest phones: eight tabs still across, in smaller type. */
-@media (max-width: 340px) { nav { gap: 2px; } nav button { font-size: 10px; padding-inline: 0; } }
+/* The narrowest phones (up to 359px, a folding phone's cover screen among them): eight tabs still
+   across, in 11px type with the tiles closer together. */
+@media (max-width: 359px) {
+  nav { gap: 1px; padding-left: max(2px, env(safe-area-inset-left, 0px)); padding-right: max(2px, env(safe-area-inset-right, 0px)); }
+  nav button { font-size: 11px; padding-inline: 0; }
+}
 /* Profile tab: a slot for each file, the ground's colour and the design's beside its name. */
 .pf-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 12px; }
 .pf-slot { display: grid; gap: 4px; align-content: start; padding: 14px; border: 1.5px dashed color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--accent) 4%, var(--sheet-2)); transition: border-color .15s, background .15s; }
@@ -1939,6 +1942,9 @@ const I18N = (() => {
     "جدول الميول": "Grades",
     "المنحنيات الرأسية": "Vertical curves",
     "جدول المحطات": "Stations",
+    "ظاهر أول": "Showing the first",
+    "صف من": "rows of",
+    "اعرض كل الصفوف": "Show all rows",
     "من": "From",
     "إلى": "To",
     "الطول": "Length",
@@ -2135,6 +2141,7 @@ const I18N = (() => {
     [/^(.*) محتاجة (\d+) قيمة\.$/, "$1 needs $2 value(s)."],
     // Project notes.
     [/^\(اتعدلت (.*)\)$/, "(edited $1)"],
+    [/^… و(\d+) تحذير كمان\.$/, "… and $1 more warnings."],
     // My projects: files and saved results.
     [/^دول أكبر من 20 ميجا ومش هيترفعوا: (.*)$/, "These are over 20 MB and won't be uploaded: $1"],
     [/^الملف «(.*)» ما اترفعش: أكبر من 20 ميجا، أو مساحة حسابك \(200 ميجا\) خلصت\.$/, "“$1” wasn't uploaded: it is over 20 MB, or your account's space (200 MB) is full."],
@@ -2929,10 +2936,13 @@ function pfChain(rows, start) {
     return { ...p, chainage: ch };
   });
 }
-// A point's chainage and offset (right of the line positive) on a chained centre line.
-function pfProject(line, p) {
+// A point's chainage and offset (right of the line positive) on a chained centre line, trying the
+// segments numbered in `segs` (all of them when not given), lowest number first.
+function pfProject(line, p, segs) {
   let best = { d: Infinity, chainage: line[0].chainage, offset: 0 };
-  for (let i = 1; i < line.length; i++) {
+  const n = segs ? segs.length : line.length - 1;
+  for (let k = 0; k < n; k++) {
+    const i = segs ? segs[k] : k + 1;
     const a = line[i - 1], b = line[i];
     const dx = b.e - a.e, dy = b.n - a.n, L2 = dx * dx + dy * dy;
     const t = L2 ? Math.max(0, Math.min(1, ((p.e - a.e) * dx + (p.n - a.n) * dy) / L2)) : 0;
@@ -2944,6 +2954,34 @@ function pfProject(line, p) {
     }
   }
   return best;
+}
+// pfProject for many points, trying for each only the segments that can lie within `reach` of it: the
+// segments go into square cells of twice that size, each into the cells around points spaced a quarter
+// cell along it, so a point finds every segment within reach in its own cell. The nearest of them is
+// the one pfProject over the whole line finds; a point with none within reach is reported at d = Infinity.
+function pfProjector(line, reach) {
+  const cell = Math.max(2 * reach, 1);
+  const cols = new Map(); // a column of cells → its cells by row → the segments in each
+  const add = (u, v, i) => {
+    let col = cols.get(u);
+    if (!col) cols.set(u, (col = new Map()));
+    const list = col.get(v);
+    if (!list) col.set(v, [i]);
+    else if (list[list.length - 1] !== i) list.push(i); // a segment goes into a cell once
+  };
+  for (let i = 1; i < line.length; i++) {
+    const a = line[i - 1], b = line[i];
+    const steps = Math.ceil(Math.hypot(b.e - a.e, b.n - a.n) / (cell / 4)) || 1;
+    let pu = NaN, pv = NaN;
+    for (let s = 0; s <= steps; s++) {
+      const cu = Math.floor((a.e + ((b.e - a.e) * s) / steps) / cell), cv = Math.floor((a.n + ((b.n - a.n) * s) / steps) / cell);
+      if (cu === pu && cv === pv) continue;
+      pu = cu;
+      pv = cv;
+      for (let u = cu - 1; u <= cu + 1; u++) for (let v = cv - 1; v <= cv + 1; v++) add(u, v, i);
+    }
+  }
+  return (p) => pfProject(line, p, cols.get(Math.floor(p.e / cell))?.get(Math.floor(p.n / cell)) ?? []);
 }
 // How many times a line of points turns back on itself (points not in order along a road).
 function pfReversals(rows) {
@@ -2987,7 +3025,8 @@ function profileFromSeries(ground, design, options = {}) {
   let stations = null;
   if (ground?.kind === "chainage") stations = ground.rows.map((r) => ({ chainage: r.chainage, groundLevel: r.level }));
   else if (ground && line) {
-    const proj = ground.rows.map((p) => ({ ...pfProject(line, p), level: p.level }));
+    const project = pfProjector(line, maxOffset);
+    const proj = ground.rows.map((p) => ({ ...project(p), level: p.level }));
     const near = proj.filter((p) => p.d <= maxOffset);
     if (near.length < proj.length) notes.push(`${proj.length - near.length} نقطة أرض أبعد من ${maxOffset} م عن محور التصميم اتسابت.`);
     if (near.length < 2) fail(`نقط الأرض الطبيعية كلها بعيدة عن محور التصميم (أكتر من ${maxOffset} م). اتأكد إن الملفين على نفس نظام الإحداثيات.`);
@@ -10293,11 +10332,10 @@ const Back = (() => {
   };
 })();
 
-// ---------- welcome screen (first thing on each visit) ----------
+// ---------- welcome screen (first thing on each load, a reload included) ----------
 {
   const close = () => {
     document.documentElement.classList.remove("show-intro");
-    try { sessionStorage.setItem("intro-seen", "1"); } catch { /* storage blocked */ }
     V3.unmount($("#intro-3d"));
     V3.remountAll();
   };
@@ -13390,6 +13428,20 @@ const pfCols = [
   { key: "cut", label: "حفر", num: 1 }, { key: "fill", label: "ردم", num: 1 },
 ];
 const pfCh = (m) => E.formatChainage(m, 3);
+// A long table (a design given at every metre) shows its first rows, the rest on request: thousands of
+// rows on the page at once freeze it. The CSV and DXF always have them all.
+const PF_SHOW = 300;
+const pfMore = new Map(); // a cut table's id → its whole HTML
+function pfTable(id, columns, rows, rowClass) {
+  if (rows.length <= PF_SHOW) return table(columns, rows, rowClass);
+  pfMore.set(id, () => table(columns, rows, rowClass));
+  return `<div data-table="${id}">${table(columns, rows.slice(0, PF_SHOW), rowClass)}<p class="hint"><span>ظاهر أول</span> <bdi>${PF_SHOW}</bdi> <span>صف من</span> <bdi>${rows.length}</bdi>. <button type="button" class="link" data-more="${id}">اعرض كل الصفوف</button></p></div>`;
+}
+$("#pf-out").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-more]");
+  const all = b && pfMore.get(b.dataset.more);
+  if (all) b.closest("[data-table]").innerHTML = all();
+});
 
 // A drawing's or a GIS file's shapes as tables of points with levels, on a grid in metres: points with
 // a level, and each 3D polyline's vertices (the longest first for a design, after the points for ground).
@@ -13495,6 +13547,7 @@ async function pfLoad(file, role) {
   const got = $(`#pf-${k}-got`);
   got.innerHTML = `<span class="hint">بيقرا الملف…</span>`;
   pfBusy[role] = true;
+  await new Promise((r) => setTimeout(r, 30)); // let the message show before the work
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const { main, extra, notes } = pfPick(await pfTables(file.name, bytes, role), role);
@@ -13519,7 +13572,11 @@ function runProfile() {
     const r = calc("profile_design", { vpis, stations, interval: numOrUndef($("#pf-int").value) });
     pfLast = { columns: pfCols, rows: r.rows };
     const sum = E.profileSummary(r.rows);
-    let html = r.warnings.length ? `<div class="notice">${r.warnings.map(esc).join("<br>")}</div>` : "";
+    // A ground file far longer than the design warns once for every station off it: the first few and
+    // how many more (thousands of lines here froze the page for a minute).
+    const warn = r.warnings.slice(0, 6).map(esc);
+    if (r.warnings.length > 6) warn.push(esc(`… و${r.warnings.length - 6} تحذير كمان.`));
+    let html = warn.length ? `<div class="notice">${warn.join("<br>")}</div>` : "";
     if (sum.stations >= 2) {
       // The deepest cut and fill with the station they are at, on a line of their own under the depth.
       const ro = (label, value, cls = "", sub = "") => `<div class="readout"><small>${esc(label)}</small><b class="${cls}">${esc(value)}</b>${sub}</div>`;
@@ -13539,7 +13596,8 @@ function runProfile() {
       if (last && Math.abs(last.gradePercent - s.gradePercent) < 1e-4) { last.to = s.to; last.length = Math.round((last.length + s.length) * 1000) / 1000; } else a.push({ ...s });
       return a;
     }, []);
-    html += "<h3>جدول الميول</h3>" + table([{ key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 }, { key: "gradePercent", label: "الميل %", num: 1, d: 4 }], segs);
+    pfMore.clear();
+    html += "<h3>جدول الميول</h3>" + pfTable("grades", [{ key: "from", label: "من" }, { key: "to", label: "إلى" }, { key: "length", label: "الطول", num: 1, d: 2 }, { key: "gradePercent", label: "الميل %", num: 1, d: 4 }], segs);
     if (r.verticalCurves.length) {
       html += "<h3>المنحنيات الرأسية</h3>" + table(
         [{ key: "atVPI", label: "VPI" }, { key: "type", label: "النوع" }, { key: "length", label: "L", num: 1, d: 2 }, { key: "A", label: "A %", num: 1, d: 3 }, { key: "K", label: "K", num: 1, d: 2 },
@@ -13547,7 +13605,7 @@ function runProfile() {
         r.verticalCurves,
       );
     }
-    html += "<h3>جدول المحطات</h3>" + table(pfCols, r.rows, (row) => (row.cut ? "is-cut" : row.fill ? "is-fill" : ""));
+    html += "<h3>جدول المحطات</h3>" + pfTable("stations", pfCols, r.rows, (row) => (row.cut ? "is-cut" : row.fill ? "is-fill" : ""));
     out.innerHTML = panel("PR", "جداول القطاع الطولي", html);
     const vpiPts = vpis.map((v) => ({ chainage: E.parseChainage(v.chainage), level: v.level })).filter((v) => Number.isFinite(v.chainage) && Number.isFinite(v.level));
     const span = vpiPts.length >= 2 ? vpiPts[vpiPts.length - 1].chainage - vpiPts[0].chainage : 0;
