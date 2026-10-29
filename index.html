@@ -382,6 +382,7 @@ h2.greet { margin: 2px 0 8px; font-family: "Aref Ruqaa", var(--f-head); font-siz
 .quick button:active { transform: translateY(1px); box-shadow: inset 0 1px 0 var(--tile-hi), 0 0 0 var(--tile-edge), 0 2px 4px -2px var(--tile-drop); }
 .quick .q-ic { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--gold); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .quick .q-ic circle[fill] { fill: var(--gold); }
+.quick .q-wide { grid-column: 1 / -1; justify-content: center; }
 .safety { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); flex-wrap: wrap; }
 .safety .tape { width: 46px; height: 10px; flex: none; border-radius: 3px; background: repeating-linear-gradient(-45deg, var(--mark) 0 6px, #111 6px 12px); }
 .safety .grow { flex: 1; min-width: 160px; }
@@ -658,6 +659,98 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
   .panel { padding: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+/* GIS tab: the drop area, the map with its toolbar beside the layer list, the picked feature, and the
+   selected layer's measures, tools, export and attribute table. */
+.gs-drop { display: grid; justify-items: center; gap: 6px; text-align: center; padding: 22px 16px 16px; border: 1.5px dashed color-mix(in srgb, var(--accent) 45%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, var(--accent) 5%, var(--sheet-2)); transition: border-color .15s, background .15s; }
+.gs-drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.gs-drop b { font-family: var(--f-head); font-size: 15px; }
+.gs-drop .hint { max-width: 640px; }
+.gs-drop .actions { justify-content: center; margin-top: 6px; }
+.gs-drop-ic { width: 34px; height: 34px; fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.gs-msgs { display: grid; gap: 8px; margin-top: 12px; }
+.gs-msgs:empty { display: none; }
+.gs-msgs p { margin: 0; }
+.gs-ok { border: 1px solid color-mix(in srgb, var(--fill) 45%, transparent); background: var(--fill-soft); padding: 9px 13px; border-radius: 11px; }
+.gs-ok b { color: var(--fill); margin-inline-end: 6px; }
+.gs-probs { margin: 6px 0 0; padding-inline-start: 18px; display: grid; gap: 3px; color: var(--ink); }
+.gs-cols { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .gs-cols { grid-template-columns: minmax(0, 1fr); } }
+.gs-mapbox { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--sheet-2); }
+.gs-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--line); background: var(--sheet); }
+.gs-bar select { width: auto; max-width: 100%; padding: 6px 9px; font-size: 13px; margin-inline-end: auto; }
+.gs-tb { width: 36px; height: 34px; display: inline-grid; place-items: center; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--sheet-2); color: var(--ink); cursor: pointer; }
+.gs-tb svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gs-tb:hover { border-color: var(--accent); color: var(--accent); }
+.gs-tb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gs-tb[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.gs-map { position: relative; height: clamp(320px, 62vh, 640px); overflow: hidden;
+  background: var(--sheet-2) radial-gradient(color-mix(in srgb, var(--muted) 24%, transparent) 1px, transparent 1.2px) 0 0 / 22px 22px; }
+.gs-map canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; outline: none; touch-action: none; }
+.gs-map canvas:active { cursor: grabbing; }
+.gs-map canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.gs-map.measuring canvas { cursor: crosshair; }
+.gs-mbox { position: absolute; top: 10px; inset-inline-start: 10px; z-index: 1; width: min(300px, calc(100% - 20px)); padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--sheet) 92%, transparent); box-shadow: 0 10px 28px -12px var(--shadow); font-size: 12.5px; }
+.gs-mbox .hint { margin: 0 0 4px; }
+.gs-mrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.gs-mrow button { padding: 4px 10px; font-size: 12px; }
+.gs-plane { position: absolute; bottom: 10px; inset-inline-end: 10px; font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--sheet) 85%, transparent); padding: 2px 9px; border-radius: 999px; pointer-events: none; }
+.gs-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 6px 10px; font-size: 11.5px; color: var(--muted); border-top: 1px solid var(--line); background: var(--sheet); min-height: 28px; }
+.gs-xy { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.gs-mapbox.gs-full { position: fixed; inset: 0; z-index: 40; border: 0; border-radius: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.gs-mapbox.gs-full .gs-map { height: auto; flex: 1; }
+.gs-fullpage body { overflow: hidden; }
+.gs-side { display: grid; gap: 8px; min-width: 0; }
+.gs-side h3 { margin: 8px 0 0; }
+.gs-side .notice { margin: 0; font-size: 12.5px; }
+.gs-layers { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: min(560px, 70vh); overflow-y: auto; }
+.gs-layer { border: 1px solid var(--line); border-radius: 12px; background: var(--sheet-2); padding: 8px 10px; display: grid; gap: 6px; min-width: 0; }
+.gs-layer[aria-current="true"] { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent); }
+.gs-lhead { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.gs-sw { width: 14px; height: 14px; border-radius: 4px; background: var(--c); flex: none; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+.gs-lname { flex: 1; min-width: 0; text-align: start; background: none; border: 0; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 0; }
+.gs-lname:hover { color: var(--accent); }
+.gs-lbtns { display: inline-flex; gap: 4px; flex: none; }
+.gs-mini { width: 28px; height: 28px; display: inline-grid; place-items: center; padding: 0; border-radius: 8px; border: 1px solid var(--line); background: var(--sheet); color: var(--muted); cursor: pointer; }
+.gs-mini svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gs-mini:hover { color: var(--accent); border-color: var(--accent); }
+.gs-lmeta { font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.gs-lmeta bdi { font-family: var(--f-num); color: var(--ink); }
+.gs-lcrs { font-size: 11.5px; gap: 3px; }
+.gs-lcrs select { padding: 5px 8px; font-size: 12.5px; }
+.gs-guess { color: var(--warn); font-style: normal; font-size: 11px; }
+.gs-info { margin-top: 12px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: 12px; padding: 12px 14px; background: var(--sheet-2); }
+.gs-ihead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.gs-ihead button { padding: 4px 12px; font-size: 12.5px; }
+.gs-kv { display: grid; grid-template-columns: minmax(80px, max-content) minmax(0, 1fr); gap: 4px 14px; margin: 8px 0 0; font-size: 13px; }
+.gs-kv dt { color: var(--muted); }
+.gs-kv dd { margin: 0; overflow-wrap: anywhere; }
+.gs-kv dd[dir="ltr"] { font-family: var(--f-num); text-align: end; }
+.gs-attrs { border-top: 1px dashed var(--line); padding-top: 8px; }
+.gs-notes p { margin: 0; }
+.gs-notes p + p { margin-top: 4px; }
+.gs-tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; margin-top: 12px; }
+.gs-color input { height: 38px; padding: 3px 6px; cursor: pointer; }
+.gs-tbar { display: flex; align-items: center; gap: 10px; }
+.gs-tbar input { max-width: 360px; }
+.gs-tablebox { max-height: 460px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; margin-top: 8px; }
+.gs-tablebox:empty { display: none; }
+.gs-tablebox table { margin: 0; border: 0; border-radius: 0; overflow: visible; }
+.gs-tablebox thead th { position: sticky; top: 0; z-index: 1; }
+.gs-tablebox tbody tr { cursor: pointer; }
+.gs-tablebox tr[aria-selected="true"] td { background: var(--accent-soft); }
+.gs-tablebox td { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+/* The narrowest phones: eight tabs still across, in smaller type. */
+@media (max-width: 340px) { nav { gap: 2px; } nav button { font-size: 10px; } }
+.readout b.txt { font-family: var(--f-body); font-size: 15px; line-height: 1.45; direction: inherit; text-align: start; overflow-wrap: normal; }
+@media (max-width: 760px) {
+  .gs-map { height: clamp(300px, 58vh, 520px); }
+  .gs-bar { justify-content: space-between; }
+  .gs-bar select { flex: 1 1 100%; margin-inline-end: 0; }
+  .gs-tb { width: 34px; height: 34px; }
+  .gs-mbox { width: min(250px, calc(100% - 20px)); padding: 8px 10px; font-size: 12px; }
+  .gs-mbox .gs-kv { font-size: 12px; }
+}
 </style>
 
 <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
@@ -702,6 +795,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <button role="tab" data-tab="chat" aria-selected="true" data-ai><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 4.7 4.7 1.8-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span class="code">AI</span>المساعد</button>
         <button role="tab" data-tab="level" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="5" width="12" height="5" rx="1.5"/><path d="M16.5 7.5h3M10.5 10v3.5M10.5 13.5 6 21M10.5 13.5 15 21M10.5 13.5V21"/></svg><span class="code">LV</span>الميزانية</button>
         <button role="tab" data-tab="gps" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/></svg><span class="code">GP</span>تحويل GPS</button>
+        <button role="tab" data-tab="gis" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 3.5 8l8.5 4.5L20.5 8z"/><path d="m3.5 12 8.5 4.5 8.5-4.5"/><path d="m3.5 16 8.5 4.5 8.5-4.5"/></svg><span class="code">GS</span>GIS</button>
         <button role="tab" data-tab="trav" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18.5 3.5 8.5l8-5 8.5 5.5-2.5 9.5z"/><circle cx="5" cy="18.5" r="1.2" fill="currentColor"/><circle cx="3.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="11.5" cy="3.5" r="1.2" fill="currentColor"/><circle cx="20" cy="9" r="1.2" fill="currentColor"/><circle cx="17.5" cy="18.5" r="1.2" fill="currentColor"/></svg><span class="code">TR</span>الترافيرس</button>
         <button role="tab" data-tab="profile" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5h18"/><path d="M3 16c2.5-.5 3.5-5 6.5-5s4 3.5 6.5 2.5 3.5-5 5-6"/><path d="M3 12.5 21 8" stroke-dasharray="2.2 2.2"/></svg><span class="code">PR</span>البروفيل</button>
         <button role="tab" data-tab="qty" aria-selected="false"><svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg><span class="code">QT</span>الكميات</button>
@@ -777,6 +871,7 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
         <button type="button" data-go="profile"><svg class="q-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20.5h18"/><path d="M3 16c2.5-.5 3.5-5 6.5-5s4 3.5 6.5 2.5 3.5-5 5-6"/><path d="M3 12.5 21 8" stroke-dasharray="2.2 2.2"/></svg>ارسم بروفيل</button>
         <button type="button" data-go="qty"><svg class="q-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>احسب كميات</button>
         <button type="button" data-go="review"><svg class="q-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 5.1 5.1"/><path d="m7.6 10.7 2 2 3.7-4"/></svg>راجع ملف رفع</button>
+        <button type="button" data-go="gis" class="q-wide"><svg class="q-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 3.5 8l8.5 4.5L20.5 8z"/><path d="m3.5 12 8.5 4.5 8.5-4.5"/><path d="m3.5 16 8.5 4.5 8.5-4.5"/></svg>افتح ملفات الخرايط GIS</button>
       </div>
       <div class="safety">
         <span class="tape" aria-hidden="true"></span>
@@ -890,6 +985,79 @@ BM2,,,0.900</textarea>
     </div>
     <div id="gp-plot"></div>
     <div id="gp-out" class="out"></div>
+  </section>
+
+  <section id="tab-gis" class="tab" hidden>
+    <div class="panel">
+      <h2><span class="callout">GS</span>جيوماتكس GIS: استقبال البيانات والتعامل معاها</h2>
+      <p class="hint">ارفع أي ملف خرايط أو رفع مساحي أو رسمة كاد: كل ملف بيبقى طبقة على الخريطة ببياناته، ونظام إحداثياته بيتقري من الملف أو بيتوقع. بعدها قيس، وغيّر النظام، وصدّر للصيغة اللي محتاجها.</p>
+      <div id="gs-drop" class="gs-drop">
+        <svg class="gs-drop-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+        <b>اسحب الملفات وارميها هنا</b>
+        <span class="hint">ملف واحد أو كذا ملف مع بعض، أو ZIP. أجزاء الـ Shapefile (.shp و.dbf و.prj و.cpg) ارفعها مع بعض.</span>
+        <div class="actions">
+          <label class="file-btn" for="gs-file">اختار ملفات</label><input type="file" id="gs-file" multiple hidden>
+          <button id="gs-paste-btn" class="secondary primary" type="button" aria-expanded="false" aria-controls="gs-paste">الصق إحداثيات أو WKT</button>
+          <button id="gs-sample" class="secondary primary" type="button">جرّب على مثال</button>
+        </div>
+      </div>
+      <div id="gs-paste" hidden>
+        <label class="block" for="gs-text">الصق جدول نقط (رقم، شرقي، شمالي، منسوب)، أو خطوط عرض وطول، أو WKT، أو GeoJSON، أو KML.
+          <textarea id="gs-text" class="data" rows="6" spellcheck="false" dir="ltr" placeholder="P1, 329899.643, 3325016.736, 22.905"></textarea>
+        </label>
+        <div class="actions"><button id="gs-add-text" class="primary" type="button">أضف كطبقة</button></div>
+      </div>
+      <div id="gs-status" class="gs-msgs" aria-live="polite"></div>
+      <details class="tr-formats">
+        <summary>الصيغ اللي بيقراها</summary>
+        <ul>
+          <li>GIS: ملفات Shapefile (الـ .shp مع الـ .dbf والـ .prj والـ .cpg، أو ZIP فيه الكل)، وGeoJSON، وKML وKMZ من Google Earth، وGPX، وGeoPackage (.gpkg)، وOpenStreetMap (.osm)، وWKT.</li>
+          <li>كاد: DXF وDWG بطبقاتهم، والبلوكات بقيم الـ Attributes بتاعتها، والنصوص، والأقواس والدواير.</li>
+          <li>جداول: Excel (xlsx وxls وods) وCSV وTXT: نقط بشرقي وشمالي ومنسوب (حتى لو الشمالي قبل الشرقي)، أو خطوط عرض وطول عشري أو درجات ودقايق وثواني، أو عمود WKT فيه أشكال.</li>
+          <li>أجهزة: Leica GSI، وLandXML، وجمل NMEA من جهاز الـ GPS.</li>
+          <li>نظام الإحداثيات بيتقري من الملف، ولو مفيش بيتوقع من الأرقام: WGS 84 أو UTM أو الشبكة المصرية بأحزمتها. اتأكد إن البيانات نازلة مكانها على الخريطة، ولو لأ غيّر نظام الطبقة.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div id="gs-work" class="panel" hidden>
+      <h2><span class="callout">MAP</span>الخريطة والطبقات</h2>
+      <div class="gs-cols">
+        <div id="gs-mapbox" class="gs-mapbox">
+          <div class="gs-bar" role="toolbar" aria-label="أدوات الخريطة">
+            <select id="gs-base" aria-label="خلفية الخريطة">
+              <option value="none">بدون خلفية</option>
+              <option value="osm">خريطة الشوارع</option>
+              <option value="sat">صور القمر الصناعي</option>
+            </select>
+            <button type="button" id="gs-fit" class="gs-tb" title="كل الطبقات"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span class="vh">كل الطبقات</span></button>
+            <button type="button" id="gs-zin" class="gs-tb" title="تكبير"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="vh">تكبير</span></button>
+            <button type="button" id="gs-zout" class="gs-tb" title="تصغير"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg><span class="vh">تصغير</span></button>
+            <button type="button" id="gs-measure" class="gs-tb" aria-pressed="false" title="قياس مسافة ومساحة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 15.5 12-12 5 5-12 12z"/><path d="m7.5 11.5 2 2M10.5 8.5l2 2M13.5 5.5l2 2"/></svg><span class="vh">قياس مسافة ومساحة</span></button>
+            <button type="button" id="gs-locate" class="gs-tb" title="موقعي"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span class="vh">موقعي</span></button>
+            <button type="button" id="gs-png" class="gs-tb dl" title="صورة الخريطة"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m4 17 5-4.5 3.5 3 3-2.5 4.5 4"/></svg><span class="vh">صورة الخريطة</span></button>
+            <button type="button" id="gs-full" class="gs-tb" aria-pressed="false" title="ملء الشاشة"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5"/></svg><span class="vh">ملء الشاشة</span></button>
+          </div>
+          <div id="gs-map" class="gs-map">
+            <canvas id="gs-canvas" tabindex="0" aria-label="الخريطة: اسحب للتحريك، والعجلة أو إصبعين للتكبير، واضغط على أي عنصر تشوف بياناته"></canvas>
+            <div id="gs-mbox" class="gs-mbox" hidden></div>
+            <div id="gs-plane" class="gs-plane" hidden>إحداثيات محلية: من غير خلفية</div>
+          </div>
+          <div class="gs-foot"><span id="gs-xy" class="gs-xy" dir="ltr"></span><span id="gs-attrib" class="gs-attrib" dir="ltr"></span></div>
+        </div>
+        <div class="gs-side">
+          <label for="gs-grid">نظام القياس والتصدير
+            <select id="gs-grid"><option value="auto">تلقائي: نظام الطبقة، أو UTM بتاعها لو بالدرجات</option></select>
+          </label>
+          <h3>الطبقات</h3>
+          <p id="gs-localnote" class="notice" hidden>في طبقة إحداثياتها محلية فمش ظاهرة مع الطبقات اللي على الخريطة؛ اختار نظامها من القايمة عشان تظهر معاهم.</p>
+          <ol id="gs-layers" class="gs-layers"></ol>
+        </div>
+      </div>
+      <div id="gs-info" class="gs-info" hidden></div>
+    </div>
+
+    <div id="gs-detail" class="panel" hidden></div>
   </section>
 
   <section id="tab-trav" class="tab" hidden>
@@ -1701,6 +1869,17 @@ const I18N = (() => {
     [/^قبل توزيع خطأ القفل \(مكبّر ×(.*)\)$/, "Before the misclosure is shared (exaggerated ×$1)"],
     [/^(\d+) ف (\d+) ط ([\d.]+) س$/, "$1 feddan $2 qirat $3 sahm"],
     [/^([\d.,]+) م$/, "$1 m"],
+    // GIS: a file's name, then what happened to it; layers' systems; what a reader left out.
+    [/^"([^"]+)": (.+)$/, (m, name, rest) => `"${name}": ${tr(rest) ?? rest}`],
+    [/^UTM زون (\d+) (شمال|جنوب) \(WGS 84\)$/, (m, z, h) => `UTM zone ${z}${h === "شمال" ? "N" : "S"} (WGS 84)`],
+    [/^اتسابت (\d+) صف من غير إحداثيات مفهومة\.$/, "$1 rows with no readable coordinates were left out."],
+    [/^نظام الإحداثيات اللي في الملف \((.*)\) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك\.$/, "The file's coordinate system ($1) is not one known here; choose the system yourself."],
+    [/^نظام الإحداثيات اللي في ملف الـ \.prj \((.*)\) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك\.$/, "The .prj file's coordinate system ($1) is not one known here; choose the system yourself."],
+    [/^نظام الإحداثيات \(EPSG:(\d+)\) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك\.$/, "The coordinate system (EPSG:$1) is not one known here; choose the system yourself."],
+    [/^اتسابت (\d+) شكل MultiPatch \(مجسمات 3D\)\.$/, "$1 MultiPatch shapes (3D solids) were left out."],
+    [/^اتسابت عناصر مش أشكال على الخريطة: (.*)\.$/, (m, l) => `Left out, not shapes on a map: ${l.replace(/، /g, ", ")}.`],
+    [/^اتسابت (\d+) عنصر من الـ Layout \(Paper space\)\.$/, "$1 entities in a layout (paper space) were left out."],
+    [/^الملف من غير عناوين أعمدة؛ اعتبرت الترتيب (.*)\. لو الترتيب عندك N قبل E \(شمالي قبل شرقي\) قولّي\.$/, (m, l) => `The file has no column headings; the order was taken as ${l.replace(/، /g, ", ")}. If your northing comes before the easting, swap E and N.`],
     // File summary under the QC report: name: table "x": N rows. Columns: a | b. Recognised: a→x، b→y.
     [/^(.*): جدول "(.*)": (\d+) صف\. الأعمدة: (.*?)\.(?: اتعرفت: (.*)\.)?$/, (m, f, t, n, cols, rec) =>
       `${f}: table "${t}": ${n} rows. Columns: ${cols}.${rec ? ` Recognised: ${rec.replace(/، /g, ", ")}.` : ""}`],
@@ -6065,7 +6244,1795 @@ ${parts.join("\n")}
   return svg;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight };
+// ---- src/engine/gis.js
+// GIS (geomatics): map data from the common file formats, read into layers of features (points,
+// lines and polygons with their attributes) in the coordinate system they came in. The system is
+// read from the file (a shapefile's .prj, a GeoJSON crs; KML and GPX are always WGS 84) or guessed
+// from the numbers. Layers are measured on a grid (lengths, areas in square metres and feddans),
+// moved between WGS 84, UTM and the Egyptian belts, and written back out as GeoJSON, KML, GPX, CSV,
+// DXF or a zipped shapefile. The page unzips files and reads spreadsheets and DWG drawings itself,
+// and hands their contents to the readers here.
+//
+// A layer: { name, format, crs, crsFrom: "file" | "guess", features: [{ geometry, properties }],
+// fields, notes }. Geometries are GeoJSON's (Point, LineString, Polygon and their Multi forms),
+// positions [x, y] or [x, y, z] in the layer's system: x is the easting or the longitude.
+
+
+// ---------- coordinate systems ----------
+const GIS_D = 180 / Math.PI;
+const GIS_RM = 6378137; // the Web Mercator sphere
+
+/** The systems the page offers, in its order: [key, Arabic label]. */
+const GIS_CRS = [
+  ["wgs84", "WGS 84 جغرافي (خط العرض وخط الطول)"],
+  ["utm:35", "UTM زون 35 شمال (WGS 84)"],
+  ["utm:36", "UTM زون 36 شمال (WGS 84)"],
+  ["utm:37", "UTM زون 37 شمال (WGS 84)"],
+  ["etm:red", "الشبكة المصرية: الحزام الأحمر"],
+  ["etm:purple", "الشبكة المصرية: الحزام الأرجواني"],
+  ["etm:xpurple", "الشبكة المصرية: الأرجواني الممتد"],
+  ["etm:blue", "الشبكة المصرية: الحزام الأزرق"],
+  ["webmerc", "Web Mercator (خرائط الويب)"],
+  ["local", "إحداثيات محلية (من غير نظام)"],
+];
+
+const gisGrid = (crs) => {
+  const u = /^utm:(\d+)(s?)$/.exec(crs ?? "");
+  if (u && +u[1] >= 1 && +u[1] <= 60) return { kind: "utm", zone: Number(u[1]), south: u[2] === "s" };
+  const b = /^etm:(\w+)$/.exec(crs ?? "");
+  return b && ETM_BELTS[b[1]] ? { kind: "etm", belt: b[1] } : null;
+};
+
+function gisCrsLabel(crs) {
+  const known = GIS_CRS.find(([k]) => k === crs);
+  if (known) return known[1];
+  const g = gisGrid(crs);
+  return g?.kind === "utm" ? `UTM زون ${g.zone} ${g.south ? "جنوب" : "شمال"} (WGS 84)` : String(crs ?? "");
+}
+
+/** The EPSG code of a system, or null for local coordinates. */
+function gisEpsg(crs) {
+  if (crs === "wgs84") return 4326;
+  if (crs === "webmerc") return 3857;
+  const g = gisGrid(crs);
+  if (!g) return null;
+  return g.kind === "utm" ? (g.south ? 32700 : 32600) + g.zone : ETM_BELTS[g.belt].epsg;
+}
+
+/** Systems tied to the earth: everything but local coordinates. */
+const gisGeoref = (crs) => crs === "wgs84" || crs === "webmerc" || gisGrid(crs) !== null;
+/** Grids in metres that lengths and areas can be measured on (not degrees, not Web Mercator). */
+const gisGridCrs = (crs) => gisGrid(crs) !== null;
+
+/** (x, y) in the system → [lon, lat] in WGS 84 degrees; null for local coordinates. */
+function gisToLonLat(crs) {
+  if (crs === "wgs84") return (x, y) => [x, y];
+  if (crs === "webmerc") return (x, y) => [(x / GIS_RM) * GIS_D, (2 * Math.atan(Math.exp(y / GIS_RM)) - Math.PI / 2) * GIS_D];
+  const g = gisGrid(crs);
+  if (!g) return null;
+  return (x, y) => {
+    try { const r = gridToGeo(x, y, g); return [r.lon, r.lat]; } catch { return [NaN, NaN]; }
+  };
+}
+
+/** [lon, lat] in WGS 84 degrees → (x, y) in the system; null for local coordinates. */
+function gisFromLonLat(crs) {
+  if (crs === "wgs84") return (lon, lat) => [lon, lat];
+  if (crs === "webmerc") return (lon, lat) => [(lon / GIS_D) * GIS_RM, Math.log(Math.tan(Math.PI / 4 + Math.max(-85.06, Math.min(85.06, lat)) / GIS_D / 2)) * GIS_RM];
+  const g = gisGrid(crs);
+  if (!g) return null;
+  return (lon, lat) => {
+    try { const r = geoToGrid(lat, lon, g); return [r.E, r.N]; } catch { return [NaN, NaN]; }
+  };
+}
+
+/** A function moving a position from one system to another (z kept), or null when only one is local. */
+function gisTransform(from, to) {
+  if (from === to) return (c) => c;
+  const a = gisToLonLat(from), b = gisFromLonLat(to);
+  if (!a || !b) return null;
+  return (c) => {
+    const [lon, lat] = a(c[0], c[1]);
+    const [x, y] = b(lon, lat);
+    return c.length > 2 ? [x, y, c[2]] : [x, y];
+  };
+}
+
+/** The UTM zone (north) or the projected system a layer is measured on when it is in degrees. */
+function gisUtmFor(lon, lat = 0) {
+  const zone = Math.min(60, Math.max(1, Math.floor((lon + 180) / 6) + 1));
+  return `utm:${zone}${lat < 0 ? "s" : ""}`;
+}
+
+const GIS_EPSG = { 4326: "wgs84", 4979: "wgs84", 4258: "wgs84", 3857: "webmerc", 900913: "webmerc", 3785: "webmerc", 102100: "webmerc", 102113: "webmerc", 22991: "etm:blue", 22992: "etm:red", 22993: "etm:purple", 22994: "etm:xpurple" };
+function gisCrsFromEpsg(code) {
+  const n = Number(code);
+  if (GIS_EPSG[n]) return GIS_EPSG[n];
+  if (n >= 32601 && n <= 32660) return `utm:${n - 32600}`;
+  if (n >= 32701 && n <= 32760) return `utm:${n - 32700}s`;
+  return null;
+}
+
+/**
+ * The system a .prj (WKT 1 or 2, ESRI or OGC) describes, or null when it is not one of ours.
+ * By the outermost EPSG code when there is one, else by the name, else by the projection's numbers.
+ */
+function gisCrsFromPrj(text) {
+  const s = String(text ?? "");
+  if (!s.trim()) return null;
+  // In WKT the outer system's code comes last.
+  const codes = [...s.matchAll(/(?:AUTHORITY|ID)\s*\[\s*"EPSG"\s*,\s*"?(\d+)"?/gi)].map((m) => Number(m[1]));
+  if (codes.length) {
+    const c = gisCrsFromEpsg(codes[codes.length - 1]);
+    if (c) return c;
+  }
+  const flat = s.toLowerCase().replace(/[_\s]+/g, " ");
+  if (/web mercator|pseudo.mercator|mercator auxiliary sphere|popular visualisation/.test(flat)) return "webmerc";
+  const head = flat.match(/^\s*(projcs|projcrs|projectedcrs|geogcs|geogcrs|geodcrs|geographiccrs)\s*\[\s*"([^"]*)"/);
+  if (!head) return null;
+  const [, kind, name] = head;
+  const wgs = /wgs ?84|wgs 1984|world geodetic system 1984|etrs|itrf|grs 1980/;
+  if (!kind.startsWith("proj")) return wgs.test(flat) && !/egypt/.test(flat) ? "wgs84" : null;
+  if (/egypt/.test(name)) {
+    if (/suez|s-650|1930/.test(name)) return null; // other Egyptian datums
+    if (/extended purple/.test(name)) return "etm:xpurple";
+    if (/purple/.test(name)) return "etm:purple";
+    if (/red/.test(name)) return "etm:red";
+    if (/blue/.test(name)) return "etm:blue";
+  }
+  const z = name.match(/utm (?:zone )?(\d{1,2}) ?([ns])?\b/);
+  if (z && wgs.test(flat)) return `utm:${Number(z[1])}${z[2] === "s" ? "s" : ""}`;
+  // A Transverse Mercator described only by its numbers.
+  if (!/transverse.mercator/.test(flat)) return null;
+  const par = (re) => {
+    const m = flat.match(new RegExp(`parameter\\s*\\[\\s*"(?:${re})"\\s*,\\s*(-?[\\d.]+(?:e[-+]?\\d+)?)`));
+    return m ? Number(m[1]) : null;
+  };
+  const cm = par("central meridian|longitude of natural origin|longitude of origin|longitude of center");
+  const k = par("scale factor|scale factor at natural origin") ?? 1;
+  const fe = par("false easting") ?? 0, fn = par("false northing") ?? 0;
+  if (cm === null) return null;
+  const near = (a, b, t = 1e-6) => Math.abs(a - b) <= t;
+  if (near(k, 0.9996) && near(fe, 500000, 1e-3) && wgs.test(flat)) {
+    const zone = Math.round((cm + 183) / 6);
+    if (near(zone * 6 - 183, cm) && (near(fn, 0, 1e-3) || near(fn, 10000000, 1e-3))) return `utm:${zone}${fn > 0 ? "s" : ""}`;
+  }
+  if (near(k, 1)) for (const [belt, b] of Object.entries(ETM_BELTS)) if (near(cm, b.lon0) && near(fe, b.fe, 1e-3) && near(fn, b.fn, 1e-3)) return `etm:${belt}`;
+  return null;
+}
+
+/** The name in a .prj, to tell the user what it was when it is not one of ours. */
+const gisPrjName = (text) => String(text ?? "").match(/^\s*\w+\s*\[\s*"([^"]*)"/)?.[1]?.replace(/_/g, " ") ?? "";
+
+const gisInEgypt = (crs, x, y) => {
+  const p = gisToLonLat(crs)?.(x, y);
+  return Boolean(p) && p[0] >= 24.5 && p[0] <= 37.2 && p[1] >= 21.5 && p[1] <= 31.9;
+};
+
+/**
+ * The likely system for coordinates that came with none, from their extent [x0, y0, x1, y1]:
+ * WGS 84 degrees; UTM (zone 36, the Nile valley's: the zone itself cannot be told from the numbers);
+ * an Egyptian belt (Blue east of about 33°E, else Red, the first that lands the data in Egypt);
+ * Web Mercator around Egypt; otherwise local. A guess: the map shows whether the data lands.
+ */
+function gisGuessCrs(bbox, { degrees = true } = {}) {
+  if (!bbox) return "local";
+  const [x0, y0, x1, y1] = bbox;
+  const inside = (a0, b0, a1, b1) => x0 >= a0 && y0 >= b0 && x1 <= a1 && y1 <= b1;
+  if (degrees && inside(-180, -90, 180, 90)) return "wgs84";
+  if (inside(100000, 1500000, 900000, 9400000)) return "utm:36";
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  if (inside(60000, -200000, 1000000, 1500000)) {
+    for (const crs of x1 < 430000 ? ["etm:blue", "etm:red"] : ["etm:red", "etm:blue", "etm:purple", "etm:xpurple"]) if (gisInEgypt(crs, cx, cy)) return crs;
+  }
+  if (inside(2200000, 2200000, 4600000, 4000000)) return "webmerc";
+  return "local";
+}
+
+// ---------- geometry ----------
+const gisFinite = (c) => Array.isArray(c) && c.length >= 2 && Number.isFinite(c[0]) && Number.isFinite(c[1]);
+const gisZ = (c, z) => (z === null || z === undefined || !Number.isFinite(z) ? c : [c[0], c[1], z]);
+const gisPos = (c) => (Number.isFinite(c[2]) ? [c[0], c[1], c[2]] : [c[0], c[1]]);
+
+/** Every position of a geometry passed to fn (no copies). */
+function gisEachPos(g, fn) {
+  if (!g) return;
+  const c = g.coordinates;
+  switch (g.type) {
+    case "Point": fn(c); break;
+    case "MultiPoint": case "LineString": for (const p of c) fn(p); break;
+    case "MultiLineString": case "Polygon": for (const l of c) for (const p of l) fn(p); break;
+    case "MultiPolygon": for (const pg of c) for (const l of pg) for (const p of l) fn(p); break;
+    default:
+  }
+}
+
+/** The geometry with every position passed through fn. */
+function gisMapGeom(g, fn) {
+  const c = g.coordinates;
+  switch (g.type) {
+    case "Point": return { type: g.type, coordinates: fn(c) };
+    case "MultiPoint": case "LineString": return { type: g.type, coordinates: c.map(fn) };
+    case "MultiLineString": case "Polygon": return { type: g.type, coordinates: c.map((l) => l.map(fn)) };
+    case "MultiPolygon": return { type: g.type, coordinates: c.map((pg) => pg.map((l) => l.map(fn))) };
+    default: return g;
+  }
+}
+
+/** [x0, y0, x1, y1] of features (or of one geometry), or null when empty. */
+function gisBbox(features) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (p) => {
+    if (p[0] < x0) x0 = p[0];
+    if (p[0] > x1) x1 = p[0];
+    if (p[1] < y0) y0 = p[1];
+    if (p[1] > y1) y1 = p[1];
+  };
+  for (const f of Array.isArray(features) ? features : [{ geometry: features }]) gisEachPos(f.geometry, add);
+  return x0 <= x1 ? [x0, y0, x1, y1] : null;
+}
+
+/** Signed area of a ring (positive anticlockwise), taken about its first vertex for precision. */
+function gisRingArea(r) {
+  if (r.length < 3) return 0;
+  const ox = r[0][0], oy = r[0][1];
+  let s = 0;
+  for (let i = 0, n = r.length; i < n; i++) {
+    const a = r[i], b = r[(i + 1) % n];
+    s += (a[0] - ox) * (b[1] - oy) - (b[0] - ox) * (a[1] - oy);
+  }
+  return s / 2;
+}
+const gisLineLen = (c) => {
+  let s = 0;
+  for (let i = 1; i < c.length; i++) s += Math.hypot(c[i][0] - c[i - 1][0], c[i][1] - c[i - 1][1]);
+  return s;
+};
+/** True if the point is inside the ring (even-odd). */
+function gisInRing(p, r) {
+  let inside = false;
+  for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const a = r[i], b = r[j];
+    if ((a[1] > p[1]) !== (b[1] > p[1]) && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]) inside = !inside;
+  }
+  return inside;
+}
+
+/** Length (lines), area and perimeter (polygons, holes taken out) and number of points, on the
+ * geometry's own plane: pass it already on the measuring grid. */
+function gisMeasure(g) {
+  let length = 0, area = 0, perimeter = 0, count = 0;
+  const poly = (rings) => {
+    area += Math.abs(gisRingArea(rings[0])) - rings.slice(1).reduce((s, h) => s + Math.abs(gisRingArea(h)), 0);
+    perimeter += gisLineLen(rings[0]);
+  };
+  switch (g?.type) {
+    case "Point": count = 1; break;
+    case "MultiPoint": count = g.coordinates.length; break;
+    case "LineString": length = gisLineLen(g.coordinates); break;
+    case "MultiLineString": for (const l of g.coordinates) length += gisLineLen(l); break;
+    case "Polygon": poly(g.coordinates); break;
+    case "MultiPolygon": for (const p of g.coordinates) poly(p); break;
+    default:
+  }
+  return { length, area, perimeter, count };
+}
+
+/** An area in square metres as feddan, qirat and sahm ("2 ف 3 ط 12.5 س"). */
+function gisFeddan(m2) {
+  let sahm = Math.round((m2 / (FEDDAN_M2 / 576)) * 100) / 100;
+  const f = Math.floor(sahm / 576);
+  sahm -= f * 576;
+  const q = Math.floor(sahm / 24);
+  sahm = Math.round((sahm - q * 24) * 100) / 100;
+  return `${f} ف ${q} ط ${sahm} س`;
+}
+
+/** The base kind of a geometry: "point", "line" or "polygon". */
+const gisKind = (g) => (/Point/.test(g?.type) ? "point" : /LineString/.test(g?.type) ? "line" : /Polygon/.test(g?.type) ? "polygon" : null);
+
+// A geometry with only what can be drawn: finite positions, lines of two or more, rings closed with
+// four or more. Null when nothing is left.
+function gisClean(g) {
+  if (!g || typeof g !== "object") return null;
+  const line = (l) => (Array.isArray(l) ? l.filter(gisFinite).map(gisPos) : []);
+  const ring = (l) => {
+    const r = line(l);
+    if (r.length >= 3) {
+      const a = r[0], b = r[r.length - 1];
+      if (a[0] !== b[0] || a[1] !== b[1]) r.push(a.slice());
+    }
+    return r.length >= 4 ? r : null;
+  };
+  const poly = (p) => {
+    const rings = (Array.isArray(p) ? p : []).map(ring);
+    return rings[0] ? rings.filter(Boolean) : null;
+  };
+  const c = g.coordinates;
+  switch (g.type) {
+    case "Point": return gisFinite(c) ? { type: "Point", coordinates: gisPos(c) } : null;
+    case "MultiPoint": { const p = line(c); return p.length ? { type: "MultiPoint", coordinates: p } : null; }
+    case "LineString": { const l = line(c); return l.length >= 2 ? { type: "LineString", coordinates: l } : null; }
+    case "MultiLineString": { const ls = (c ?? []).map(line).filter((l) => l.length >= 2); return ls.length ? { type: "MultiLineString", coordinates: ls } : null; }
+    case "Polygon": { const p = poly(c); return p ? { type: "Polygon", coordinates: p } : null; }
+    case "MultiPolygon": { const ps = (c ?? []).map(poly).filter(Boolean); return ps.length ? { type: "MultiPolygon", coordinates: ps } : null; }
+    default: return null;
+  }
+}
+
+// Features of a geometry (collections become one feature per member) with the same attributes.
+function gisPush(out, g, properties) {
+  if (!g) return;
+  if (g.type === "GeometryCollection") {
+    for (const m of g.geometries ?? []) gisPush(out, m, properties);
+    return;
+  }
+  const c = gisClean(g);
+  if (c) out.push({ geometry: c, properties });
+}
+
+// A spreadsheet or text cell: numbers written as text become numbers ("22.5", "-3"), but not codes
+// that would lose their leading zeros ("007") or their length ("12345678901234567").
+const gisTyped = (v) => {
+  const c = gisCell(v);
+  return typeof c === "string" && /^-?(?:0|[1-9]\d{0,14})(?:\.\d+)?$/.test(c) ? Number(c) : c;
+};
+const gisCell = (v) => {
+  if (v === undefined || v === null) return null;
+  if (v instanceof Date) return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, v.getUTCHours() || v.getUTCMinutes() ? 16 : 10).replace("T", " ");
+  if (typeof v === "number" || typeof v === "boolean") return v;
+  if (typeof v === "object") return JSON.stringify(v);
+  const s = String(v).trim();
+  return s === "" ? null : s;
+};
+
+/** A layer from features: its fields in the order they first appear, its system read or guessed
+ * (degrees: false for drawings and instruments, which are never in degrees). */
+function gisLayer(name, format, features, { crs = null, notes = [], degrees = true } = {}) {
+  const fields = [];
+  const seen = new Set();
+  for (const f of features) for (const k of Object.keys(f.properties ?? {})) if (!seen.has(k)) { seen.add(k); fields.push(k); }
+  return { name, format, crs: crs ?? gisGuessCrs(gisBbox(features), { degrees }), crsFrom: crs ? "file" : "guess", features, fields, notes };
+}
+
+/** The field to name features by on the map: a name, a number or a text, if a layer has one. */
+function gisLabelField(layer) {
+  const pref = /^(name|names|label|title|id|pointid|pointno|point|pt|no|number|text|اسم|الاسم|رقم|رقمالنقطه|النقطه|نقطه|م|code|كود)$/;
+  const norm = (s) => String(s).toLowerCase().replace(/[\s_\-.]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه");
+  const order = ["name", "text", "label", "id", "number", "point", "code"];
+  const cands = layer.fields.filter((f) => pref.test(norm(f)));
+  cands.sort((a, b) => {
+    const ia = order.findIndex((o) => norm(a).includes(o)), ib = order.findIndex((o) => norm(b).includes(o));
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  });
+  return cands[0] ?? null;
+}
+
+// ---------- XML (KML, GPX, LandXML, OSM) ----------
+const GIS_ENT = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'" };
+const gisUnent = (s) => (s.indexOf("&") < 0 ? s : s.replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (m, e) => {
+  if (e[0] !== "#") return GIS_ENT[e] ?? m;
+  const n = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+  return Number.isFinite(n) && n > 0 && n < 0x110000 ? String.fromCodePoint(n) : m;
+}));
+const gisLocal = (n) => n.slice(n.indexOf(":") + 1);
+
+/** A small XML reader: { name, attrs, kids, text } elements; namespace prefixes dropped. */
+function gisXml(text) {
+  const root = { name: "", attrs: {}, kids: [], text: "" };
+  const stack = [root];
+  const re = /<!--[\s\S]*?-->|<!\[CDATA\[([\s\S]*?)\]\]>|<[?!][^>]*>|<\/\s*([^\s>]+)\s*>|<([^\s/>!?]+)([^>]*?)(\/?)>|([^<]+)/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const top = stack[stack.length - 1];
+    if (m[1] !== undefined) top.text += m[1];
+    else if (m[2] !== undefined) {
+      const n = gisLocal(m[2]);
+      for (let i = stack.length - 1; i > 0; i--) if (stack[i].name === n) { stack.length = i; break; }
+    } else if (m[3] !== undefined) {
+      const el = { name: gisLocal(m[3]), attrs: {}, kids: [], text: "" };
+      for (const a of m[4].matchAll(/([^\s=]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) el.attrs[gisLocal(a[1])] = gisUnent(a[2] ?? a[3]);
+      top.kids.push(el);
+      if (!m[5]) stack.push(el);
+    } else if (m[6] !== undefined && stack.length > 1 && m[6].trim()) top.text += gisUnent(m[6]);
+  }
+  return root;
+}
+const gisKid = (el, name) => el?.kids.find((k) => k.name === name) ?? null;
+const gisKids = (el, name) => el?.kids.filter((k) => k.name === name) ?? [];
+const gisText = (el) => (el ? el.text + el.kids.map(gisText).join("") : "");
+/** Every element named name under el, in document order, not looking inside the ones found. */
+function gisFindAll(el, name) {
+  const out = [];
+  const stack = [...el.kids].reverse();
+  while (stack.length) {
+    const k = stack.pop();
+    if (k.name === name) out.push(k);
+    else for (let i = k.kids.length - 1; i >= 0; i--) stack.push(k.kids[i]);
+  }
+  return out;
+}
+
+// HTML (a KML description) to plain text.
+const gisPlain = (html) => gisUnent(String(html ?? "").replace(/<br\s*\/?>|<\/p>|<\/tr>|<\/div>/gi, "\n").replace(/<[^>]+>/g, " "))
+  .replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n").trim();
+
+// ---------- KML ----------
+const gisKmlCoords = (s) => String(s ?? "").trim().replace(/\s*,\s*/g, ",").split(/\s+/)
+  .map((t) => t.split(",").map(Number))
+  .filter(gisFinite)
+  .map(gisPos);
+
+function gisKmlGeoms(el, out) {
+  const ring = (b) => gisKmlCoords(gisKid(gisKid(b, "LinearRing"), "coordinates")?.text);
+  switch (el.name) {
+    case "Point": { const c = gisKmlCoords(gisKid(el, "coordinates")?.text)[0]; if (c) out.push({ type: "Point", coordinates: c }); break; }
+    case "LineString": out.push({ type: "LineString", coordinates: gisKmlCoords(gisKid(el, "coordinates")?.text) }); break;
+    case "LinearRing": out.push({ type: "Polygon", coordinates: [gisKmlCoords(gisKid(el, "coordinates")?.text)] }); break;
+    case "Polygon": {
+      const outer = gisKid(el, "outerBoundaryIs");
+      if (outer) out.push({ type: "Polygon", coordinates: [ring(outer), ...gisKids(el, "innerBoundaryIs").map(ring)] });
+      break;
+    }
+    case "Track": {
+      const cs = gisKids(el, "coord").map((c) => gisPos(c.text.trim().split(/\s+/).map(Number))).filter(gisFinite);
+      out.push({ type: "LineString", coordinates: cs });
+      break;
+    }
+    case "MultiGeometry": case "MultiTrack": for (const k of el.kids) gisKmlGeoms(k, out); break;
+    default:
+  }
+}
+
+// Attributes a KML description holds as an HTML table (as ArcGIS and QGIS write them): two-cell rows.
+function gisKmlTable(html) {
+  const out = {};
+  for (const row of String(html).matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)) {
+    const cells = [...row[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) => gisPlain(c[1]));
+    if (cells.length === 2 && cells[0] && cells[0].length <= 40) out[cells[0]] = /^<?null>?$/i.test(cells[1]) ? null : gisTyped(cells[1]);
+  }
+  return out;
+}
+
+/** Placemarks of a KML (Google Earth) with their folder, name, description and extended data. */
+function gisFromKml(text, name = "KML") {
+  const doc = gisXml(text);
+  const feats = [];
+  const walk = (el, path) => {
+    for (const k of el.kids) {
+      if (k.name === "Folder" || k.name === "Document") {
+        const n = gisKid(k, "name")?.text.trim();
+        walk(k, k.name === "Folder" && n ? [...path, n] : path);
+      } else if (k.name === "Placemark") {
+        const props = {};
+        const nm = gisKid(k, "name")?.text.trim();
+        if (nm) props.name = nm;
+        if (path.length) props.folder = path.join(" / ");
+        const desc = gisText(gisKid(k, "description"));
+        const table = /<td\b/i.test(desc) ? gisKmlTable(desc) : {};
+        if (desc.trim() && !Object.keys(table).length) props.description = gisPlain(desc).slice(0, 1000);
+        Object.assign(props, table);
+        const ext = gisKid(k, "ExtendedData");
+        for (const d of gisKids(ext, "Data")) if (d.attrs.name) props[d.attrs.name] = gisTyped(gisKid(d, "value")?.text ?? "");
+        for (const sd of gisKids(ext, "SchemaData")) for (const d of gisKids(sd, "SimpleData")) if (d.attrs.name) props[d.attrs.name] = gisTyped(d.text);
+        const geoms = [];
+        for (const g of k.kids) gisKmlGeoms(g, geoms);
+        // Parts of one kind make one multi-part feature; mixed kinds stay apart.
+        const kinds = new Set(geoms.map((g) => g.type));
+        if (geoms.length > 1 && kinds.size === 1) {
+          const [type] = kinds;
+          gisPush(feats, { type: `Multi${type}`, coordinates: geoms.map((g) => g.coordinates) }, props);
+        } else for (const g of geoms) gisPush(feats, g, props);
+      } else if (k.kids.length) walk(k, path);
+    }
+  };
+  walk(doc, []);
+  if (!feats.length) fail(`"${name}": ملف الـ KML مفيهوش نقط ولا خطوط ولا مضلعات.`);
+  return gisLayer(name, "KML", feats, { crs: "wgs84" });
+}
+
+// ---------- GPX ----------
+/** Waypoints, routes and tracks of a GPX file. */
+function gisFromGpx(text, name = "GPX") {
+  const doc = gisXml(text);
+  const feats = [];
+  const pos = (el) => {
+    const lon = toNumber(el.attrs.lon), lat = toNumber(el.attrs.lat);
+    return lon === null || lat === null ? null : gisZ([lon, lat], toNumber(gisKid(el, "ele")?.text));
+  };
+  const props = (el) => {
+    const p = {};
+    for (const k of ["name", "desc", "cmt", "sym", "type", "time"]) {
+      const v = gisKid(el, k)?.text.trim();
+      if (v) p[k] = v;
+    }
+    return p;
+  };
+  for (const w of gisFindAll(doc, "wpt")) {
+    const c = pos(w);
+    if (c) feats.push({ geometry: { type: "Point", coordinates: c }, properties: { ...props(w), ...(c[2] !== undefined ? { ele: c[2] } : {}) } });
+  }
+  for (const r of gisFindAll(doc, "rte")) gisPush(feats, { type: "LineString", coordinates: gisKids(r, "rtept").map(pos).filter(Boolean) }, props(r));
+  for (const t of gisFindAll(doc, "trk")) {
+    const segs = gisKids(t, "trkseg").map((s) => gisKids(s, "trkpt").map(pos).filter(Boolean)).filter((s) => s.length >= 2);
+    if (segs.length) gisPush(feats, segs.length === 1 ? { type: "LineString", coordinates: segs[0] } : { type: "MultiLineString", coordinates: segs }, props(t));
+  }
+  if (!feats.length) fail(`"${name}": ملف الـ GPX مفيهوش نقط ولا مسارات.`);
+  return gisLayer(name, "GPX", feats, { crs: "wgs84" });
+}
+
+// ---------- GeoJSON ----------
+const GIS_GEOJSON = new Set(["FeatureCollection", "Feature", "GeometryCollection", "Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"]);
+
+/** A GeoJSON object or text; its legacy "crs" member is read, else the system is RFC 7946's WGS 84
+ * unless the numbers are plainly not degrees. */
+function gisFromGeoJson(json, name = "GeoJSON") {
+  let j = json;
+  if (typeof j === "string") {
+    try { j = JSON.parse(j); } catch { fail(`"${name}": ملف JSON مش سليم.`); }
+  }
+  if (j?.type === "Topology") fail(`"${name}": ده TopoJSON. حوّله GeoJSON الأول (من mapshaper.org مثلًا) وارفعه.`);
+  if (!GIS_GEOJSON.has(j?.type)) fail(`"${name}": ملف JSON ده مش GeoJSON.`);
+  const feats = [];
+  const flatProps = (p) => Object.fromEntries(Object.entries(p ?? {}).map(([k, v]) => [k, gisCell(v)]));
+  const list = j.type === "FeatureCollection" ? j.features ?? [] : j.type === "Feature" ? [j] : [{ geometry: j, properties: {} }];
+  for (const f of list) gisPush(feats, f?.geometry, { ...(f?.id !== undefined && f?.id !== null ? { id: f.id } : {}), ...flatProps(f?.properties) });
+  if (!feats.length) fail(`"${name}": ملف الـ GeoJSON مفيهوش أشكال.`);
+  const named = String(j.crs?.properties?.name ?? "");
+  const code = named.match(/EPSG:{1,2}(\d+)/i)?.[1];
+  let crs = /CRS84$/i.test(named) ? "wgs84" : code ? gisCrsFromEpsg(code) : null;
+  const notes = [];
+  if (!crs && !named) {
+    const g = gisGuessCrs(gisBbox(feats));
+    crs = g === "wgs84" ? "wgs84" : null;
+  } else if (!crs) notes.push(`نظام الإحداثيات اللي في الملف (${named}) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك.`);
+  return gisLayer(name, "GeoJSON", feats, { crs, notes });
+}
+
+// ---------- WKT ----------
+const GIS_WKT_RE = /^\s*(?:SRID=\d+;\s*)?(?:POINT|LINESTRING|POLYGON|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON|GEOMETRYCOLLECTION)\b/i;
+
+/** One WKT geometry (with Z, M, ZM or EWKT's SRID), or null for EMPTY or text that is not WKT. */
+function gisWkt(text) {
+  const tok = String(text ?? "").replace(/^\s*SRID=\d+;/i, "").match(/[A-Za-z]+|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?|[(),]/g) ?? [];
+  let i = 0;
+  const peek = () => tok[i];
+  const take = (t) => { if (tok[i] !== t) throw new Error("wkt"); i++; };
+  const isNum = () => /^[-+.\d]/.test(tok[i] ?? "");
+  const geom = () => {
+    const type = String(tok[i++] ?? "").toUpperCase();
+    // No type name ends in Z or M, so a suffix there is the dimensions ("POINTZ" as "POINT Z").
+    const base = type.replace(/(ZM|Z|M)$/, "");
+    let dims = type.slice(base.length);
+    if (/^(Z|M|ZM)$/i.test(peek() ?? "")) dims = tok[i++].toUpperCase();
+    if (String(peek()).toUpperCase() === "EMPTY") { i++; return null; }
+    const pos = () => {
+      const n = [];
+      while (isNum()) n.push(Number(tok[i++]));
+      if (n.length < 2) throw new Error("wkt");
+      return dims === "M" ? [n[0], n[1]] : n.length > 2 ? [n[0], n[1], n[2]] : [n[0], n[1]];
+    };
+    const list = (item) => {
+      take("(");
+      const out = [item()];
+      while (peek() === ",") { i++; out.push(item()); }
+      take(")");
+      return out;
+    };
+    const line = () => list(pos);
+    // A point in brackets; a multipoint's points may also be written without them.
+    const inner = () => {
+      if (peek() !== "(") return pos();
+      take("(");
+      const p = pos();
+      take(")");
+      return p;
+    };
+    switch (base) {
+      case "POINT": return { type: "Point", coordinates: list(pos)[0] };
+      case "LINESTRING": return { type: "LineString", coordinates: line() };
+      case "POLYGON": return { type: "Polygon", coordinates: list(line) };
+      case "MULTIPOINT": return { type: "MultiPoint", coordinates: list(inner) };
+      case "MULTILINESTRING": return { type: "MultiLineString", coordinates: list(line) };
+      case "MULTIPOLYGON": return { type: "MultiPolygon", coordinates: list(() => list(line)) };
+      case "GEOMETRYCOLLECTION": return { type: "GeometryCollection", geometries: list(geom).filter(Boolean) };
+      default: throw new Error("wkt");
+    }
+  };
+  try { return geom(); } catch { return null; }
+}
+
+function gisFromWktText(text, name) {
+  const feats = [];
+  const lines = String(text).split(/\r?\n(?=\s*(?:SRID=\d+;\s*)?[A-Za-z])/);
+  lines.forEach((l, n) => gisPush(feats, gisWkt(l), { n: n + 1 }));
+  if (!feats.length) fail(`"${name}": مفيش أشكال WKT مفهومة في الملف.`);
+  return gisLayer(name, "WKT", feats);
+}
+
+// ---------- tables (Excel, CSV, text) ----------
+const gisHead = (s) => String(s ?? "").toLowerCase().replace(/[\s_\-.()[\]/:'"°#*]+/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const GIS_LAT = /^(lat|lats|latitude|latdeg|latitudedeg|latwgs84|φ|phi|خطالعرض|خطعرض|العرض|دائرهالعرض)$/;
+const GIS_LON = /^(lon|long|lng|longitude|londeg|longdeg|longitudedeg|lonwgs84|λ|lambda|خطالطول|خططول|الطول)$/;
+const GIS_WKT_HEAD = /^(wkt|wktgeom|wktgeometry|geometry|geom|thegeom|shape|الشكل)$/;
+
+// Degrees from a number or text: 30.0444, "30 02 39.8", "30°02'39.8\"N", "W 31.2".
+function gisAngle(v) {
+  const n = toNumber(v);
+  if (n !== null) return n;
+  const s = String(v ?? "").replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/٫/g, ".").trim();
+  const nums = s.match(/\d+(?:\.\d+)?/g);
+  if (!nums || nums.length > 3) return null;
+  const [d, m = 0, sec = 0] = nums.map(Number);
+  if (m >= 60 || sec >= 60) return null;
+  const val = d + m / 60 + sec / 3600;
+  return /^\s*-|[SW]|جنوب|غرب/i.test(s) ? -val : val;
+}
+
+/**
+ * A table (from tableFromMatrix, parseDelimited or parseGsi) → a layer: shapes from a WKT column,
+ * points from latitude and longitude columns, or from E/N (X/Y) columns. The other columns are the
+ * attributes, under the names the file gave them.
+ */
+function gisFromTable(t, name = "", format = "جدول") {
+  const rows = t?.rows ?? [];
+  if (!rows.length) fail(`"${name}": الجدول فاضي.`);
+  const keys = t.columns;
+  const heads = (t.originalHeaders ?? keys).map((h, i) => (String(h ?? "").trim() || keys[i]));
+  const hk = heads.map(gisHead);
+  const sample = rows.slice(0, 50);
+  const colOf = (re) => { const i = hk.findIndex((h) => re.test(h)); return i < 0 ? null : keys[i]; };
+  const wktK = keys.find((k, i) => GIS_WKT_HEAD.test(hk[i]) && sample.some((r) => GIS_WKT_RE.test(String(r[k] ?? ""))))
+    ?? keys.find((k) => sample.filter((r) => GIS_WKT_RE.test(String(r[k] ?? ""))).length >= Math.max(1, sample.length / 2));
+  const latK = colOf(GIS_LAT), lonK = colOf(GIS_LON);
+  let xK = keys.includes("x") ? "x" : null, yK = keys.includes("y") ? "y" : null;
+  let zK = keys.includes("z") ? "z" : null;
+  if (!xK || !yK) {
+    // No names to go by: the first two columns of numbers (and a third as the level).
+    const numeric = keys.filter((k) => sample.filter((r) => toNumber(r[k]) !== null).length >= Math.max(1, sample.length * 0.8));
+    if (numeric.length >= 2) [xK, yK, zK = zK] = numeric;
+  }
+  const used = new Set([wktK, latK, lonK, ...(wktK || (latK && lonK) ? [] : [xK, yK])].filter(Boolean));
+  const propsOf = (r) => {
+    const p = {};
+    keys.forEach((k, i) => { if (!used.has(k)) p[heads[i]] = gisTyped(r[k]); });
+    return p;
+  };
+  const notes = [...(t.notes ?? [])];
+  const feats = [];
+  let skipped = 0;
+  let crs = null;
+  if (wktK) {
+    for (const r of rows) {
+      const before = feats.length;
+      gisPush(feats, gisWkt(r[wktK]), propsOf(r));
+      if (feats.length === before) skipped++;
+    }
+  } else if (latK && lonK) {
+    for (const r of rows) {
+      const lat = gisAngle(r[latK]), lon = gisAngle(r[lonK]);
+      if (lat === null || lon === null || Math.abs(lat) > 90 || Math.abs(lon) > 180) { skipped++; continue; }
+      feats.push({ geometry: { type: "Point", coordinates: gisZ([lon, lat], zK ? toNumber(r[zK]) : null) }, properties: propsOf(r) });
+    }
+    crs = "wgs84";
+  } else if (xK && yK) {
+    let pts = [];
+    for (const r of rows) {
+      const x = toNumber(r[xK]), y = toNumber(r[yK]);
+      if (x === null || y === null) { skipped++; continue; }
+      pts.push([x, y, zK ? toNumber(r[zK]) : null, r]);
+    }
+    const med = (k) => { const v = pts.map((p) => p[k]).sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; };
+    if (pts.length) {
+      const mx = med(0), my = med(1);
+      // Northing written first (P,N,E,Z): a UTM northing is in the millions, an easting is not.
+      if (mx >= 1500000 && mx <= 9400000 && my >= 100000 && my <= 900000) {
+        pts = pts.map(([x, y, z, r]) => [y, x, z, r]);
+        notes.push("العمود الأول من الإحداثيات فيه أرقام بالملايين (شمالي)، فاتعامل كـ N والتاني كـ E.");
+      } else if (t.hasHeader === false && pts.every(([x, y]) => x >= 21 && x <= 32.5 && y >= 24 && y <= 37.5)) {
+        // No headers and numbers like Egypt's latitude then longitude.
+        pts = pts.map(([x, y, z, r]) => [y, x, z, r]);
+        crs = "wgs84";
+        notes.push("الأرقام شكلها خط عرض وخط طول، واتقرت خط العرض الأول.");
+      }
+    }
+    for (const [x, y, z, r] of pts) feats.push({ geometry: { type: "Point", coordinates: gisZ([x, y], z) }, properties: propsOf(r) });
+  } else {
+    fail(`"${name}": مش لاقي أعمدة إحداثيات (شرقي وشمالي، أو X وY، أو خط العرض وخط الطول، أو عمود WKT).`);
+  }
+  if (!feats.length) fail(`"${name}": مفيش صف فيه إحداثيات مفهومة.`);
+  if (skipped) notes.push(`اتسابت ${skipped} صف من غير إحداثيات مفهومة.`);
+  return gisLayer(name, format, feats, { crs, notes, degrees: format !== "GSI" });
+}
+
+// ---------- NMEA and written GPS points, LandXML, OSM ----------
+function gisFromGpsText(text, name, format = "NMEA") {
+  const r = parseGpsText(text);
+  const feats = r.points.map((p) => ({
+    geometry: { type: "Point", coordinates: gisZ([p.lon, p.lat], p.msl ?? p.h) },
+    properties: Object.fromEntries(Object.entries({ id: p.id, quality: p.quality, sats: p.sats, hdop: p.hdop, time: p.time, code: p.code }).filter(([, v]) => v !== undefined && v !== null && v !== "")),
+  })).filter((f) => gisFinite(f.geometry.coordinates));
+  if (!feats.length) fail(`"${name}": مفيش نقط GPS في الملف.`);
+  return gisLayer(name, format, feats, { crs: "wgs84", notes: r.notes });
+}
+
+function gisFromLandXml(text, name) {
+  const out = [];
+  for (const t of parseLandXml(text)) {
+    if (!t.columns.includes("x")) continue;
+    try { out.push(gisFromTable(t, `${name} › ${t.sheet}`, "LandXML")); } catch { /* no coordinates */ }
+  }
+  if (!out.length) fail(`"${name}": ملف LandXML مفيهوش نقط بإحداثيات.`);
+  return out;
+}
+
+const GIS_OSM_AREA = /^(building|landuse|natural|leisure|amenity|area|place|waterway|water|man_made|parking|boundary)$/;
+/** OpenStreetMap XML: tagged nodes as points, ways as lines (closed ways with area tags as polygons). */
+function gisFromOsm(text, name = "OSM") {
+  const doc = gisXml(text);
+  const osm = gisKid(doc, "osm") ?? doc;
+  const nodes = new Map();
+  const feats = [];
+  const tags = (el) => Object.fromEntries(gisKids(el, "tag").map((t) => [t.attrs.k, t.attrs.v]));
+  for (const n of gisKids(osm, "node")) {
+    const c = [Number(n.attrs.lon), Number(n.attrs.lat)];
+    if (!gisFinite(c)) continue;
+    nodes.set(n.attrs.id, c);
+    const t = tags(n);
+    if (Object.keys(t).length) feats.push({ geometry: { type: "Point", coordinates: c }, properties: { osm_id: n.attrs.id, ...t } });
+  }
+  for (const w of gisKids(osm, "way")) {
+    const cs = gisKids(w, "nd").map((d) => nodes.get(d.attrs.ref)).filter(Boolean);
+    const t = tags(w);
+    const closed = cs.length >= 4 && cs[0] === cs[cs.length - 1];
+    const area = closed && (t.area === "yes" || Object.keys(t).some((k) => GIS_OSM_AREA.test(k))) && t.area !== "no";
+    gisPush(feats, area ? { type: "Polygon", coordinates: [cs] } : { type: "LineString", coordinates: cs }, { osm_id: w.attrs.id, ...t });
+  }
+  if (!feats.length) fail(`"${name}": ملف OSM مفيهوش عناصر ليها إحداثيات.`);
+  return gisLayer(name, "OSM", feats, { crs: "wgs84" });
+}
+
+// ---------- shapefile ----------
+// The text encoding of a .dbf: its .cpg, else UTF-8 if it reads as UTF-8, else Arabic Windows.
+function gisDbfEncoding(bytes, cpg, from) {
+  const c = String(cpg ?? "").trim().toLowerCase().replace(/^ansi\s*/, "");
+  if (c) {
+    if (/utf-?8|65001/.test(c)) return "utf-8";
+    const n = c.match(/(\d{3,5})$/)?.[1];
+    const label = n === "1256" ? "windows-1256" : n === "1252" ? "windows-1252" : n === "88596" || /8859-6/.test(c) ? "iso-8859-6" : n === "88591" || /8859-1/.test(c) ? "iso-8859-1" : null;
+    if (label) return label;
+  }
+  if (bytes[29] === 0x7e || bytes[29] === 0xcb) return "windows-1256"; // DBF language drivers for Arabic Windows
+  try {
+    new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(from));
+    return "utf-8";
+  } catch {
+    return "windows-1256";
+  }
+}
+
+/** A dBase table (a shapefile's .dbf): { fields, rows, encoding }. Deleted records stay as empty rows
+ * so that row i still belongs to shape i. */
+function gisDbf(bytes, cpg) {
+  if (!bytes || bytes.length < 33) return { fields: [], rows: [], encoding: "" };
+  const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const n = v.getUint32(4, true), headLen = v.getUint16(8, true), recLen = v.getUint16(10, true);
+  const encoding = gisDbfEncoding(bytes, cpg, Math.min(headLen, bytes.length));
+  const dec = new TextDecoder(encoding);
+  const latin = new TextDecoder("iso-8859-1");
+  const fields = [];
+  const names = new Set();
+  let off = 1;
+  for (let p = 32; p + 32 <= headLen && bytes[p] !== 0x0d; p += 32) {
+    let e = p;
+    while (e < p + 11 && bytes[e] !== 0) e++;
+    let fname = dec.decode(bytes.subarray(p, e)).trim() || `FIELD${fields.length + 1}`;
+    for (let k = 2; names.has(fname); k++) fname = `${fname.replace(/_\d+$/, "")}_${k}`;
+    names.add(fname);
+    fields.push({ name: fname, type: String.fromCharCode(bytes[p + 11]), len: bytes[p + 16], dec: bytes[p + 17], off });
+    off += bytes[p + 16];
+  }
+  const rows = [];
+  for (let i = 0; i < n; i++) {
+    const r = headLen + i * recLen;
+    if (r + recLen > bytes.length) break;
+    const row = {};
+    if (bytes[r] !== 0x2a) {
+      for (const f of fields) {
+        const raw = bytes.subarray(r + f.off, r + f.off + f.len);
+        let val = null;
+        switch (f.type) {
+          case "C": { const s = dec.decode(raw).replace(/\0+$/, "").trim(); val = s === "" ? null : s; break; }
+          case "N": case "F": { const s = latin.decode(raw).replace(/\0/g, "").trim(); val = s === "" || /^\*+$/.test(s) ? null : toNumber(s); break; }
+          case "L": { const s = latin.decode(raw).trim().toUpperCase(); val = /^[TY]$/.test(s) ? true : /^[FN]$/.test(s) ? false : null; break; }
+          case "D": { const s = latin.decode(raw).trim(); val = /^\d{8}$/.test(s) ? `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6)}` : null; break; }
+          case "I": val = f.len === 4 ? v.getInt32(r + f.off, true) : null; break;
+          case "O": case "B": val = f.len === 8 ? v.getFloat64(r + f.off, true) : null; break;
+          default: val = null;
+        }
+        row[f.name] = val;
+      }
+    }
+    rows.push(row);
+  }
+  return { fields: fields.map((f) => f.name), rows, encoding };
+}
+
+// Shapefile rings: outer rings clockwise, holes anticlockwise; each hole goes in the smallest outer
+// ring around it.
+function gisShpPolygons(rings) {
+  const outers = [], holes = [];
+  for (const r of rings) (gisRingArea(r) <= 0 ? outers : holes).push(r);
+  if (!outers.length) return holes.map((h) => [h]);
+  const polys = outers.map((o) => ({ rings: [o], area: Math.abs(gisRingArea(o)) }));
+  for (const h of holes) {
+    const host = polys.filter((p) => gisInRing(h[0], p.rings[0])).sort((a, b) => a.area - b.area)[0];
+    if (host) host.rings.push(h);
+    else polys.push({ rings: [h], area: Math.abs(gisRingArea(h)) });
+  }
+  return polys.map((p) => p.rings);
+}
+
+/**
+ * A shapefile: .shp shapes with the .dbf attributes (any encoding: .cpg, UTF-8 or Arabic Windows),
+ * in the system the .prj names (guessed when there is no .prj).
+ */
+function gisFromShp({ shp, dbf = null, prj = "", cpg = "", name = "shapefile" }) {
+  if (!shp || shp.length < 100) fail(`"${name}": ملف الـ .shp ناقص أو مش سليم.`);
+  const v = new DataView(shp.buffer, shp.byteOffset, shp.byteLength);
+  if (v.getInt32(0) !== 9994) fail(`"${name}": ملف الـ .shp مش سليم.`);
+  const table = dbf ? gisDbf(dbf, cpg) : null;
+  const feats = [];
+  let i = 0;
+  let nulls = 0;
+  let patches = 0;
+  for (let off = 100; off + 12 <= shp.length; i++) {
+    const len = v.getInt32(off + 4) * 2;
+    const s = off + 8;
+    off = s + len;
+    if (len < 4 || off > shp.length) break;
+    const type = v.getInt32(s, true);
+    const props = table?.rows[i] ?? {};
+    const d = (p) => v.getFloat64(p, true);
+    let geom = null;
+    if (type === 1 || type === 11 || type === 21) {
+      geom = { type: "Point", coordinates: type === 11 && len >= 28 ? [d(s + 4), d(s + 12), d(s + 20)] : [d(s + 4), d(s + 12)] };
+    } else if (type === 8 || type === 18 || type === 28) {
+      const np = v.getInt32(s + 36, true);
+      const pts = [];
+      for (let k = 0; k < np; k++) pts.push([d(s + 40 + k * 16), d(s + 48 + k * 16)]);
+      if (type === 18) { const z0 = s + 40 + np * 16 + 16; if (z0 + np * 8 <= off) pts.forEach((p, k) => p.push(d(z0 + k * 8))); }
+      geom = { type: "MultiPoint", coordinates: pts };
+    } else if ([3, 5, 13, 15, 23, 25].includes(type)) {
+      const nParts = v.getInt32(s + 36, true), np = v.getInt32(s + 40, true);
+      const parts = [];
+      for (let k = 0; k < nParts; k++) parts.push(v.getInt32(s + 44 + k * 4, true));
+      const p0 = s + 44 + nParts * 4;
+      const pts = [];
+      for (let k = 0; k < np; k++) pts.push([d(p0 + k * 16), d(p0 + 8 + k * 16)]);
+      if (type === 13 || type === 15) { const z0 = p0 + np * 16 + 16; if (z0 + np * 8 <= off) pts.forEach((p, k) => p.push(d(z0 + k * 8))); }
+      const lines = parts.map((p, k) => pts.slice(p, k + 1 < parts.length ? parts[k + 1] : np));
+      if (type === 3 || type === 13 || type === 23) geom = lines.length === 1 ? { type: "LineString", coordinates: lines[0] } : { type: "MultiLineString", coordinates: lines };
+      else {
+        const polys = gisShpPolygons(lines.filter((l) => l.length >= 4));
+        geom = polys.length === 1 ? { type: "Polygon", coordinates: polys[0] } : { type: "MultiPolygon", coordinates: polys };
+      }
+    } else if (type === 31) patches++;
+    else nulls++;
+    if (geom) gisPush(feats, geom, props);
+  }
+  const notes = [];
+  const crs = gisCrsFromPrj(prj);
+  if (!dbf) notes.push("مفيش ملف .dbf جنب الـ .shp، فالأشكال اتقرت من غير بياناتها. ارفع الملفين مع بعض (أو ZIP فيه الكل).");
+  if (prj && !crs) notes.push(`نظام الإحداثيات اللي في ملف الـ .prj (${gisPrjName(prj) || "مش واضح"}) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك.`);
+  if (!prj) notes.push("مفيش ملف .prj، فالنظام متوقع من الأرقام.");
+  if (patches) notes.push(`اتسابت ${patches} شكل MultiPatch (مجسمات 3D).`);
+  if (!feats.length) fail(`"${name}": الـ shapefile مفيهوش أشكال${nulls ? " (كل الأشكال فاضية)" : ""}.`);
+  return gisLayer(name, "Shapefile", feats, { crs, notes });
+}
+
+// ---------- CAD (DXF, DWG) ----------
+const gisCadText = (t) => String(t ?? "")
+  .replace(/\\U\+([0-9A-Fa-f]{4})/g, (m, h) => String.fromCharCode(parseInt(h, 16)))
+  .replace(/\\P/g, "\n").replace(/\\~/g, " ")
+  .replace(/\\[ACcFfHhQqTtWw][^;\\]*;/g, "")
+  .replace(/\\S([^;]*);/g, (m, s) => s.replace(/[#^]/, "/"))
+  .replace(/\\[LlOoKk]/g, "")
+  .replace(/%%[cC]/g, "Ø").replace(/%%[dD]/g, "°").replace(/%%[pP]/g, "±").replace(/%%%/g, "%")
+  .replace(/[{}]/g, "").replace(/\\\\/g, "\\")
+  .trim();
+
+/**
+ * The model-space entities of an ASCII DXF, in the shape libredwg-web gives a DWG's, so that
+ * gisFromCad reads both: polylines with their bulges, block insertions with their attributes.
+ */
+function gisDxfEntities(text) {
+  const s = String(text ?? "");
+  if (/^AutoCAD Binary DXF/.test(s)) fail("ملف الـ DXF ده محفوظ Binary. احفظه من الأوتوكاد DXF عادي (ASCII) وارفعه تاني.");
+  const L = s.split(/\r\n|\r|\n/);
+  const out = [];
+  let section = null, wantName = false;
+  let rec = null, parent = null;
+  const end = () => {
+    if (!rec) return;
+    if (rec.type === "VERTEX" || rec.type === "ATTRIB") { if (parent) parent.kids.push(rec); }
+    else if (rec.type === "SEQEND") { if (parent) out.push(gisDxfEntity(parent)); parent = null; }
+    else {
+      if (parent) { out.push(gisDxfEntity(parent)); parent = null; }
+      const g = rec.g;
+      let attribs = false;
+      for (let k = 0; k < g.length; k += 2) if (g[k] === 66 && g[k + 1].trim() === "1") attribs = true;
+      if (rec.type === "POLYLINE" || (rec.type === "INSERT" && attribs)) { rec.kids = []; parent = rec; }
+      else out.push(gisDxfEntity(rec));
+    }
+    rec = null;
+  };
+  for (let i = 0; i + 1 < L.length; i += 2) {
+    const code = parseInt(L[i], 10);
+    const val = L[i + 1];
+    if (code === 0) {
+      const t = val.trim();
+      if (section === "ENTITIES") {
+        end();
+        if (t === "ENDSEC") { if (parent) out.push(gisDxfEntity(parent)); parent = null; section = null; continue; }
+        rec = { type: t, g: [] };
+        continue;
+      }
+      if (t === "SECTION") wantName = true;
+      else if (t === "ENDSEC") section = null;
+      else if (t === "EOF") break;
+    } else if (code === 2 && wantName) { section = val.trim(); wantName = false; }
+    else if (rec) rec.g.push(code, val);
+  }
+  end();
+  if (parent) out.push(gisDxfEntity(parent));
+  return out.filter(Boolean);
+}
+
+// One DXF entity's groups → the libredwg-web field names (angles in radians).
+function gisDxfEntity(r) {
+  const g = r.g;
+  const first = (c) => { for (let k = 0; k < g.length; k += 2) if (g[k] === c) return g[k + 1]; return undefined; };
+  const num = (c, d = 0) => { const x = parseFloat(first(c)); return Number.isFinite(x) ? x : d; };
+  const pt = (c) => ({ x: num(c, NaN), y: num(c + 10, NaN), z: num(c + 20, 0) });
+  const seq = (cx) => { // repeated points (cx, cx+10, cx+20)
+    const pts = [];
+    let p = null;
+    for (let k = 0; k < g.length; k += 2) {
+      if (g[k] === cx) { p = { x: parseFloat(g[k + 1]), y: NaN, z: 0 }; pts.push(p); }
+      else if (g[k] === cx + 10 && p) p.y = parseFloat(g[k + 1]);
+      else if (g[k] === cx + 20 && p) p.z = parseFloat(g[k + 1]) || 0;
+    }
+    return pts;
+  };
+  const all = (c) => { const v = []; for (let k = 0; k < g.length; k += 2) if (g[k] === c) v.push(parseFloat(g[k + 1])); return v; };
+  const base = { type: r.type, layer: (first(8) ?? "0").trim(), paper: (first(67) ?? "").trim() === "1", extrusionDirection: { x: num(210), y: num(220), z: num(230, 1) } };
+  const rad = (c) => (num(c) * Math.PI) / 180;
+  switch (r.type) {
+    case "POINT": return { ...base, position: pt(10) };
+    case "LINE": return { ...base, startPoint: pt(10), endPoint: pt(11) };
+    case "LWPOLYLINE": {
+      const vertices = [];
+      let p = null;
+      for (let k = 0; k < g.length; k += 2) {
+        if (g[k] === 10) { p = { x: parseFloat(g[k + 1]), y: NaN, bulge: 0 }; vertices.push(p); }
+        else if (g[k] === 20 && p) p.y = parseFloat(g[k + 1]);
+        else if (g[k] === 42 && p) p.bulge = parseFloat(g[k + 1]) || 0;
+      }
+      return { ...base, closed: (num(70) & 1) === 1, elevation: num(38), vertices };
+    }
+    case "POLYLINE": {
+      const flag = num(70);
+      const vertices = (r.kids ?? []).map((k) => {
+        const e = gisDxfEntity({ type: "VERTEX", g: k.g });
+        return e;
+      }).filter((v) => !(v.flag & 16) && !(v.flag & 128));
+      const type = flag & 64 || flag & 16 ? "MESH" : flag & 8 ? "POLYLINE3D" : "POLYLINE2D";
+      return { ...base, type, closed: (flag & 1) === 1, elevation: num(30), vertices };
+    }
+    case "VERTEX": return { x: num(10, NaN), y: num(20, NaN), z: num(30, 0), bulge: num(42), flag: num(70) };
+    case "ARC": return { ...base, center: pt(10), radius: num(40), startAngle: rad(50), endAngle: rad(51) };
+    case "CIRCLE": return { ...base, center: pt(10), radius: num(40) };
+    case "ELLIPSE": return { ...base, center: pt(10), majorAxisEndPoint: pt(11), axisRatio: num(40, 1), startAngle: num(41), endAngle: num(42, 2 * Math.PI) };
+    case "SPLINE": return { ...base, flag: num(70), degree: num(71, 3), knots: all(40), weights: all(41), controlPoints: seq(10), fitPoints: seq(11) };
+    case "TEXT": {
+      const aligned = num(72) !== 0 || num(73) !== 0;
+      const p11 = pt(11);
+      return { ...base, text: first(1) ?? "", startPoint: aligned && Number.isFinite(p11.x) ? p11 : pt(10), textHeight: num(40), rotation: rad(50) };
+    }
+    case "MTEXT": {
+      let text = "";
+      for (let k = 0; k < g.length; k += 2) if (g[k] === 3 || g[k] === 1) text += g[k + 1];
+      return { ...base, text, insertionPoint: pt(10), textHeight: num(40), rotation: rad(50) };
+    }
+    case "INSERT": return { ...base, name: (first(2) ?? "").trim(), insertionPoint: pt(10), rotation: rad(50), attribs: (r.kids ?? []).map((k) => ({ tag: (k.g[k.g.indexOf(2) + 1] ?? "").trim(), text: gisDxfEntity({ type: "ATTVAL", g: k.g }).text })) };
+    case "ATTVAL": return { text: first(1) ?? "" };
+    case "3DFACE": return { ...base, corner1: pt(10), corner2: pt(11), corner3: pt(12), corner4: pt(13) };
+    case "SOLID": case "TRACE": return { ...base, type: "SOLID", corner1: pt(10), corner2: pt(11), corner3: pt(12), corner4: pt(13) };
+    default: return { ...base };
+  }
+}
+
+const GIS_ARC_STEP = Math.PI / 36; // arcs as chords of at most 5°
+
+function gisArc(cx, cy, r, a0, a1, z) {
+  let sweep = a1 - a0;
+  while (sweep <= 1e-12) sweep += 2 * Math.PI;
+  const n = Math.max(2, Math.ceil(sweep / GIS_ARC_STEP));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (sweep * i) / n;
+    out.push(gisZ([cx + r * Math.cos(a), cy + r * Math.sin(a)], z));
+  }
+  return out;
+}
+
+// The points inside the arc a polyline's bulge draws from p1 to p2 (positive: anticlockwise).
+function gisBulge(p1, p2, b, out) {
+  const theta = 4 * Math.atan(b);
+  const dx = p2[0] - p1[0], dy = p2[1] - p1[1], c = Math.hypot(dx, dy);
+  if (!c || !b) return;
+  const r = c / (2 * Math.sin(theta / 2));
+  const h = r * Math.cos(theta / 2);
+  const cx = (p1[0] + p2[0]) / 2 - (dy / c) * h, cy = (p1[1] + p2[1]) / 2 + (dx / c) * h;
+  const a0 = Math.atan2(p1[1] - cy, p1[0] - cx);
+  const n = Math.max(1, Math.ceil(Math.abs(theta) / GIS_ARC_STEP));
+  for (let i = 1; i < n; i++) {
+    const a = a0 + (theta * i) / n;
+    out.push(gisZ([cx + Math.abs(r) * Math.cos(a), cy + Math.abs(r) * Math.sin(a)], p1[2]));
+  }
+}
+
+// A B-spline (rational when it has weights) as a polyline, by de Boor's algorithm.
+function gisSpline(e) {
+  const fit = (e.fitPoints ?? []).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+  if (fit.length >= 2) return fit.map((p) => gisZ([p.x, p.y], p.z));
+  const P = (e.controlPoints ?? []).filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
+  const k = e.degree ?? 3, U = e.knots ?? [], W = e.weights?.length === P.length ? e.weights : null;
+  const n = P.length;
+  if (n < 2) return [];
+  if (k < 1 || U.length !== n + k + 1) return P.map((p) => gisZ([p.x, p.y], p.z));
+  const lo = U[k], hi = U[n];
+  const steps = Math.min(600, Math.max(16, n * 10));
+  const out = [];
+  for (let s = 0; s <= steps; s++) {
+    const t = s === steps ? hi : lo + ((hi - lo) * s) / steps;
+    let span = k;
+    while (span < n - 1 && t >= U[span + 1]) span++;
+    const d = [];
+    for (let j = 0; j <= k; j++) {
+      const p = P[span - k + j], w = W ? W[span - k + j] || 1 : 1;
+      d.push([p.x * w, p.y * w, (p.z ?? 0) * w, w]);
+    }
+    for (let rr = 1; rr <= k; rr++) {
+      for (let j = k; j >= rr; j--) {
+        const i = span - k + j, den = U[i + k - rr + 1] - U[i], a = den ? (t - U[i]) / den : 0;
+        for (let q = 0; q < 4; q++) d[j][q] = (1 - a) * d[j - 1][q] + a * d[j][q];
+      }
+    }
+    const [x, y, z, w] = d[k];
+    out.push(gisZ([x / w, y / w], z / w));
+  }
+  return out;
+}
+
+/**
+ * CAD entities (gisDxfEntities, or a DWG's from libredwg-web) → one layer: lines and polylines (with
+ * their arcs), closed polylines and circles as polygons, texts and block insertions as points carrying
+ * the text, the block's name and its attribute values. Paper space and the types the notes name
+ * (dimensions, hatches, images …) are left out. Every feature keeps its CAD layer in "layer".
+ */
+function gisFromCad(entities, name = "CAD", format = "DXF") {
+  const feats = [];
+  const skipped = new Map();
+  let paper = 0, curves = 0, marks = 0;
+  for (const e of entities ?? []) {
+    if (!e?.type) continue;
+    if (/^(TEXT|MTEXT|INSERT)$/.test(e.type)) marks++;
+    if (/^(ELLIPSE|SPLINE)$/.test(e.type)) curves++;
+    if (e.paper || e.isInPaperSpace) { paper++; continue; }
+    const flip = (e.extrusionDirection?.z ?? 1) < 0; // mirrored 2D entities (normal 0,0,-1)
+    const P = (p, z, ocs = true) => (p && Number.isFinite(p.x) && Number.isFinite(p.y) ? gisZ([flip && ocs ? -p.x : p.x, p.y], z === undefined ? p.z : z) : null);
+    const props = { layer: String(e.layer ?? "0"), type: e.type };
+    let geom = null;
+    switch (e.type) {
+      case "POINT": { const c = P(e.position, undefined, false); if (c) geom = { type: "Point", coordinates: c }; break; }
+      case "LINE": { const a = P(e.startPoint, undefined, false), b = P(e.endPoint, undefined, false); if (a && b) geom = { type: "LineString", coordinates: [a, b] }; break; }
+      case "LWPOLYLINE": case "POLYLINE2D": case "POLYLINE3D": {
+        const is3d = e.type === "POLYLINE3D";
+        const closed = e.closed ?? (e.type === "LWPOLYLINE" ? ((e.flag ?? 0) & 512) !== 0 : ((e.flag ?? 0) & 1) !== 0);
+        const elev = !is3d && Number.isFinite(e.elevation) && e.elevation !== 0 ? e.elevation : null;
+        const vs = (e.vertices ?? []).filter((v) => Number.isFinite(v.x) && Number.isFinite(v.y));
+        const pts = [];
+        vs.forEach((v, k) => {
+          const a = P(v, is3d ? v.z : elev);
+          pts.push(a);
+          const nx = vs[k + 1] ?? (closed ? vs[0] : null);
+          if (!is3d && nx && v.bulge) { gisBulge(a, P(nx, elev), flip ? -v.bulge : v.bulge, pts); curves++; }
+        });
+        if (elev !== null) props.elevation = elev;
+        if (closed && pts.length >= 3) geom = { type: "Polygon", coordinates: [pts] };
+        else if (pts.length >= 2) geom = { type: "LineString", coordinates: pts };
+        break;
+      }
+      case "ARC": case "CIRCLE": {
+        const c = P(e.center);
+        if (!c || !(e.radius > 0)) break;
+        const full = e.type === "CIRCLE";
+        // Drawn in the entity's own plane, then mirrored with it.
+        let pts = gisArc(e.center.x, e.center.y, e.radius, full ? 0 : e.startAngle, full ? 2 * Math.PI : e.endAngle, c[2]);
+        if (flip) pts = pts.map((p) => gisZ([-p[0], p[1]], p[2]));
+        geom = full ? { type: "Polygon", coordinates: [pts] } : { type: "LineString", coordinates: pts };
+        curves++;
+        props.radius = e.radius;
+        break;
+      }
+      case "ELLIPSE": {
+        const c = e.center, m = e.majorAxisEndPoint;
+        if (!c || !m || !Number.isFinite(m.x)) break;
+        const ratio = e.axisRatio || 1;
+        let a0 = e.startAngle ?? 0, a1 = e.endAngle ?? 2 * Math.PI;
+        let sweep = a1 - a0;
+        while (sweep <= 1e-12) sweep += 2 * Math.PI;
+        const n = Math.max(8, Math.ceil(sweep / GIS_ARC_STEP));
+        const pts = [];
+        for (let i = 0; i <= n; i++) {
+          const t = a0 + (sweep * i) / n;
+          pts.push(gisZ([c.x + m.x * Math.cos(t) - m.y * ratio * Math.sin(t), c.y + m.y * Math.cos(t) + m.x * ratio * Math.sin(t)], c.z));
+        }
+        geom = sweep >= 2 * Math.PI - 1e-9 ? { type: "Polygon", coordinates: [pts] } : { type: "LineString", coordinates: pts };
+        break;
+      }
+      case "SPLINE": {
+        const pts = gisSpline(e);
+        const closed = ((e.flag ?? 0) & 1) === 1;
+        if (closed && pts.length >= 3) geom = { type: "Polygon", coordinates: [pts] };
+        else if (pts.length >= 2) geom = { type: "LineString", coordinates: pts };
+        break;
+      }
+      case "TEXT": case "MTEXT": {
+        const c = P(e.startPoint ?? e.insertionPoint ?? e.position, undefined, e.type === "TEXT");
+        const text = gisCadText(e.text?.text ?? e.text);
+        if (!c || !text) break;
+        geom = { type: "Point", coordinates: c };
+        props.text = text;
+        if (e.textHeight) props.height = e.textHeight;
+        break;
+      }
+      case "INSERT": {
+        const c = P(e.insertionPoint ?? e.position);
+        if (!c) break;
+        geom = { type: "Point", coordinates: c };
+        props.block = e.name ?? "";
+        for (const a of e.attribs ?? []) {
+          const tag = String(a.tag ?? "").trim();
+          const val = gisCadText(a.text?.text ?? a.text);
+          if (tag && !(tag in props)) props[tag] = toNumber(val) !== null && /^[-+]?\d+(\.\d+)?$/.test(val.trim()) && !/^0\d/.test(val.trim()) ? toNumber(val) : val || null;
+        }
+        break;
+      }
+      case "3DFACE": case "SOLID": {
+        const cs = [e.corner1, e.corner2, e.type === "SOLID" ? e.corner4 : e.corner3, e.type === "SOLID" ? e.corner3 : e.corner4].map((p) => P(p, undefined, e.type === "SOLID"));
+        const ring = cs.filter(Boolean).filter((p, k, a) => k === 0 || p[0] !== a[k - 1][0] || p[1] !== a[k - 1][1]);
+        if (ring.length >= 3) geom = { type: "Polygon", coordinates: [ring] };
+        break;
+      }
+      default:
+    }
+    const before = feats.length;
+    if (geom) gisPush(feats, geom, props);
+    if (feats.length === before) skipped.set(e.type, (skipped.get(e.type) ?? 0) + 1);
+  }
+  const notes = [];
+  if (skipped.size) notes.push(`اتسابت عناصر مش أشكال على الخريطة: ${[...skipped].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([t, n]) => `${t} (${n})`).join("، ")}.`);
+  if (paper) notes.push(`اتسابت ${paper} عنصر من الـ Layout (Paper space).`);
+  if (marks) notes.push("البلوكات والنصوص اتقرت نقط في مكانها، ومعاها اسم البلوك وقيم الـ Attributes والنص.");
+  if (curves) notes.push("الأقواس والدواير والمنحنيات اتقسمت لأوتار قصيرة (كل وتر 5 درجات على الأكتر).");
+  if (!feats.length) fail(`"${name}": الرسمة مفيهاش نقط ولا خطوط في الـ Model.`);
+  const layer = gisLayer(name, format, feats, { notes, degrees: false });
+  // CAD layer first, then the kind, the text and the block, then the attributes.
+  const front = ["layer", "type", "text", "block"].filter((f) => layer.fields.includes(f));
+  layer.fields = [...front, ...layer.fields.filter((f) => !front.includes(f))];
+  return layer;
+}
+
+// ---------- WKB and GeoPackage ----------
+/** A WKB geometry (ISO or EWKB, either byte order, with Z or M): { geometry, end }. */
+function gisWkb(bytes, offset = 0) {
+  const v = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let p = offset;
+  const read = () => {
+    const le = v.getUint8(p) === 1;
+    p += 1;
+    let t = v.getUint32(p, le);
+    p += 4;
+    let hasZ = false, hasM = false;
+    if (t & 0x80000000) hasZ = true;
+    if (t & 0x40000000) hasM = true;
+    if (t & 0x20000000) p += 4; // EWKB SRID
+    t &= 0x0fffffff;
+    if (t >= 3000) { hasZ = hasM = true; t -= 3000; } else if (t >= 2000) { hasM = true; t -= 2000; } else if (t >= 1000) { hasZ = true; t -= 1000; }
+    const dim = 2 + (hasZ ? 1 : 0) + (hasM ? 1 : 0);
+    const u32 = () => { const x = v.getUint32(p, le); p += 4; return x; };
+    const pos = () => {
+      const x = v.getFloat64(p, le), y = v.getFloat64(p + 8, le), z = hasZ ? v.getFloat64(p + 16, le) : null;
+      p += 8 * dim;
+      return gisZ([x, y], z);
+    };
+    const line = () => { const n = u32(); const out = []; for (let i = 0; i < n; i++) out.push(pos()); return out; };
+    const many = (f) => { const n = u32(); const out = []; for (let i = 0; i < n; i++) out.push(f()); return out; };
+    switch (t) {
+      case 1: { const c = pos(); return Number.isNaN(c[0]) ? null : { type: "Point", coordinates: c }; }
+      case 2: return { type: "LineString", coordinates: line() };
+      case 3: return { type: "Polygon", coordinates: many(line) };
+      case 4: return { type: "MultiPoint", coordinates: many(read).filter(Boolean).map((g) => g.coordinates) };
+      case 5: return { type: "MultiLineString", coordinates: many(read).map((g) => g.coordinates) };
+      case 6: return { type: "MultiPolygon", coordinates: many(read).map((g) => g.coordinates) };
+      case 7: return { type: "GeometryCollection", geometries: many(read).filter(Boolean) };
+      default: throw new Error(`WKB ${t}`);
+    }
+  };
+  const geometry = read();
+  return { geometry, end: p };
+}
+
+/** A GeoPackage geometry blob (its "GP" header, then WKB), or null when empty. */
+function gisGpkgGeom(bytes) {
+  if (!bytes || bytes.length < 5) return null;
+  if (bytes[0] !== 0x47 || bytes[1] !== 0x50) return gisWkb(bytes).geometry;
+  const flags = bytes[3];
+  if (flags & 0x10) return null;
+  const env = [0, 32, 48, 48, 64][(flags >> 1) & 7] ?? 0;
+  return gisWkb(bytes, 8 + env).geometry;
+}
+
+/** A GeoPackage table's rows ({ geometry blob, other columns }) → a layer in the system its srs id names. */
+function gisFromRows(rows, geomColumn, { name = "GeoPackage", format = "GeoPackage", epsg = null, wkt = "" } = {}) {
+  const feats = [];
+  for (const r of rows) {
+    const props = {};
+    for (const [k, val] of Object.entries(r)) if (k !== geomColumn) props[k] = val instanceof Uint8Array ? null : gisCell(val);
+    let g = null;
+    try { g = gisGpkgGeom(r[geomColumn]); } catch { g = null; }
+    gisPush(feats, g, props);
+  }
+  if (!feats.length) fail(`"${name}": الجدول مفيهوش أشكال.`);
+  const crs = (epsg && gisCrsFromEpsg(epsg)) || gisCrsFromPrj(wkt);
+  const notes = !crs && epsg ? [`نظام الإحداثيات (EPSG:${epsg}) مش من الأنظمة المعروفة هنا؛ اختار النظام بنفسك.`] : [];
+  return gisLayer(name, format, feats, { crs, notes });
+}
+
+// ---------- reading any text file ----------
+/**
+ * The layers in a text file, by its content (and its name's extension where content is not enough):
+ * KML, GPX, LandXML, OSM, GeoJSON, DXF, WKT, Leica GSI, NMEA, or a delimited table of coordinates.
+ */
+function gisFromText(text, name = "") {
+  const t = String(text ?? "").replace(/^﻿/, "");
+  if (!t.trim()) fail(`"${name}": الملف فاضي.`);
+  const head = t.slice(0, 4000);
+  const ext = (name.match(/\.([^.\\/]+)$/)?.[1] ?? "").toLowerCase();
+  if (/<kml\b|<Placemark\b/i.test(head) || ext === "kml") return [gisFromKml(t, name)];
+  if (/<gpx\b/i.test(head) || ext === "gpx") return [gisFromGpx(t, name)];
+  if (/<LandXML\b/i.test(head)) return gisFromLandXml(t, name);
+  if (/<osm\b/i.test(head) || ext === "osm") return [gisFromOsm(t, name)];
+  if (/^\s*[{[]/.test(t)) return [gisFromGeoJson(t, name)];
+  if (ext === "dxf" || /^\s*0\s*\r?\n\s*SECTION\s*\r?\n/.test(head)) return [gisFromCad(gisDxfEntities(t), name, "DXF")];
+  if (GIS_WKT_RE.test(t)) return [gisFromWktText(t, name)];
+  if (ext === "gsi" || /^\*?11[0-9.]{4}[+-]/.test(t.trimStart())) {
+    const g = parseGsi(t);
+    if (g) return [gisFromTable(g, name, "GSI")];
+  }
+  if (/^\s*\$[A-Z]{2}(GGA|GNS|RMC|GLL),/m.test(head)) return [gisFromGpsText(t, name)];
+  try {
+    return [gisFromTable(parseDelimited(t, name), name, ext ? ext.toUpperCase() : "نص")];
+  } catch (err) {
+    // Points written by hand in degrees, minutes and seconds ("P1 30°02'39.8\"N 31°14'08.5\"E").
+    try { return [gisFromGpsText(t, name, ext ? ext.toUpperCase() : "نص")]; } catch { throw err; }
+  }
+}
+
+/** A sheet (rows of cells) → a layer, or null when it has no coordinates. */
+function gisFromMatrix(matrix, name = "") {
+  const t = tableFromMatrix(matrix, name);
+  if (!t.rows.length) return null;
+  try { return gisFromTable(t, name, "Excel"); } catch { return null; }
+}
+
+// ---------- tools ----------
+/** Points of a layer, in their order, joined into one line or (closed) one polygon. */
+function gisConnect(layer, closed) {
+  const pts = [];
+  for (const f of layer.features) {
+    if (f.geometry.type === "Point") pts.push(f.geometry.coordinates);
+    else if (f.geometry.type === "MultiPoint") pts.push(...f.geometry.coordinates);
+  }
+  if (pts.length < (closed ? 3 : 2)) fail(closed ? "لازم 3 نقط على الأقل عشان يتعمل مضلع." : "لازم نقطتين على الأقل عشان يتعمل خط.");
+  const coords = pts.map((p) => p.slice());
+  const geometry = closed ? { type: "Polygon", coordinates: [[...coords, coords[0].slice()]] } : { type: "LineString", coordinates: coords };
+  return {
+    name: `${layer.name} — ${closed ? "مضلع" : "خط"}`, format: layer.format, crs: layer.crs, crsFrom: layer.crsFrom,
+    features: [{ geometry, properties: { name: layer.name, points: pts.length } }], fields: ["name", "points"], notes: [],
+  };
+}
+
+/** The layer with x and y swapped in every position (for a file written N before E). */
+function gisSwapXY(layer) {
+  const features = layer.features.map((f) => ({ ...f, geometry: gisMapGeom(f.geometry, (c) => (c.length > 2 ? [c[1], c[0], c[2]] : [c[1], c[0]])) }));
+  return { ...layer, features, crs: layer.crsFrom === "guess" ? gisGuessCrs(gisBbox(features)) : layer.crs };
+}
+
+// ---------- writing ----------
+const gisXmlEsc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]);
+const gisRound = (v, d) => Math.round(v * 10 ** d) / 10 ** d;
+const gisFix = (v, d) => (Number.isFinite(v) ? String(gisRound(v, d)) : "");
+
+// The layer's geometries moved to WGS 84 degrees (null when its system is local).
+function gisWgs(layer) {
+  const fn = gisTransform(layer.crs, "wgs84");
+  return fn ? layer.features.map((f) => ({ ...f, geometry: gisMapGeom(f.geometry, fn) })) : null;
+}
+const gisNeedWgs = (layer) => { const f = gisWgs(layer); if (!f) fail(`"${layer.name}": إحداثياتها محلية؛ اختار نظامها الأول عشان تتصدّر بخطوط الطول والعرض.`); return f; };
+
+/** GeoJSON (RFC 7946: WGS 84 degrees) of a layer; local coordinates are written as they are. */
+function gisToGeoJson(layer) {
+  const georef = gisGeoref(layer.crs);
+  const feats = georef ? gisNeedWgs(layer) : layer.features;
+  const d = georef ? 8 : 4;
+  const r = (c) => (c.length > 2 ? [gisRound(c[0], d), gisRound(c[1], d), gisRound(c[2], 4)] : [gisRound(c[0], d), gisRound(c[1], d)]);
+  return JSON.stringify({ type: "FeatureCollection", name: layer.name, features: feats.map((f) => ({ type: "Feature", properties: f.properties ?? {}, geometry: gisMapGeom(f.geometry, r) })) });
+}
+
+const gisKmlColor = (hex, alpha) => {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex ?? "") ?? [null, "e7", "b7", "5a"];
+  return `${alpha}${m[3]}${m[2]}${m[1]}`.toLowerCase();
+};
+
+/** KML for Google Earth: a folder per layer, named placemarks, the attributes as extended data. */
+function gisToKml(layers, { colors = [], labels = [] } = {}) {
+  const styles = [];
+  const folders = layers.map((layer, li) => {
+    const feats = gisNeedWgs(layer);
+    const color = colors[li] ?? "#e7b75a";
+    styles.push(`<Style id="s${li}"><IconStyle><color>${gisKmlColor(color, "ff")}</color><scale>0.9</scale><Icon><href>https://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon></IconStyle><LineStyle><color>${gisKmlColor(color, "ff")}</color><width>2.5</width></LineStyle><PolyStyle><color>${gisKmlColor(color, "55")}</color></PolyStyle></Style>`);
+    const label = labels[li];
+    const pos = (c) => `${gisFix(c[0], 9)},${gisFix(c[1], 9)}${c.length > 2 ? `,${gisFix(c[2], 3)}` : ""}`;
+    const coords = (l) => `<coordinates>${l.map(pos).join(" ")}</coordinates>`;
+    const poly = (p) => `<Polygon><outerBoundaryIs><LinearRing>${coords(p[0])}</LinearRing></outerBoundaryIs>${p.slice(1).map((h) => `<innerBoundaryIs><LinearRing>${coords(h)}</LinearRing></innerBoundaryIs>`).join("")}</Polygon>`;
+    const geom = (g) => {
+      switch (g.type) {
+        case "Point": return `<Point>${coords([g.coordinates])}</Point>`;
+        case "MultiPoint": return `<MultiGeometry>${g.coordinates.map((c) => `<Point>${coords([c])}</Point>`).join("")}</MultiGeometry>`;
+        case "LineString": return `<LineString><tessellate>1</tessellate>${coords(g.coordinates)}</LineString>`;
+        case "MultiLineString": return `<MultiGeometry>${g.coordinates.map((l) => `<LineString><tessellate>1</tessellate>${coords(l)}</LineString>`).join("")}</MultiGeometry>`;
+        case "Polygon": return poly(g.coordinates);
+        case "MultiPolygon": return `<MultiGeometry>${g.coordinates.map(poly).join("")}</MultiGeometry>`;
+        default: return "";
+      }
+    };
+    const marks = feats.map((f, i) => {
+      const p = f.properties ?? {};
+      const nm = label && p[label] !== null && p[label] !== undefined ? String(p[label]) : "";
+      const data = Object.entries(p).filter(([, v]) => v !== null && v !== undefined && v !== "").map(([k, v]) => `<Data name="${gisXmlEsc(k)}"><value>${gisXmlEsc(v)}</value></Data>`).join("");
+      return `<Placemark>${nm ? `<name>${gisXmlEsc(nm)}</name>` : ""}<styleUrl>#s${li}</styleUrl>${data ? `<ExtendedData>${data}</ExtendedData>` : ""}${geom(f.geometry)}</Placemark>`;
+    });
+    return `<Folder><name>${gisXmlEsc(layer.name)}</name>\n${marks.join("\n")}\n</Folder>`;
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>GeoX</name>\n${styles.join("\n")}\n${folders.join("\n")}\n</Document></kml>\n`;
+}
+
+/** GPX for handheld receivers: points as waypoints, lines and polygon outlines as tracks. */
+function gisToGpx(layer, { label = null } = {}) {
+  const feats = gisNeedWgs(layer);
+  const pt = (tag, c, inner = "") => `<${tag} lat="${gisFix(c[1], 9)}" lon="${gisFix(c[0], 9)}">${c.length > 2 ? `<ele>${gisFix(c[2], 3)}</ele>` : ""}${inner}</${tag}>`;
+  const wpts = [], trks = [];
+  feats.forEach((f, i) => {
+    const p = f.properties ?? {};
+    const nm = `<name>${gisXmlEsc(label && p[label] !== null && p[label] !== undefined ? p[label] : `${i + 1}`)}</name>`;
+    const g = f.geometry;
+    const seg = (l) => `<trkseg>${l.map((c) => pt("trkpt", c)).join("")}</trkseg>`;
+    if (g.type === "Point") wpts.push(pt("wpt", g.coordinates, nm));
+    else if (g.type === "MultiPoint") g.coordinates.forEach((c) => wpts.push(pt("wpt", c, nm)));
+    else if (g.type === "LineString") trks.push(`<trk>${nm}${seg(g.coordinates)}</trk>`);
+    else if (g.type === "MultiLineString") trks.push(`<trk>${nm}${g.coordinates.map(seg).join("")}</trk>`);
+    else if (g.type === "Polygon") trks.push(`<trk>${nm}${seg(g.coordinates[0])}</trk>`);
+    else if (g.type === "MultiPolygon") trks.push(`<trk>${nm}${g.coordinates.map((pg) => seg(pg[0])).join("")}</trk>`);
+  });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="GeoX" xmlns="http://www.topografix.com/GPX/1/1">\n${[...wpts, ...trks].join("\n")}\n</gpx>\n`;
+}
+
+const gisCsvCell = (v) => (v === null || v === undefined ? "" : /[",\n\r]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
+
+/**
+ * CSV on a grid: one row per point with E, N, Z, latitude, longitude and the attributes; for lines
+ * and polygons one row per vertex, numbered by feature, part and vertex.
+ */
+function gisToCsv(layer, grid) {
+  const toGrid = gisTransform(layer.crs, grid) ?? ((c) => c);
+  const toWgs = gisTransform(layer.crs, "wgs84");
+  const d = gisGeoref(grid) && !gisGridCrs(grid) && grid !== "webmerc" ? 9 : 4;
+  const head = [], rows = [];
+  const onlyPoints = layer.features.every((f) => f.geometry.type === "Point");
+  const geo = (c) => (toWgs ? (() => { const w = toWgs(c); return [gisFix(w[1], 9), gisFix(w[0], 9)]; })() : []);
+  // In degrees the columns are longitude and latitude, and there is no second pair.
+  const deg = grid === "wgs84" || (!gisTransform(layer.crs, grid) && layer.crs === "wgs84");
+  const xy = deg ? ["Lon", "Lat"] : ["E", "N"];
+  const ll = toWgs && !deg ? ["Lat", "Lon"] : [];
+  const geoCols = (c) => (ll.length ? geo(c) : []);
+  if (onlyPoints) {
+    head.push(...xy, "Z", ...ll, ...layer.fields);
+    for (const f of layer.features) {
+      const c = f.geometry.coordinates, g = toGrid(c);
+      rows.push([gisFix(g[0], d), gisFix(g[1], d), c.length > 2 ? gisFix(c[2], 4) : "", ...geoCols(c), ...layer.fields.map((k) => f.properties?.[k])]);
+    }
+  } else {
+    head.push("Feature", "Part", "Vertex", ...xy, "Z", ...ll, ...layer.fields);
+    layer.features.forEach((f, fi) => {
+      const g = f.geometry;
+      const parts = g.type === "Point" ? [[g.coordinates]] : g.type === "MultiPoint" ? g.coordinates.map((c) => [c])
+        : g.type === "LineString" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates.flat() : g.coordinates;
+      parts.forEach((part, pi) => part.forEach((c, vi) => {
+        const q = toGrid(c);
+        rows.push([fi + 1, pi + 1, vi + 1, gisFix(q[0], d), gisFix(q[1], d), c.length > 2 ? gisFix(c[2], 4) : "", ...geoCols(c), ...layer.fields.map((k) => f.properties?.[k])]);
+      }));
+    });
+  }
+  return `﻿${[head, ...rows].map((r) => r.map(gisCsvCell).join(",")).join("\r\n")}\r\n`;
+}
+
+/** Points as P,E,N,Z,D lines with no header (Civil 3D, total stations), on a grid. */
+function gisToPenz(layer, grid, label) {
+  const toGrid = gisTransform(layer.crs, grid) ?? ((c) => c);
+  const lines = [];
+  let n = 0;
+  for (const f of layer.features) {
+    const cs = f.geometry.type === "Point" ? [f.geometry.coordinates] : f.geometry.type === "MultiPoint" ? f.geometry.coordinates : [];
+    for (const c of cs) {
+      n++;
+      const g = toGrid(c);
+      const p = f.properties ?? {};
+      const id = label && p[label] !== null && p[label] !== undefined ? p[label] : n;
+      const code = p.code ?? p.CODE ?? p.Code ?? p["الكود"] ?? p["كود"] ?? "";
+      lines.push([id, gisFix(g[0], 4), gisFix(g[1], 4), c.length > 2 ? gisFix(c[2], 4) : "", code].map(gisCsvCell).join(","));
+    }
+  }
+  if (!lines.length) fail("الطبقة دي مفيهاش نقط.");
+  return `${lines.join("\r\n")}\r\n`;
+}
+
+// DXF texts: ASCII as is, anything else as AutoCAD's \U+XXXX.
+const gisDxfStr = (s) => String(s ?? "").replace(/[\r\n]+/g, " ").replace(/[^\x20-\x7e]/g, (c) => `\\U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, "0")}`);
+const gisDxfLayerName = (s, i) => {
+  const t = String(s ?? "").trim().replace(/[<>/\\":;?*|=,`]/g, "_");
+  return t && /^[\x20-\x7e]+$/.test(t) ? t.slice(0, 31) : `LAYER${i + 1}`;
+};
+const GIS_ACI = [2, 4, 1, 3, 6, 5, 30, 140, 40, 92];
+
+/**
+ * DXF (R12, read by every CAD program) on a grid: points as POINT with a TEXT label, lines and
+ * polygons as polylines (3D when their heights vary). A CAD file's own layer names come back; other
+ * layers are named after the map layer.
+ */
+function gisToDxf(layers, grid, { labels = [], textHeight = null } = {}) {
+  const out = ["0", "SECTION", "2", "HEADER", "9", "$ACADVER", "1", "AC1009", "0", "ENDSEC", "0", "SECTION", "2", "ENTITIES"];
+  const all = [];
+  layers.forEach((layer, li) => {
+    const toGrid = gisTransform(layer.crs, grid) ?? ((c) => c);
+    for (const f of layer.features) all.push({ li, f, g: gisMapGeom(f.geometry, toGrid) });
+  });
+  const bb = gisBbox(all.map((a) => ({ geometry: a.g })));
+  const span = bb ? Math.max(bb[2] - bb[0], bb[3] - bb[1]) : 100;
+  const nice = (x) => { const p = 10 ** Math.floor(Math.log10(x)); return [1, 2, 2.5, 5, 10].map((m) => m * p).find((v) => v >= x) ?? x; };
+  const th = textHeight ?? Math.max(0.1, nice(span / 400));
+  const n = (v) => gisFix(v, 4) || "0";
+  for (const { li, f, g } of all) {
+    const p = f.properties ?? {};
+    const lay = gisDxfLayerName(p.layer ?? layers[li].name, li);
+    const color = String(GIS_ACI[li % GIS_ACI.length]);
+    const head = ["8", lay, "62", color];
+    const label = labels[li] && p[labels[li]] !== null && p[labels[li]] !== undefined ? String(p[labels[li]]) : "";
+    const point = (c) => {
+      out.push("0", "POINT", ...head, "10", n(c[0]), "20", n(c[1]), "30", n(c[2] ?? 0));
+      if (label) out.push("0", "TEXT", ...head, "10", n(c[0] + th * 0.6), "20", n(c[1] + th * 0.3), "30", n(c[2] ?? 0), "40", n(th), "1", gisDxfStr(label));
+    };
+    const poly = (l, closed) => {
+      const pts = closed && l.length > 1 && l[0][0] === l[l.length - 1][0] && l[0][1] === l[l.length - 1][1] ? l.slice(0, -1) : l;
+      const zs = pts.map((c) => c[2] ?? 0);
+      const flat = zs.every((z) => Math.abs(z - zs[0]) < 1e-9);
+      out.push("0", "POLYLINE", ...head, "66", "1", "10", "0", "20", "0", "30", n(flat ? zs[0] : 0), "70", String((closed ? 1 : 0) | (flat ? 0 : 8)));
+      for (const c of pts) out.push("0", "VERTEX", "8", lay, "10", n(c[0]), "20", n(c[1]), "30", n(flat ? zs[0] : c[2] ?? 0), "70", flat ? "0" : "32");
+      out.push("0", "SEQEND", "8", lay);
+    };
+    switch (g.type) {
+      case "Point": point(g.coordinates); break;
+      case "MultiPoint": g.coordinates.forEach(point); break;
+      case "LineString": poly(g.coordinates, false); break;
+      case "MultiLineString": g.coordinates.forEach((l) => poly(l, false)); break;
+      case "Polygon": g.coordinates.forEach((r) => poly(r, true)); break;
+      case "MultiPolygon": g.coordinates.forEach((pg) => pg.forEach((r) => poly(r, true))); break;
+      default:
+    }
+  }
+  out.push("0", "ENDSEC", "0", "EOF");
+  return `${out.join("\r\n")}\r\n`;
+}
+
+// ---------- shapefile writing ----------
+const gisUtf8 = (s) => new TextEncoder().encode(String(s));
+
+// Arabic Windows (code page 1256) bytes of a text, or null if a character is not in it.
+let gis1256 = null;
+function gisCp1256(s) {
+  if (!gis1256) {
+    gis1256 = new Map();
+    const d = new TextDecoder("windows-1256");
+    for (let b = 0x80; b < 0x100; b++) gis1256.set(d.decode(new Uint8Array([b])), b);
+  }
+  const out = [];
+  for (const ch of String(s)) {
+    const c = ch.codePointAt(0);
+    if (c < 0x80) out.push(c);
+    else if (gis1256.has(ch)) out.push(gis1256.get(ch));
+    else return null;
+  }
+  return new Uint8Array(out);
+}
+
+/**
+ * A .dbf of the rows' keys, and its .cpg. Text in Arabic goes in code page 1256 when every character
+ * is in it: a field name then keeps its 10 letters ("المساحة"), where UTF-8 leaves room for only 5.
+ * Anything else is UTF-8.
+ */
+function gisDbfWrite(rows, keys) {
+  const today = new Date();
+  const show = (v) => (typeof v === "string" ? v : JSON.stringify(v) ?? "");
+  const texts = [...keys.map(String), ...rows.flatMap((r) => keys.map((k) => r[k]).filter((v) => typeof v === "string"))];
+  const arabic = texts.some((t) => /[^\x00-\x7f]/.test(t)) && texts.every((t) => gisCp1256(t) !== null);
+  const enc = arabic ? gisCp1256 : gisUtf8;
+  // The longest start of a text that fits in n bytes, cut between characters.
+  const cut = (s, n) => {
+    if (arabic) return String(s).slice(0, n);
+    let out = "", len = 0;
+    for (const ch of String(s)) {
+      const b = gisUtf8(ch).length;
+      if (len + b > n) break;
+      out += ch;
+      len += b;
+    }
+    return out;
+  };
+  const names = new Set();
+  const fields = keys.map((k) => {
+    const vals = rows.map((r) => r[k]).filter((v) => v !== null && v !== undefined && v !== "");
+    const numeric = vals.length > 0 && vals.every((v) => typeof v === "number" && Number.isFinite(v));
+    let name = cut(String(k).replace(/[\s.]+/g, "_"), 10) || "FIELD";
+    for (let i = 2; names.has(name.toUpperCase()); i++) name = `${cut(name, 10 - String(i).length - 1)}_${i}`;
+    names.add(name.toUpperCase());
+    if (numeric) {
+      const dec = Math.min(8, Math.max(0, ...vals.map((v) => (String(v).split(".")[1] ?? "").replace(/e.*$/i, "").length)));
+      const len = Math.min(19, Math.max(1, ...vals.map((v) => v.toFixed(dec).length)));
+      return { key: k, name, type: "N", len, dec };
+    }
+    return { key: k, name, type: "C", len: Math.min(254, Math.max(1, ...vals.map((v) => enc(show(v)).length))), dec: 0 };
+  });
+  const headLen = 32 + fields.length * 32 + 1;
+  const recLen = 1 + fields.reduce((s, f) => s + f.len, 0);
+  const buf = new Uint8Array(headLen + rows.length * recLen + 1);
+  const v = new DataView(buf.buffer);
+  buf[0] = 0x03;
+  buf[1] = today.getFullYear() - 1900; buf[2] = today.getMonth() + 1; buf[3] = today.getDate();
+  v.setUint32(4, rows.length, true);
+  v.setUint16(8, headLen, true);
+  v.setUint16(10, recLen, true);
+  fields.forEach((f, i) => {
+    const p = 32 + i * 32;
+    buf.set(enc(f.name).subarray(0, 10), p);
+    buf[p + 11] = f.type.charCodeAt(0);
+    buf[p + 16] = f.len;
+    buf[p + 17] = f.dec;
+  });
+  buf[headLen - 1] = 0x0d;
+  rows.forEach((r, i) => {
+    let p = headLen + i * recLen;
+    buf[p++] = 0x20;
+    for (const f of fields) {
+      const val = r[f.key];
+      const cell = new Uint8Array(f.len).fill(0x20);
+      if (val !== null && val !== undefined && val !== "") {
+        if (f.type === "N") { const s = gisUtf8(val.toFixed(f.dec)); cell.set(s.subarray(0, f.len), Math.max(0, f.len - s.length)); }
+        else cell.set(enc(cut(show(val), f.len)));
+      }
+      buf.set(cell, p);
+      p += f.len;
+    }
+  });
+  buf[buf.length - 1] = 0x1a;
+  return { dbf: buf, cpg: arabic ? "1256" : "UTF-8" };
+}
+
+// One shapefile (.shp, .shx) of the given shape type from geometries already on the output grid.
+function gisShpWrite(geoms, type) {
+  const hasZ = type === 11 || type === 13 || type === 15 || type === 18;
+  const recs = geoms.map((g) => {
+    if (type === 1 || type === 11) {
+      const c = g.coordinates;
+      const b = new DataView(new ArrayBuffer(hasZ ? 36 : 20));
+      b.setInt32(0, type, true); b.setFloat64(4, c[0], true); b.setFloat64(12, c[1], true);
+      if (hasZ) { b.setFloat64(20, c[2] ?? 0, true); b.setFloat64(28, 0, true); }
+      return { bytes: new Uint8Array(b.buffer), box: [c[0], c[1], c[0], c[1]], z: [c[2] ?? 0] };
+    }
+    // Parts: points of a multipoint, lines, or rings (outer clockwise, holes anticlockwise).
+    let parts;
+    if (type === 8 || type === 18) parts = [g.coordinates];
+    else if (g.type === "LineString") parts = [g.coordinates];
+    else if (g.type === "MultiLineString") parts = g.coordinates;
+    else {
+      const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+      parts = polys.flatMap((p) => p.map((r, k) => {
+        const cw = gisRingArea(r) < 0;
+        return (k === 0) === cw ? r : [...r].reverse();
+      }));
+    }
+    const pts = parts.flat();
+    const box = gisBbox({ type: "MultiPoint", coordinates: pts });
+    const multi = type === 8 || type === 18;
+    const np = pts.length, nParts = multi ? 0 : parts.length;
+    const head = multi ? 40 : 44 + nParts * 4;
+    const size = head + np * 16 + (hasZ ? 16 + np * 8 : 0);
+    const b = new DataView(new ArrayBuffer(size));
+    b.setInt32(0, type, true);
+    box.forEach((x, k) => b.setFloat64(4 + k * 8, x, true));
+    if (multi) b.setInt32(36, np, true);
+    else {
+      b.setInt32(36, nParts, true);
+      b.setInt32(40, np, true);
+      let start = 0;
+      parts.forEach((pt, k) => { b.setInt32(44 + k * 4, start, true); start += pt.length; });
+    }
+    pts.forEach((c, k) => { b.setFloat64(head + k * 16, c[0], true); b.setFloat64(head + k * 16 + 8, c[1], true); });
+    const zs = pts.map((c) => c[2] ?? 0);
+    if (hasZ) {
+      const z0 = head + np * 16;
+      b.setFloat64(z0, Math.min(...zs), true);
+      b.setFloat64(z0 + 8, Math.max(...zs), true);
+      zs.forEach((z, k) => b.setFloat64(z0 + 16 + k * 8, z, true));
+    }
+    return { bytes: new Uint8Array(b.buffer), box, z: zs };
+  });
+  const shpLen = 100 + recs.reduce((s, r) => s + 8 + r.bytes.length, 0);
+  const shp = new Uint8Array(shpLen), shx = new Uint8Array(100 + recs.length * 8);
+  const header = (buf, len) => {
+    const v = new DataView(buf.buffer);
+    v.setInt32(0, 9994);
+    v.setInt32(24, len / 2);
+    v.setInt32(28, 1000, true);
+    v.setInt32(32, type, true);
+    const box = recs.reduce((a, r) => [Math.min(a[0], r.box[0]), Math.min(a[1], r.box[1]), Math.max(a[2], r.box[2]), Math.max(a[3], r.box[3])], [Infinity, Infinity, -Infinity, -Infinity]);
+    const zs = recs.flatMap((r) => r.z);
+    [...box, hasZ ? Math.min(...zs) : 0, hasZ ? Math.max(...zs) : 0, 0, 0].forEach((x, k) => v.setFloat64(36 + k * 8, Number.isFinite(x) ? x : 0, true));
+  };
+  header(shp, shpLen);
+  header(shx, shx.length);
+  const sv = new DataView(shp.buffer), xv = new DataView(shx.buffer);
+  let off = 100;
+  recs.forEach((r, i) => {
+    sv.setInt32(off, i + 1);
+    sv.setInt32(off + 4, r.bytes.length / 2);
+    shp.set(r.bytes, off + 8);
+    xv.setInt32(100 + i * 8, off / 2);
+    xv.setInt32(104 + i * 8, r.bytes.length / 2);
+    off += 8 + r.bytes.length;
+  });
+  return { shp, shx };
+}
+
+/**
+ * Shapefiles of a layer on a grid, one set per kind of shape it has (points, lines, polygons), each
+ * with its .shp .shx .dbf (with a .cpg naming its encoding) and .prj. Polygons get AREA_M2 and lines LENGTH_M when
+ * the grid is in metres. Returns { "name.shp": bytes, … }.
+ */
+function gisToShapefiles(layer, grid, base = "layer") {
+  const toGrid = gisTransform(layer.crs, grid) ?? ((c) => c);
+  const outCrs = gisTransform(layer.crs, grid) ? grid : layer.crs;
+  const metres = gisGridCrs(outCrs) || outCrs === "local";
+  const prj = gisPrj(outCrs);
+  const groups = { points: [], multipoints: [], lines: [], polygons: [] };
+  for (const f of layer.features) {
+    const g = gisMapGeom(f.geometry, toGrid);
+    const key = g.type === "Point" ? "points" : g.type === "MultiPoint" ? "multipoints" : /LineString/.test(g.type) ? "lines" : "polygons";
+    groups[key].push({ g, p: f.properties ?? {} });
+  }
+  const files = {};
+  const used = Object.entries(groups).filter(([, list]) => list.length);
+  for (const [kind, list] of used) {
+    const hasZ = list.some(({ g }) => { let z = false; gisEachPos(g, (c) => { if (c.length > 2) z = true; }); return z; });
+    const type = { points: hasZ ? 11 : 1, multipoints: hasZ ? 18 : 8, lines: hasZ ? 13 : 3, polygons: hasZ ? 15 : 5 }[kind];
+    const name = used.length > 1 ? `${base}_${kind}` : base;
+    const { shp, shx } = gisShpWrite(list.map((x) => x.g), type);
+    const keys = layer.fields.slice();
+    const rows = list.map(({ g, p }) => {
+      const r = { ...p };
+      if (metres && kind === "polygons") r.AREA_M2 = gisRound(gisMeasure(g).area, 3);
+      if (metres && kind === "lines") r.LENGTH_M = gisRound(gisMeasure(g).length, 3);
+      return r;
+    });
+    if (metres && kind === "polygons" && !keys.includes("AREA_M2")) keys.push("AREA_M2");
+    if (metres && kind === "lines" && !keys.includes("LENGTH_M")) keys.push("LENGTH_M");
+    files[`${name}.shp`] = shp;
+    files[`${name}.shx`] = shx;
+    const { dbf, cpg } = gisDbfWrite(rows, keys);
+    files[`${name}.dbf`] = dbf;
+    files[`${name}.cpg`] = cpg;
+    if (prj) files[`${name}.prj`] = prj;
+  }
+  return files;
+}
+
+const GIS_PRJ_WGS = 'GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]';
+const GIS_PRJ_1907 = 'GEOGCS["GCS_Egypt_1907",DATUM["D_Egypt_1907",SPHEROID["Helmert_1906",6378200.0,298.3]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]';
+const gisTmPrj = (name, geog, fe, fn, cm, k, lat0) => `PROJCS["${name}",${geog},PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",${fe.toFixed(1)}],PARAMETER["False_Northing",${fn.toFixed(1)}],PARAMETER["Central_Meridian",${cm.toFixed(1)}],PARAMETER["Scale_Factor",${k}],PARAMETER["Latitude_Of_Origin",${lat0.toFixed(1)}],UNIT["Meter",1.0]]`;
+
+/** The ESRI .prj text of a system, or null for local coordinates. */
+function gisPrj(crs) {
+  if (crs === "wgs84") return GIS_PRJ_WGS;
+  if (crs === "webmerc") return `PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",${GIS_PRJ_WGS},PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0]]`;
+  const g = gisGrid(crs);
+  if (!g) return null;
+  if (g.kind === "utm") return gisTmPrj(`WGS_1984_UTM_Zone_${g.zone}${g.south ? "S" : "N"}`, GIS_PRJ_WGS, 500000, g.south ? 10000000 : 0, g.zone * 6 - 183, "0.9996", 0);
+  const b = ETM_BELTS[g.belt];
+  return gisTmPrj(`Egypt_${{ red: "Red", purple: "Purple", xpurple: "Extended_Purple", blue: "Blue" }[g.belt]}_Belt`, GIS_PRJ_1907, b.fe, b.fn, b.lon0, "1.0", 30);
+}
+
+let gisCrcTable = null;
+function gisCrc32(u8) {
+  if (!gisCrcTable) {
+    gisCrcTable = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      gisCrcTable[n] = c >>> 0;
+    }
+  }
+  let c = 0xffffffff;
+  for (let i = 0; i < u8.length; i++) c = gisCrcTable[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+/** A ZIP (stored, not compressed) of { "name": bytes or text }, names in UTF-8. */
+function gisZip(files) {
+  const now = new Date();
+  const time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const entries = Object.entries(files).map(([name, data]) => ({ name: gisUtf8(name), data: typeof data === "string" ? gisUtf8(data) : data }));
+  const size = entries.reduce((s, e) => s + 30 + 46 + 2 * e.name.length + e.data.length, 22);
+  const out = new Uint8Array(size), v = new DataView(out.buffer);
+  let p = 0;
+  for (const e of entries) {
+    e.crc = gisCrc32(e.data);
+    e.offset = p;
+    v.setUint32(p, 0x04034b50, true); v.setUint16(p + 4, 20, true); v.setUint16(p + 6, 0x0800, true); v.setUint16(p + 8, 0, true);
+    v.setUint16(p + 10, time, true); v.setUint16(p + 12, date, true); v.setUint32(p + 14, e.crc, true);
+    v.setUint32(p + 18, e.data.length, true); v.setUint32(p + 22, e.data.length, true); v.setUint16(p + 26, e.name.length, true); v.setUint16(p + 28, 0, true);
+    out.set(e.name, p + 30);
+    out.set(e.data, p + 30 + e.name.length);
+    p += 30 + e.name.length + e.data.length;
+  }
+  const cd = p;
+  for (const e of entries) {
+    v.setUint32(p, 0x02014b50, true); v.setUint16(p + 4, 20, true); v.setUint16(p + 6, 20, true); v.setUint16(p + 8, 0x0800, true); v.setUint16(p + 10, 0, true);
+    v.setUint16(p + 12, time, true); v.setUint16(p + 14, date, true); v.setUint32(p + 16, e.crc, true);
+    v.setUint32(p + 20, e.data.length, true); v.setUint32(p + 24, e.data.length, true); v.setUint16(p + 28, e.name.length, true);
+    v.setUint16(p + 30, 0, true); v.setUint16(p + 32, 0, true); v.setUint16(p + 34, 0, true); v.setUint16(p + 36, 0, true); v.setUint32(p + 38, 0, true);
+    v.setUint32(p + 42, e.offset, true);
+    out.set(e.name, p + 46);
+    p += 46 + e.name.length;
+  }
+  v.setUint32(p, 0x06054b50, true); v.setUint16(p + 8, entries.length, true); v.setUint16(p + 10, entries.length, true);
+  v.setUint32(p + 12, p - cd, true); v.setUint32(p + 16, cd, true);
+  return out;
+}
+
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
 })();
 </script>
 <script>
@@ -8110,7 +10077,7 @@ async function readImage(bytes, name, ext) {
 }
 
 let dwgLib = null;
-async function readDwg(bytes) {
+async function dwgDatabase(bytes) {
   if (!dwgLib) {
     try {
       const mod = await import(new URL("dwg/dist/libredwg-web.js", document.baseURI).href);
@@ -8121,10 +10088,9 @@ async function readDwg(bytes) {
   }
   const dwg = dwgLib.lib.dwg_read_data(bytes, dwgLib.type);
   if (!dwg) throw new Error("ملف الـ DWG ده ما اتقريش. احفظه DXF من الأوتوكاد وارفعه.");
-  let db;
-  try { db = dwgLib.lib.convert(dwg); } finally { dwgLib.lib.dwg_free(dwg); }
-  return E.modelFromDwg(db);
+  try { return dwgLib.lib.convert(dwg); } finally { dwgLib.lib.dwg_free(dwg); }
 }
+const readDwg = async (bytes) => E.modelFromDwg(await dwgDatabase(bytes));
 
 async function cadResult(model, name) {
   const cad = E.cadData(model);
@@ -8872,6 +10838,1203 @@ $("#gp-file").onchange = async (e) => {
   } catch (err) { showError($("#gp-out"), err); }
 };
 $("#gp-text").value = GP_EXAMPLE;
+
+// ---------- GIS ----------
+// Map data from any common file (shapefile, KML/KMZ, GeoJSON, GPX, GeoPackage, OSM, DXF/DWG, Excel,
+// CSV, GSI, LandXML, NMEA, WKT) as layers on a map. Each layer keeps the coordinate system it came in,
+// read from the file or guessed, and changeable; lengths and areas are taken on a grid; any layer goes
+// back out as GeoJSON, KML, a zipped shapefile, DXF, CSV, GPX or P,E,N,Z on the grid asked for.
+I18N.add({
+  "GIS": "GIS", "افتح ملفات الخرايط GIS": "Open map files (GIS)",
+  "جيوماتكس GIS: استقبال البيانات والتعامل معاها": "Geomatics GIS: receiving data and working with it",
+  "ارفع أي ملف خرايط أو رفع مساحي أو رسمة كاد: كل ملف بيبقى طبقة على الخريطة ببياناته، ونظام إحداثياته بيتقري من الملف أو بيتوقع. بعدها قيس، وغيّر النظام، وصدّر للصيغة اللي محتاجها.":
+    "Upload any map, survey or CAD file: each file becomes a layer on the map with its attributes, its coordinate system read from the file or guessed. Then measure, change the system, and export to the format you need.",
+  "اسحب الملفات وارميها هنا": "Drag and drop files here",
+  "ملف واحد أو كذا ملف مع بعض، أو ZIP. أجزاء الـ Shapefile (.shp و.dbf و.prj و.cpg) ارفعها مع بعض.": "One file or several together, or a ZIP. Upload a shapefile's parts (.shp, .dbf, .prj, .cpg) together.",
+  "اختار ملفات": "Choose files", "الصق إحداثيات أو WKT": "Paste coordinates or WKT", "جرّب على مثال": "Try an example",
+  "الصق جدول نقط (رقم، شرقي، شمالي، منسوب)، أو خطوط عرض وطول، أو WKT، أو GeoJSON، أو KML.": "Paste a table of points (number, easting, northing, level), latitudes and longitudes, WKT, GeoJSON or KML.",
+  "أضف كطبقة": "Add as a layer", "الصيغ اللي بيقراها": "Formats it reads",
+  "GIS: ملفات Shapefile (الـ .shp مع الـ .dbf والـ .prj والـ .cpg، أو ZIP فيه الكل)، وGeoJSON، وKML وKMZ من Google Earth، وGPX، وGeoPackage (.gpkg)، وOpenStreetMap (.osm)، وWKT.":
+    "GIS: shapefiles (the .shp with its .dbf, .prj and .cpg, or a ZIP of them), GeoJSON, KML and KMZ from Google Earth, GPX, GeoPackage (.gpkg), OpenStreetMap (.osm) and WKT.",
+  "كاد: DXF وDWG بطبقاتهم، والبلوكات بقيم الـ Attributes بتاعتها، والنصوص، والأقواس والدواير.": "CAD: DXF and DWG with their layers, blocks with their attribute values, texts, arcs and circles.",
+  "جداول: Excel (xlsx وxls وods) وCSV وTXT: نقط بشرقي وشمالي ومنسوب (حتى لو الشمالي قبل الشرقي)، أو خطوط عرض وطول عشري أو درجات ودقايق وثواني، أو عمود WKT فيه أشكال.":
+    "Tables: Excel (xlsx, xls, ods), CSV and TXT: points by easting, northing and level (even with the northing first), latitudes and longitudes in decimals or degrees minutes seconds, or a WKT column of shapes.",
+  "أجهزة: Leica GSI، وLandXML، وجمل NMEA من جهاز الـ GPS.": "Instruments: Leica GSI, LandXML and NMEA sentences from a GPS receiver.",
+  "نظام الإحداثيات بيتقري من الملف، ولو مفيش بيتوقع من الأرقام: WGS 84 أو UTM أو الشبكة المصرية بأحزمتها. اتأكد إن البيانات نازلة مكانها على الخريطة، ولو لأ غيّر نظام الطبقة.":
+    "The coordinate system is read from the file, or guessed from the numbers when there is none: WGS 84, UTM or the Egyptian grid's belts. Check the data lands in its place on the map; if not, change the layer's system.",
+  "الخريطة والطبقات": "Map and layers", "أدوات الخريطة": "Map tools", "خلفية الخريطة": "Map background",
+  "بدون خلفية": "No background", "خريطة الشوارع": "Street map", "صور القمر الصناعي": "Satellite imagery",
+  "كل الطبقات": "All layers", "تكبير": "Zoom in", "تصغير": "Zoom out", "قياس مسافة ومساحة": "Measure distance and area",
+  "موقعي": "My location", "صورة الخريطة": "Map image", "ملء الشاشة": "Full screen", "خروج من ملء الشاشة": "Exit full screen",
+  "الخريطة: اسحب للتحريك، والعجلة أو إصبعين للتكبير، واضغط على أي عنصر تشوف بياناته": "Map: drag to move, wheel or two fingers to zoom, click any feature to see its data",
+  "إحداثيات محلية: من غير خلفية": "Local coordinates: no background",
+  "نظام القياس والتصدير": "Grid for measuring and export", "تلقائي: نظام الطبقة، أو UTM بتاعها لو بالدرجات": "Automatic: the layer's system, or its UTM zone if it is in degrees",
+  "الطبقات": "Layers", "امسح كل الطبقات": "Remove all layers", "اضغط تاني للمسح": "Press again to remove",
+  "إظهار الطبقة": "Show the layer", "اختار الطبقة": "Select the layer", "زووم على الطبقة": "Zoom to the layer", "لفوق": "Move up", "شيل الطبقة": "Remove the layer",
+  "نظام الطبقة": "Layer's system", "متوقع": "guessed", "نقط": "Points", "خطوط": "Lines", "مضلعات": "Polygons",
+  "عدد العناصر": "Features", "الطول الكلي (م)": "Total length (m)", "المساحة الكلية (م²)": "Total area (m²)", "بالفدان": "In feddan",
+  "المحيط الكلي (م)": "Total perimeter (m)", "النظام": "System", "مقاسة على": "Measured on", "الصيغة": "Format",
+  "الاسم على الخريطة": "Label on the map", "من غير أسماء": "No labels", "لوّن حسب": "Colour by", "لون واحد": "One colour", "لون الطبقة": "Layer colour",
+  "وصّل النقط خط": "Join the points into a line", "اقفل النقط مضلع": "Close the points into a polygon", "بدّل E وN": "Swap E and N",
+  "تصدير": "Export", "Shapefile (ZIP)": "Shapefile (ZIP)", "نقط P,E,N,Z,D": "Points P,E,N,Z,D",
+  "كل الطبقات KML": "All layers KML", "كل الطبقات DXF": "All layers DXF",
+  "البيانات": "Attributes", "دوّر في البيانات": "Search the attributes", "عرض كمان": "Show more",
+  "إحصائيات حقل": "Field statistics", "اختار حقل": "Choose a field", "العدد": "Count", "أقل قيمة": "Minimum", "أكبر قيمة": "Maximum", "المجموع": "Sum", "المتوسط": "Mean",
+  "قيم مختلفة": "Distinct values", "الأكتر تكرار": "Most frequent", "فاضي": "empty",
+  "E (م)": "E (m)", "N (م)": "N (m)", "الطول (م)": "Length (m)", "المساحة (م²)": "Area (m²)", "المحيط (م)": "Perimeter (m)",
+  "العنصر": "Feature", "الطبقة": "Layer", "زووم": "Zoom", "قفل": "Close", "خط العرض": "Latitude", "خط الطول": "Longitude", "المنسوب Z": "Level Z",
+  "اضغط على الخريطة تحط نقط القياس. ضغطتين ورا بعض أو «خلص» تقفل القياس.": "Click the map to place measuring points. Double-click or «Done» ends the measurement.",
+  "خلص": "Done", "شيل آخر نقطة": "Undo last point", "امسح": "Clear", "المسافة (م)": "Distance (m)",
+  "بيقرا الملفات…": "Reading the files…", "ما اتقريش": "Not read", "طبقات اتضافت": "Layers added",
+  "نظام الإحداثيات متوقع من الأرقام؛ اتأكد إن الطبقة نازلة مكانها على الخريطة، ولو لأ غيّر نظامها من قايمة الطبقات.":
+    "The coordinate system is guessed from the numbers: check the layer lands in its place on the map, and if not, change its system in the layer list.",
+  "في طبقة إحداثياتها محلية فمش ظاهرة مع الطبقات اللي على الخريطة؛ اختار نظامها من القايمة عشان تظهر معاهم.": "A layer in local coordinates is not shown with the layers on the map; choose its system in the list to show it with them.",
+  "جدول": "Table", "نص": "Text", "الملف كبير جدًا.": "The file is too big.",
+  "البحث شغال: التصدير والحفظ هيكونوا للعناصر اللي ظاهرة في البحث بس.": "A search is on: export and save cover only the features it shows.",
+  "مكانك مش متاح: المتصفح ما ادّاش الإذن أو الـ GPS مقفول.": "Your location is not available: the browser gave no permission or the GPS is off.",
+  "مكانك بيظهر مع الطبقات اللي ليها نظام إحداثيات بس.": "Your location shows only with layers that have a coordinate system.",
+  "مكانك": "You", "ما قدرتش أحفظ الملف.": "Could not save the file.",
+  "الصق بيانات الأول.": "Paste some data first.", "بيانات ملصوقة": "Pasted data",
+  "نقط الرفع": "Survey points", "قطع الأرض": "Land parcels", "محور الطريق": "Road centre line",
+  "مضلع": "polygon", "خط": "line",
+  // What the readers say (src/engine/gis.js).
+  "مش لاقي أعمدة إحداثيات (شرقي وشمالي، أو X وY، أو خط العرض وخط الطول، أو عمود WKT).": "No coordinate columns found (easting and northing, X and Y, latitude and longitude, or a WKT column).",
+  "ملف الـ KML مفيهوش نقط ولا خطوط ولا مضلعات.": "The KML file has no points, lines or polygons.",
+  "ملف الـ GPX مفيهوش نقط ولا مسارات.": "The GPX file has no points or tracks.",
+  "ملف JSON مش سليم.": "The JSON file is not valid.",
+  "ده TopoJSON. حوّله GeoJSON الأول (من mapshaper.org مثلًا) وارفعه.": "This is TopoJSON. Convert it to GeoJSON first (at mapshaper.org, say) and upload that.",
+  "ملف JSON ده مش GeoJSON.": "This JSON file is not GeoJSON.",
+  "ملف الـ GeoJSON مفيهوش أشكال.": "The GeoJSON file has no shapes.",
+  "مفيش أشكال WKT مفهومة في الملف.": "No readable WKT shapes in the file.",
+  "الجدول فاضي.": "The table is empty.",
+  "مفيش صف فيه إحداثيات مفهومة.": "No row has readable coordinates.",
+  "العمود الأول من الإحداثيات فيه أرقام بالملايين (شمالي)، فاتعامل كـ N والتاني كـ E.": "The first coordinate column holds millions (northings), so it was read as N and the second as E.",
+  "الأرقام شكلها خط عرض وخط طول، واتقرت خط العرض الأول.": "The numbers look like latitude and longitude, and were read latitude first.",
+  "مفيش نقط GPS في الملف.": "No GPS points in the file.",
+  "ملف LandXML مفيهوش نقط بإحداثيات.": "The LandXML file has no points with coordinates.",
+  "ملف OSM مفيهوش عناصر ليها إحداثيات.": "The OSM file has no elements with coordinates.",
+  "ملف الـ .shp ناقص أو مش سليم.": "The .shp file is incomplete or damaged.",
+  "ملف الـ .shp مش سليم.": "The .shp file is damaged.",
+  "مفيش ملف .dbf جنب الـ .shp، فالأشكال اتقرت من غير بياناتها. ارفع الملفين مع بعض (أو ZIP فيه الكل).": "There is no .dbf with the .shp, so the shapes were read without their attributes. Upload both together (or a ZIP of them all).",
+  "مفيش ملف .prj، فالنظام متوقع من الأرقام.": "There is no .prj file, so the system is guessed from the numbers.",
+  "الـ shapefile مفيهوش أشكال.": "The shapefile has no shapes.",
+  "الـ shapefile مفيهوش أشكال (كل الأشكال فاضية).": "The shapefile has no shapes (all of them are empty).",
+  "ملف الـ DXF ده محفوظ Binary. احفظه من الأوتوكاد DXF عادي (ASCII) وارفعه تاني.": "This DXF is saved as binary. Save it from AutoCAD as an ordinary (ASCII) DXF and upload it again.",
+  "البلوكات والنصوص اتقرت نقط في مكانها، ومعاها اسم البلوك وقيم الـ Attributes والنص.": "Blocks and texts were read as points where they stand, with the block's name, its attribute values and the text.",
+  "الأقواس والدواير والمنحنيات اتقسمت لأوتار قصيرة (كل وتر 5 درجات على الأكتر).": "Arcs, circles and curves were split into short chords (5 degrees at most each).",
+  "الرسمة مفيهاش نقط ولا خطوط في الـ Model.": "The drawing has no points or lines in model space.",
+  "الجدول مفيهوش أشكال.": "The table has no shapes.",
+  "الملف فاضي.": "The file is empty.",
+  "لازم 3 نقط على الأقل عشان يتعمل مضلع.": "A polygon needs at least 3 points.",
+  "لازم نقطتين على الأقل عشان يتعمل خط.": "A line needs at least 2 points.",
+  "إحداثياتها محلية؛ اختار نظامها الأول عشان تتصدّر بخطوط الطول والعرض.": "It is in local coordinates; choose its system first to export it in latitude and longitude.",
+  "الطبقة دي مفيهاش نقط.": "This layer has no points.",
+  "WGS 84 جغرافي (خط العرض وخط الطول)": "WGS 84 geographic (latitude and longitude)",
+  "Web Mercator (خرائط الويب)": "Web Mercator (web maps)",
+  "إحداثيات محلية (من غير نظام)": "Local coordinates (no system)",
+  // What the page says while reading.
+  "ملفات مضغوطة جوه بعض كتير.": "Too many archives inside each other.",
+  "الملف المضغوط كبير جدًا.": "The archive is too big.",
+  "الملف المضغوط فاضي.": "The archive is empty.",
+  "ده مش GeoPackage (مفيهوش جدول gpkg_contents).": "This is not a GeoPackage (it has no gpkg_contents table).",
+  "الـ GeoPackage ده مفيهوش طبقات أشكال.": "This GeoPackage has no feature layers.",
+  "الـ GeoPackage ده مفيهوش أشكال.": "This GeoPackage has no shapes.",
+  "مفيش شيت فيه إحداثيات (شرقي وشمالي، أو خط العرض وخط الطول، أو عمود WKT).": "No sheet has coordinates (easting and northing, latitude and longitude, or a WKT column).",
+  "ملف PDF مش بيانات خرايط. لو فيه جدول نقط صدّره Excel أو CSV.": "A PDF is not map data. If it holds a table of points, export it to Excel or CSV.",
+  "الصور والخرايط الممسوحة مش بتتقري كطبقات هنا؛ ارفع ملفات الأشكال (Shapefile أو KML أو DXF أو Excel).": "Images and scanned maps are not read as layers here; upload shape files (shapefile, KML, DXF or Excel).",
+  "ملفات MapInfo (.TAB) صدّرها Shapefile أو KML أو GeoJSON.": "Export MapInfo files (.TAB) to a shapefile, KML or GeoJSON.",
+  "صيغة مش معروفة. صدّرها Shapefile أو KML أو GeoJSON أو DXF أو Excel أو CSV.": "Unknown format. Export it to a shapefile, KML, GeoJSON, DXF, Excel or CSV.",
+  "ملف .dbf لوحده من غير الـ .shp بتاعه: ارفع الـ .shp معاه.": "A .dbf on its own, without its .shp: upload the .shp with it.",
+  "Shapefile وDXF وCSV وP,E,N,Z بتتكتب على «": "Shapefile, DXF, CSV and P,E,N,Z are written on «",
+  "»، وKML وGPX وGeoJSON بخطوط الطول والعرض (WGS 84).": "»; KML, GPX and GeoJSON in latitude and longitude (WGS 84).",
+});
+
+const GS_COLORS = ["#e7b75a", "#3cc8f0", "#ff7b5c", "#4fd98b", "#b18cff", "#f472b6", "#facc15", "#2dd4bf", "#fb923c", "#a3e635"];
+const GS_SHP = new Set([".shp", ".dbf", ".prj", ".cpg", ".shx", ".sbn", ".sbx", ".qix", ".qmd", ".fix", ".atx", ".aih", ".ain", ".ixs", ".mxs"]);
+const GS_SKIP = /\.(png|jpe?g|gif|bmp|webp|svg|tiff?|html?|pdf|docx?|qml|qmd|sld|lyrx?|qpj|mxd|aprx|ini|md|style|xsl|shp\.xml|dbf\.xml)$/i;
+const GS_ROWS = 300; // attribute rows shown at a time
+const GS_MAX = 400 * 1024 * 1024;
+const GS_R = 6378137;
+FILE_LIBS.sqljs = ["https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"];
+const gsLayers = [];
+let gsSeq = 0;
+let gsSel = null; // the selected layer
+let gsPick = null; // the selected feature: { l, i }
+let gsGrid = "auto";
+let gsSql = null;
+
+const gsMerc = (lon, lat) => [(lon * Math.PI * GS_R) / 180, Math.log(Math.tan(Math.PI / 4 + (Math.max(-85, Math.min(85, lat)) * Math.PI) / 360)) * GS_R];
+const gsLonLat = (x, y) => [(x / GS_R) * (180 / Math.PI), (2 * Math.atan(Math.exp(y / GS_R)) - Math.PI / 2) * (180 / Math.PI)];
+const gsNum = (v, d = 3) => (Number.isFinite(v) ? v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }) : "—");
+const gsPlain = (s) => String(s ?? "").toLowerCase().replace(/[ًٌٍَُِّْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+const gsStem = (n) => String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/, "");
+const gsCrsName = (crs) => E.gisCrsLabel(crs);
+const gsSay = (html) => { $("#gs-status").innerHTML = html; };
+
+// ---- each layer's shapes in map units (Web Mercator metres, or its own local units) ----
+function gsShape(g, fn) {
+  const parts = [];
+  const bb = [Infinity, Infinity, -Infinity, -Infinity];
+  const part = (cs) => {
+    const a = new Float64Array(cs.length * 2);
+    cs.forEach((c, k) => {
+      const [x, y] = fn(c);
+      a[2 * k] = x;
+      a[2 * k + 1] = y;
+      if (x < bb[0]) bb[0] = x;
+      if (x > bb[2]) bb[2] = x;
+      if (y < bb[1]) bb[1] = y;
+      if (y > bb[3]) bb[3] = y;
+    });
+    parts.push(a);
+  };
+  const t = g.type, c = g.coordinates;
+  if (t === "Point") part([c]);
+  else if (t === "MultiPoint") c.forEach((p) => part([p]));
+  else if (t === "LineString") part(c);
+  else if (t === "MultiLineString" || t === "Polygon") c.forEach(part);
+  else if (t === "MultiPolygon") c.forEach((p) => p.forEach(part));
+  return { k: /Point/.test(t) ? "pt" : /Line/.test(t) ? "ln" : "pg", parts, bb };
+}
+function gsProject(l) {
+  const toLL = E.gisToLonLat(l.crs);
+  l.geo = Boolean(toLL);
+  const fn = toLL ? (c) => { const [lon, lat] = toLL(c[0], c[1]); return gsMerc(lon, lat); } : (c) => c;
+  l.view = l.features.map((f) => gsShape(f.geometry, fn));
+  l.bb = l.view.reduce((b, v) => (v.bb[0] <= v.bb[2] ? [Math.min(b[0], v.bb[0]), Math.min(b[1], v.bb[1]), Math.max(b[2], v.bb[2]), Math.max(b[3], v.bb[3])] : b), [Infinity, Infinity, -Infinity, -Infinity]);
+  l.meas = null;
+}
+// The grid a layer is measured and written on.
+function gsGridOf(l) {
+  if (!l.geo) return l.crs;
+  if (gsGrid !== "auto") return gsGrid;
+  if (E.gisGridCrs(l.crs)) return l.crs;
+  const [lon, lat] = gsLonLat((l.bb[0] + l.bb[2]) / 2, (l.bb[1] + l.bb[3]) / 2);
+  return E.gisUtmFor(lon, lat);
+}
+function gsMeasures(l) {
+  const grid = gsGridOf(l);
+  if (l.meas?.grid === grid) return l.meas;
+  const fn = E.gisTransform(l.crs, grid) ?? ((c) => c);
+  const list = l.features.map((f) => E.gisMeasure(E.gisMapGeom(f.geometry, fn)));
+  const tot = list.reduce((a, m) => ({ length: a.length + m.length, area: a.area + m.area, perimeter: a.perimeter + m.perimeter }), { length: 0, area: 0, perimeter: 0 });
+  return (l.meas = { grid, list, tot });
+}
+const gsCounts = (l) => l.features.reduce((n, f) => { n[E.gisKind(f.geometry)]++; return n; }, { point: 0, line: 0, polygon: 0 });
+// The features export and save take: those the search shows when there is a search.
+const gsOut = (l) => (l.match ? { ...l, features: l.features.filter((_, i) => l.match.has(i)) } : l);
+
+function gsAdd(layer, source) {
+  const l = { ...layer, id: `L${++gsSeq}`, source, color: GS_COLORS[(gsSeq - 1) % GS_COLORS.length], visible: true, label: E.gisLabelField(layer), style: layer.fields.includes("layer") && layer.format.match(/DXF|DWG/) ? "layer" : "", filter: "", match: null, shown: GS_ROWS };
+  l.name = String(l.name).split(" › ").map((p, k) => (k ? p : gsStem(p))).join(" › ");
+  gsProject(l);
+  gsColors(l);
+  gsLayers.push(l);
+  return l;
+}
+// Colours for "colour by": the commonest values get the palette, the rest grey.
+function gsColors(l) {
+  l.cat = new Map();
+  if (!l.style) return;
+  const count = new Map();
+  for (const f of l.features) { const v = String(f.properties?.[l.style] ?? ""); count.set(v, (count.get(v) ?? 0) + 1); }
+  [...count].sort((a, b) => b[1] - a[1]).slice(0, GS_COLORS.length).forEach(([v], k) => l.cat.set(v, GS_COLORS[k]));
+}
+
+// ---- reading files ----
+async function gsExpand(items, problems, depth = 0) {
+  const out = [];
+  for (const it of items) {
+    const ext = extOf(it.name);
+    if (depth > 0 && GS_SKIP.test(it.name)) continue;
+    const zip = ext === ".zip" || ext === ".kmz" || (latin1(it.bytes.subarray(0, 2)) === "PK" && !SHEET_EXT.has(ext) && !OFFICE_EXT.has(ext));
+    if (!zip) { out.push(it); continue; }
+    if (depth > 2) { problems.push([it.shown ?? it.name, "ملفات مضغوطة جوه بعض كتير."]); continue; }
+    try {
+      await needLib("fflate");
+      let total = 0, count = 0;
+      const z = fflate.unzipSync(it.bytes, {
+        filter: (f) => {
+          if (f.name.endsWith("/") || f.name.startsWith("__MACOSX/") || /(^|\/)\./.test(f.name)) return false;
+          total += f.originalSize;
+          if (++count > 1000 || total > GS_MAX) throw new Error("الملف المضغوط كبير جدًا.");
+          return true;
+        },
+      });
+      // A KMZ is its KML, named after the KMZ when it is the usual doc.kml.
+      const inner = Object.entries(z).filter(([n]) => ext !== ".kmz" || extOf(n) === ".kml")
+        .map(([n, b]) => ({ name: ext === ".kmz" && /^doc\.kml$/i.test(n) ? `${gsStem(it.name)}.kml` : n, bytes: b, shown: `${it.shown ?? it.name} › ${n}` }));
+      if (!inner.length) throw new Error("الملف المضغوط فاضي.");
+      out.push(...(await gsExpand(inner, problems, depth + 1)));
+    } catch (err) { problems.push([it.shown ?? it.name, err.message]); }
+  }
+  return out;
+}
+
+async function gsDwg(bytes) {
+  return E.gisFromCad((await dwgDatabase(bytes)).entities, "DWG", "DWG");
+}
+
+async function gsGpkg(bytes, name) {
+  await needLib("sqljs");
+  gsSql ??= initSqlJs({ locateFile: (f) => FILE_LIBS.sqljs[0].replace(/[^/]+$/, f) }).catch((err) => { gsSql = null; throw err; });
+  const SQL = await gsSql;
+  const db = new SQL.Database(bytes);
+  try {
+    const q = (sql, params = []) => {
+      const st = db.prepare(sql);
+      st.bind(params);
+      const rows = [];
+      while (st.step()) rows.push(st.getAsObject());
+      st.free();
+      return rows;
+    };
+    let tables;
+    try { tables = q("SELECT c.table_name AS t, g.column_name AS g, g.srs_id AS s FROM gpkg_contents c JOIN gpkg_geometry_columns g ON g.table_name = c.table_name WHERE c.data_type = 'features'"); }
+    catch { throw new Error("ده مش GeoPackage (مفيهوش جدول gpkg_contents)."); }
+    if (!tables.length) throw new Error("الـ GeoPackage ده مفيهوش طبقات أشكال.");
+    const out = [];
+    for (const { t, g, s } of tables) {
+      const srs = q("SELECT organization AS o, organization_coordsys_id AS id, definition AS d FROM gpkg_spatial_ref_sys WHERE srs_id = ?", [s])[0] ?? {};
+      const rows = q(`SELECT * FROM "${String(t).replace(/"/g, '""')}" LIMIT 500000`);
+      try { out.push(E.gisFromRows(rows, g, { name: tables.length > 1 ? `${name} › ${t}` : name, epsg: String(srs.o ?? "").toUpperCase() === "EPSG" ? srs.id : null, wkt: srs.d ?? "" })); }
+      catch { /* an empty table */ }
+    }
+    if (!out.length) throw new Error("الـ GeoPackage ده مفيهوش أشكال.");
+    return out;
+  } finally { db.close(); }
+}
+
+async function gsOne(it) {
+  const ext = extOf(it.name);
+  const name = gsStem(it.name);
+  const head = latin1(it.bytes.subarray(0, 16));
+  if (SHEET_EXT.has(ext)) {
+    await needLib("xlsx");
+    const wb = XLSX.read(it.bytes, { type: "array", cellDates: true });
+    const out = wb.SheetNames.map((s) => E.gisFromMatrix(XLSX.utils.sheet_to_json(wb.Sheets[s], { header: 1, raw: true, defval: null, blankrows: false }), wb.SheetNames.length > 1 ? `${name} › ${s}` : name)).filter(Boolean);
+    if (!out.length) throw new Error("مفيش شيت فيه إحداثيات (شرقي وشمالي، أو خط العرض وخط الطول، أو عمود WKT).");
+    return out;
+  }
+  if (ext === ".dwg" || /^AC10\d\d/.test(head)) { const l = await gsDwg(it.bytes); l.name = name; return [l]; }
+  if (ext === ".gpkg" || ext === ".sqlite" || head.startsWith("SQLite format 3")) return gsGpkg(it.bytes, name);
+  if (ext === ".pdf" || head.startsWith("%PDF")) throw new Error("ملف PDF مش بيانات خرايط. لو فيه جدول نقط صدّره Excel أو CSV.");
+  if (IMAGE_EXT.has(ext) || [".tif", ".tiff", ".ecw", ".jp2", ".sid", ".jgw", ".tfw", ".pgw"].includes(ext)) throw new Error("الصور والخرايط الممسوحة مش بتتقري كطبقات هنا؛ ارفع ملفات الأشكال (Shapefile أو KML أو DXF أو Excel).");
+  if ([".tab", ".map", ".id", ".ind"].includes(ext)) throw new Error("ملفات MapInfo (.TAB) صدّرها Shapefile أو KML أو GeoJSON.");
+  if (UNSUPPORTED[ext]) throw new Error(UNSUPPORTED[ext]);
+  const text = decodeText(it.bytes);
+  if (text === null) throw new Error("صيغة مش معروفة. صدّرها Shapefile أو KML أو GeoJSON أو DXF أو Excel أو CSV.");
+  return E.gisFromText(text, it.name);
+}
+
+async function gsIngest(items) {
+  const problems = [];
+  const flat = await gsExpand(items, problems);
+  const got = [];
+  const add = (list, it) => { for (const l of list) got.push(gsAdd(l, it.shown ?? it.name)); };
+  // A shapefile's parts go together by name.
+  const sets = new Map();
+  const rest = [];
+  for (const it of flat) {
+    const ext = extOf(it.name);
+    if (GS_SHP.has(ext)) {
+      const key = it.name.slice(0, -ext.length).toLowerCase();
+      sets.set(key, { ...sets.get(key), [ext.slice(1)]: it });
+    } else if (!/\.(shp|dbf)\.xml$/i.test(it.name)) rest.push(it);
+  }
+  const txt = (it) => (it ? new TextDecoder().decode(it.bytes) : "");
+  for (const s of sets.values()) {
+    const it = s.shp ?? s.dbf;
+    if (!it) continue; // a .prj or .cpg on its own
+    try {
+      if (s.shp) add([E.gisFromShp({ shp: s.shp.bytes, dbf: s.dbf?.bytes ?? null, prj: txt(s.prj), cpg: txt(s.cpg), name: gsStem(s.shp.name) })], s.shp);
+      else {
+        const t = E.gisDbf(s.dbf.bytes, txt(s.cpg));
+        try { add([E.gisFromTable({ columns: t.fields, rows: t.rows.filter((r) => Object.keys(r).length), hasHeader: true }, gsStem(it.name), "DBF")], it); }
+        catch { throw new Error("ملف .dbf لوحده من غير الـ .shp بتاعه: ارفع الـ .shp معاه."); }
+      }
+    } catch (err) { problems.push([it.shown ?? it.name, err.message]); }
+  }
+  for (const it of rest) {
+    try { add(await gsOne(it), it); }
+    catch (err) { problems.push([it.shown ?? it.name, err.message]); }
+  }
+  return { got, problems };
+}
+
+async function gsLoad(items) {
+  gsSay(`<p class="hint">بيقرا الملفات…</p>`);
+  await new Promise((r) => setTimeout(r, 30)); // let the message show before the work
+  let res;
+  try { res = await gsIngest(items); }
+  catch (err) { showError($("#gs-status"), err); return; }
+  const { got, problems } = res;
+  const out = [];
+  if (got.length) out.push(`<div class="gs-ok"><b>طبقات اتضافت</b> <span data-no-i18n>${got.map((l) => `<bdi>${esc(l.name)}</bdi>`).join("، ")}</span></div>`);
+  if (problems.length) out.push(`<div class="error"><b>ما اتقريش</b><ul class="gs-probs">${problems.map(([n, m]) => `<li><bdi data-no-i18n>${esc(n)}</bdi>: <span>${esc(m)}</span></li>`).join("")}</ul></div>`);
+  gsSay(out.join(""));
+  if (got.length) {
+    gsSel = got[got.length - 1].id;
+    gsPick = null;
+    gsRender();
+    gsMap.fit(got);
+  }
+}
+
+// ---- the map ----
+// Web Mercator under a street or satellite background, or local coordinates on a plain sheet. Drag to
+// move, wheel or two fingers to zoom; a click picks a feature, or adds a point while measuring.
+const gsMap = (() => {
+  const box = $("#gs-map"), cv = $("#gs-canvas"), g = cv.getContext("2d");
+  const WORLD = 2 * Math.PI * GS_R, HALF = WORLD / 2;
+  const BASES = {
+    osm: { url: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`, max: 19, credit: "© OpenStreetMap contributors" },
+    sat: { url: (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`, max: 19, credit: "Imagery © Esri, Maxar, Earthstar Geographics" },
+  };
+  let W = 0, H = 0;
+  let cx = 3460000, cy = 3100000, res = 1800; // centre in map units and units per CSS pixel: Egypt
+  let plane = false; // local coordinates: no background
+  let base = "none";
+  let frame = 0;
+  const tiles = new Map();
+  const measure = { on: false, pts: [], done: false };
+  let me = null;
+  const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  const redraw = () => { if (!frame) frame = requestAnimationFrame(draw); };
+  const toMap = (px, py) => [cx + (px - W / 2) * res, cy - (py - H / 2) * res];
+
+  function tile(z, x, y) {
+    const key = `${base}/${z}/${x}/${y}`;
+    let img = tiles.get(key);
+    if (img) { tiles.delete(key); tiles.set(key, img); return img; }
+    img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = redraw;
+    img.src = BASES[base].url(z, x, y);
+    tiles.set(key, img);
+    if (tiles.size > 700) for (const k of [...tiles.keys()].slice(0, 150)) tiles.delete(k);
+    return img;
+  }
+  const ready = (img) => img && img.complete && img.naturalWidth > 0;
+  function drawTiles() {
+    const src = BASES[base];
+    const z = Math.max(0, Math.min(src.max, Math.round(Math.log2(WORLD / 256 / res))));
+    const n = 2 ** z, tm = WORLD / n, size = tm / res;
+    const left = cx - (W / 2) * res, top = cy + (H / 2) * res;
+    const tx0 = Math.floor((left + HALF) / tm), tx1 = Math.floor((left + W * res + HALF) / tm);
+    const ty0 = Math.max(0, Math.floor((HALF - top) / tm)), ty1 = Math.min(n - 1, Math.floor((HALF - top + H * res) / tm));
+    for (let ty = ty0; ty <= ty1; ty++) {
+      for (let tx = tx0; tx <= tx1; tx++) {
+        const wx = ((tx % n) + n) % n;
+        const X = (tx * tm - HALF - left) / res, Y = (top - (HALF - ty * tm)) / res;
+        const img = tile(z, wx, ty);
+        if (ready(img)) { g.drawImage(img, X, Y, size + 0.6, size + 0.6); continue; }
+        // A coarser tile already here stands in while this one loads.
+        for (let d = 1; d <= 5 && z - d >= 0; d++) {
+          const f = 2 ** d, p = tiles.get(`${base}/${z - d}/${Math.floor(wx / f)}/${Math.floor(ty / f)}`);
+          if (ready(p)) { const s = 256 / f; g.drawImage(p, (wx % f) * s, (ty % f) * s, s, s, X, Y, size + 0.6, size + 0.6); break; }
+        }
+      }
+    }
+  }
+
+  function trace(parts, close, X, Y) {
+    g.beginPath();
+    for (const p of parts) {
+      let lx = NaN, ly = NaN, started = false;
+      for (let k = 0; k < p.length; k += 2) {
+        if (!Number.isFinite(p[k]) || !Number.isFinite(p[k + 1])) continue;
+        const x = X(p[k]), y = Y(p[k + 1]);
+        if (!started) { g.moveTo(x, y); started = true; }
+        else if (Math.abs(x - lx) + Math.abs(y - ly) >= 0.7 || k === p.length - 2) g.lineTo(x, y);
+        else continue;
+        lx = x; ly = y;
+      }
+      if (close && started) g.closePath();
+    }
+  }
+  function drawLayer(l, X, Y, view, paper) {
+    const many = l.view.length > 20000;
+    for (let i = 0; i < l.view.length; i++) {
+      const v = l.view[i];
+      if (v.bb[2] < view[0] || v.bb[0] > view[2] || v.bb[3] < view[1] || v.bb[1] > view[3]) continue;
+      const col = l.style ? l.cat.get(String(l.features[i].properties?.[l.style] ?? "")) ?? "#8b9aaa" : l.color;
+      const a = l.match && !l.match.has(i) ? 0.15 : 1;
+      if (v.k === "pg") {
+        trace(v.parts, true, X, Y);
+        g.globalAlpha = 0.2 * a; g.fillStyle = col; g.fill("evenodd");
+        g.globalAlpha = a; g.strokeStyle = col; g.lineWidth = 1.6; g.stroke();
+      } else if (v.k === "ln") {
+        trace(v.parts, false, X, Y);
+        g.globalAlpha = a; g.strokeStyle = col; g.lineWidth = 2.2; g.stroke();
+      } else {
+        g.globalAlpha = a; g.fillStyle = col;
+        for (const p of v.parts) {
+          const x = X(p[0]), y = Y(p[1]);
+          if (!Number.isFinite(x)) continue;
+          if (many) { g.fillRect(x - 1.5, y - 1.5, 3, 3); continue; }
+          g.beginPath(); g.arc(x, y, 4, 0, 2 * Math.PI); g.fill();
+          g.lineWidth = 1.4; g.strokeStyle = paper; g.stroke();
+        }
+      }
+    }
+    g.globalAlpha = 1;
+  }
+  // Names by the features, as many as fit without overlapping.
+  function drawLabels(ink, paper, X, Y, view) {
+    const placed = [];
+    let budget = 1500;
+    g.font = "600 11.5px 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif";
+    g.textBaseline = "middle";
+    g.lineJoin = "round";
+    for (const l of gsLayers) {
+      if (!l.visible || l.geo === plane || !l.label) continue;
+      for (let i = 0; i < l.view.length && budget > 0; i++) {
+        const v = l.view[i];
+        if (v.bb[2] < view[0] || v.bb[0] > view[2] || v.bb[3] < view[1] || v.bb[1] > view[3]) continue;
+        if (l.match && !l.match.has(i)) continue;
+        const t = l.features[i].properties?.[l.label];
+        if (t === null || t === undefined || t === "") continue;
+        const text = String(t).slice(0, 40);
+        let x, y;
+        if (v.k === "pt") { x = X(v.parts[0][0]) + 7; y = Y(v.parts[0][1]) - 7; }
+        else if (v.k === "ln") { const p = v.parts[0], m = 2 * Math.floor(p.length / 4); x = X(p[m]); y = Y(p[m + 1]); }
+        else { x = X((v.bb[0] + v.bb[2]) / 2); y = Y((v.bb[1] + v.bb[3]) / 2); }
+        const w = g.measureText(text).width;
+        const r = [x - (v.k === "pt" ? 0 : w / 2), y - 8, w, 16];
+        if (r[0] + r[2] < 0 || r[0] > W || r[1] + r[3] < 0 || r[1] > H) continue;
+        if (placed.some((q) => r[0] < q[0] + q[2] && q[0] < r[0] + r[2] && r[1] < q[1] + q[3] && q[1] < r[1] + r[3])) continue;
+        placed.push(r);
+        budget--;
+        g.direction = /[֐-ࣿ]/.test(text) ? "rtl" : "ltr";
+        g.textAlign = v.k === "pt" ? "left" : "center";
+        g.strokeStyle = paper; g.lineWidth = 3.5; g.strokeText(text, x, y);
+        g.fillStyle = ink; g.fillText(text, x, y);
+      }
+    }
+  }
+  function drawScale(ink, paper) {
+    const lat = plane ? 0 : gsLonLat(cx, cy)[1];
+    const mpp = plane ? res : res * Math.cos((lat * Math.PI) / 180); // ground metres per pixel
+    const want = 110 * mpp, p = 10 ** Math.floor(Math.log10(want));
+    const len = [5, 2, 1].map((m) => m * p).find((v) => v <= want) ?? p;
+    const px = len / mpp, x = 12, y = H - 14;
+    g.strokeStyle = paper; g.lineWidth = 5; g.beginPath(); g.moveTo(x, y); g.lineTo(x + px, y); g.stroke();
+    g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y - 5); g.lineTo(x, y); g.lineTo(x + px, y); g.lineTo(x + px, y - 5); g.stroke();
+    const t = len >= 1000 ? `${+(len / 1000).toPrecision(3)} km` : `${+len.toPrecision(3)} m`;
+    g.font = "600 11px 'IBM Plex Mono', monospace"; g.textAlign = "center"; g.textBaseline = "bottom"; g.direction = "ltr";
+    g.strokeStyle = paper; g.lineWidth = 3; g.strokeText(t, x + px / 2, y - 4);
+    g.fillStyle = ink; g.fillText(t, x + px / 2, y - 4);
+  }
+  function draw() {
+    frame = 0;
+    W = box.clientWidth; H = box.clientHeight;
+    if (!W || !H) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const pw = Math.round(W * dpr), ph = Math.round(H * dpr);
+    if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, W, H);
+    const css = getComputedStyle(document.documentElement);
+    const ink = css.getPropertyValue("--ink").trim() || "#e6edf4", paper = css.getPropertyValue("--paper").trim() || "#090e13", accent = css.getPropertyValue("--accent").trim() || "#3cc8f0";
+    if (!plane && base !== "none") drawTiles();
+    const left = cx - (W / 2) * res, top = cy + (H / 2) * res;
+    const X = (x) => (x - left) / res, Y = (y) => (top - y) / res;
+    const view = [left, top - H * res, left + W * res, top];
+    for (const l of gsLayers) if (l.visible && l.geo !== plane) drawLayer(l, X, Y, view, paper);
+    drawLabels(ink, paper, X, Y, view);
+    if (gsPick && gsPick.l.visible && gsPick.l.geo !== plane) {
+      const v = gsPick.l.view[gsPick.i];
+      g.save();
+      g.shadowColor = accent; g.shadowBlur = 10; g.strokeStyle = accent; g.lineWidth = 3.2;
+      if (v.k === "pt") for (const p of v.parts) { g.beginPath(); g.arc(X(p[0]), Y(p[1]), 7, 0, 2 * Math.PI); g.stroke(); }
+      else { trace(v.parts, v.k === "pg", X, Y); g.stroke(); }
+      g.restore();
+    }
+    if (measure.pts.length) {
+      g.save();
+      g.strokeStyle = accent; g.fillStyle = accent; g.lineWidth = 2.4; g.setLineDash([7, 5]);
+      g.beginPath();
+      measure.pts.forEach(([x, y], k) => (k ? g.lineTo(X(x), Y(y)) : g.moveTo(X(x), Y(y))));
+      if (measure.pts.length > 2) { g.closePath(); g.globalAlpha = 0.12; g.fill(); g.globalAlpha = 1; }
+      g.stroke();
+      g.setLineDash([]);
+      for (const [x, y] of measure.pts) { g.beginPath(); g.arc(X(x), Y(y), 4.5, 0, 2 * Math.PI); g.fillStyle = paper; g.fill(); g.strokeStyle = accent; g.stroke(); }
+      g.restore();
+    }
+    if (me && !plane) {
+      const x = X(me.x), y = Y(me.y), r = me.acc / res;
+      g.save();
+      g.fillStyle = "rgba(66,133,244,.15)"; g.beginPath(); g.arc(x, y, Math.max(r, 8), 0, 2 * Math.PI); g.fill();
+      g.fillStyle = "#4285f4"; g.strokeStyle = "#fff"; g.lineWidth = 2.5; g.beginPath(); g.arc(x, y, 6.5, 0, 2 * Math.PI); g.fill(); g.stroke();
+      g.restore();
+    }
+    drawScale(ink, paper);
+    if (coarse) {
+      // On a touch screen the cross at the centre is the cursor: its position shows under the map.
+      g.lineCap = "round";
+      for (const [col, w] of [[paper, 4.5], [ink, 1.8]]) {
+        g.strokeStyle = col; g.lineWidth = w;
+        g.beginPath(); g.moveTo(W / 2 - 11, H / 2); g.lineTo(W / 2 - 4, H / 2); g.moveTo(W / 2 + 4, H / 2); g.lineTo(W / 2 + 11, H / 2);
+        g.moveTo(W / 2, H / 2 - 11); g.lineTo(W / 2, H / 2 - 4); g.moveTo(W / 2, H / 2 + 4); g.lineTo(W / 2, H / 2 + 11); g.stroke();
+      }
+      gsXY(cx, cy);
+    }
+  }
+
+  // ---- picking ----
+  const segDist = (px, py, ax, ay, bx, by) => {
+    const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    const t = L ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L)) : 0;
+    return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+  };
+  function hit(px, py) {
+    const [mx, my] = toMap(px, py), tol = 7 * res;
+    for (let li = gsLayers.length - 1; li >= 0; li--) {
+      const l = gsLayers[li];
+      if (!l.visible || l.geo === plane) continue;
+      let best = null, bestD = Infinity;
+      for (let i = 0; i < l.view.length; i++) {
+        const v = l.view[i];
+        if (mx < v.bb[0] - tol || mx > v.bb[2] + tol || my < v.bb[1] - tol || my > v.bb[3] + tol) continue;
+        let d = Infinity, inside = false;
+        for (const p of v.parts) {
+          if (v.k === "pt") d = Math.min(d, Math.hypot(p[0] - mx, p[1] - my));
+          else {
+            for (let k = 2; k < p.length; k += 2) d = Math.min(d, segDist(mx, my, p[k - 2], p[k - 1], p[k], p[k + 1]));
+            if (v.k === "pg") for (let a = 0, b = p.length - 2; a < p.length; b = a, a += 2) if ((p[a + 1] > my) !== (p[b + 1] > my) && mx < ((p[b] - p[a]) * (my - p[a + 1])) / (p[b + 1] - p[a + 1]) + p[a]) inside = !inside;
+          }
+        }
+        // Points and lines near the click win over the polygon they lie in.
+        if (inside) d = Math.min(d, tol * 0.95);
+        if (d <= tol && d < bestD) { bestD = d; best = i; }
+      }
+      if (best !== null) return { l, i: best };
+    }
+    return null;
+  }
+
+  // ---- moving ----
+  function zoomAt(px, py, f) {
+    const [mx, my] = toMap(px, py);
+    res = Math.max(plane ? 1e-4 : 0.02, Math.min(plane ? 1e7 : 40000, res * f));
+    cx = mx - (px - W / 2) * res;
+    cy = my + (py - H / 2) * res;
+    redraw();
+  }
+  const pointers = new Map();
+  let drag = null, pinch = null, moved = false;
+  cv.addEventListener("pointerdown", (e) => {
+    cv.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, res, at: toMap(mid.x, mid.y) };
+      drag = null;
+      moved = true;
+    } else if (pointers.size === 1) { drag = { x: e.offsetX, y: e.offsetY, cx, cy }; moved = false; }
+  });
+  cv.addEventListener("pointermove", (e) => {
+    if (!coarse) gsXY(...toMap(e.offsetX, e.offsetY));
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.offsetX, y: e.offsetY });
+    if (pinch && pointers.size >= 2) {
+      const [a, b] = [...pointers.values()];
+      const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      res = Math.max(plane ? 1e-4 : 0.02, Math.min(plane ? 1e7 : 40000, (pinch.res * pinch.d) / (Math.hypot(a.x - b.x, a.y - b.y) || 1)));
+      cx = pinch.at[0] - (mid.x - W / 2) * res;
+      cy = pinch.at[1] + (mid.y - H / 2) * res;
+      redraw();
+    } else if (drag) {
+      const dx = e.offsetX - drag.x, dy = e.offsetY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
+      if (moved) { cx = drag.cx - dx * res; cy = drag.cy + dy * res; redraw(); }
+    }
+  });
+  const lift = (e, click) => {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 1) { const [p] = pointers.values(); drag = { x: p.x, y: p.y, cx, cy }; return; }
+    if (!pointers.size) {
+      if (click && drag && !moved) tap(e.offsetX, e.offsetY);
+      drag = null;
+    }
+  };
+  cv.addEventListener("pointerup", (e) => lift(e, true));
+  cv.addEventListener("pointercancel", (e) => lift(e, false));
+  cv.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, Math.exp(Math.max(-1, Math.min(1, e.deltaY * (e.deltaMode ? 0.05 : 0.0016))))); }, { passive: false });
+  cv.addEventListener("dblclick", (e) => {
+    if (measure.on) { finishMeasure(); return; }
+    zoomAt(e.offsetX, e.offsetY, 0.5);
+  });
+  cv.addEventListener("keydown", (e) => {
+    const step = 80;
+    const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+    if (moves[e.key]) { e.preventDefault(); cx += moves[e.key][0] * res; cy -= moves[e.key][1] * res; redraw(); }
+    else if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomAt(W / 2, H / 2, 0.6); }
+    else if (e.key === "-" || e.key === "_") { e.preventDefault(); zoomAt(W / 2, H / 2, 1 / 0.6); }
+  });
+  cv.addEventListener("pointerleave", () => { if (!coarse) $("#gs-xy").textContent = ""; });
+  new ResizeObserver(redraw).observe(box);
+
+  function tap(px, py) {
+    if (measure.on) {
+      if (measure.done) { measure.pts = []; measure.done = false; }
+      const last = measure.pts[measure.pts.length - 1];
+      const p = toMap(px, py);
+      if (last && Math.hypot(p[0] - last[0], p[1] - last[1]) < 4 * res) return;
+      measure.pts.push(p);
+      showMeasure();
+      redraw();
+      return;
+    }
+    const h = hit(px, py);
+    gsPick = h;
+    if (h && h.l.id !== gsSel) { gsSel = h.l.id; gsList(); gsDetail(); }
+    gsInfo();
+    gsMarkRow();
+    redraw();
+  }
+
+  // ---- measuring on the grid ----
+  function showMeasure() {
+    const boxEl = $("#gs-mbox");
+    boxEl.hidden = !measure.on;
+    if (!measure.on) return;
+    const pts = measure.pts;
+    let grid = null, fn = (c) => c;
+    if (!plane) {
+      const [lon, lat] = gsLonLat(...(pts[0] ?? [cx, cy]));
+      grid = gsGrid !== "auto" ? gsGrid : (gsLayers.find((l) => l.visible && l.geo && E.gisGridCrs(l.crs))?.crs ?? E.gisUtmFor(lon, lat));
+      const to = E.gisFromLonLat(grid);
+      fn = (c) => to(...gsLonLat(c[0], c[1]));
+    }
+    const q = pts.map(fn);
+    const len = E.gisMeasure({ type: "LineString", coordinates: q.length > 1 ? q : [[0, 0], [0, 0]] }).length;
+    const area = q.length > 2 ? E.gisMeasure({ type: "Polygon", coordinates: [[...q, q[0]]] }) : null;
+    const items = [["المسافة (م)", gsNum(len)]];
+    if (area) items.push(["المساحة (م²)", gsNum(area.area, 2)], ["بالفدان", E.gisFeddan(area.area)], ["المحيط (م)", gsNum(area.perimeter)]);
+    if (grid) items.push(["مقاسة على", gsCrsName(grid)]);
+    boxEl.innerHTML = `${pts.length ? "" : `<p class="hint">اضغط على الخريطة تحط نقط القياس. ضغطتين ورا بعض أو «خلص» تقفل القياس.</p>`}
+      <dl class="gs-kv">${items.map(([k, v]) => `<dt>${esc(k)}</dt><dd dir="ltr">${esc(v)}</dd>`).join("")}</dl>
+      <div class="gs-mrow"><button type="button" class="secondary primary" data-m="done">خلص</button><button type="button" class="secondary primary" data-m="undo">شيل آخر نقطة</button><button type="button" class="secondary primary" data-m="clear">امسح</button></div>`;
+  }
+  function finishMeasure() { measure.done = true; showMeasure(); redraw(); }
+  $("#gs-mbox").addEventListener("click", (e) => {
+    const m = e.target.closest("[data-m]")?.dataset.m;
+    if (m === "done") finishMeasure();
+    else if (m === "undo") { measure.pts.pop(); measure.done = false; showMeasure(); redraw(); }
+    else if (m === "clear") { measure.pts = []; measure.done = false; showMeasure(); redraw(); }
+  });
+  function setMeasure(on) {
+    measure.on = on;
+    if (!on) { measure.pts = []; measure.done = false; }
+    $("#gs-measure").setAttribute("aria-pressed", String(on));
+    box.classList.toggle("measuring", on);
+    showMeasure();
+    redraw();
+  }
+
+  // ---- the frame ----
+  function update() {
+    const shown = gsLayers.filter((l) => l.visible);
+    const wasPlane = plane;
+    plane = shown.length > 0 && shown.every((l) => !l.geo);
+    $("#gs-plane").hidden = !plane;
+    $("#gs-base").disabled = plane;
+    $("#gs-attrib").textContent = !plane && base !== "none" ? BASES[base].credit : "";
+    if (plane !== wasPlane) { setMeasure(false); fit(); }
+    redraw();
+  }
+  function fit(list) {
+    const ls = (list ?? gsLayers).filter((l) => l.visible && l.geo !== plane && l.bb[0] <= l.bb[2]);
+    if (!ls.length) { redraw(); return; }
+    const b = ls.reduce((a, l) => [Math.min(a[0], l.bb[0]), Math.min(a[1], l.bb[1]), Math.max(a[2], l.bb[2]), Math.max(a[3], l.bb[3])], [Infinity, Infinity, -Infinity, -Infinity]);
+    fitBox(b);
+  }
+  function fitBox(b) {
+    W = box.clientWidth || W || 600; H = box.clientHeight || H || 400;
+    cx = (b[0] + b[2]) / 2; cy = (b[1] + b[3]) / 2;
+    // Room around the data for the names beside the points and the scale bar.
+    const span = Math.max((b[2] - b[0]) / Math.max(1, W - 110), (b[3] - b[1]) / Math.max(1, H - 90));
+    res = span > 0 ? span : plane ? 0.05 : 0.3;
+    redraw();
+  }
+  function setBase(b) {
+    base = b;
+    try { localStorage.setItem("gs-base", b); } catch { /* storage blocked */ }
+    update();
+  }
+  function locate() {
+    if (plane) { gsSay(`<p class="notice">مكانك بيظهر مع الطبقات اللي ليها نظام إحداثيات بس.</p>`); return; }
+    if (!navigator.geolocation) { gsSay(`<p class="notice">مكانك مش متاح: المتصفح ما ادّاش الإذن أو الـ GPS مقفول.</p>`); return; }
+    navigator.geolocation.getCurrentPosition((p) => {
+      const [x, y] = gsMerc(p.coords.longitude, p.coords.latitude);
+      me = { x, y, acc: (p.coords.accuracy || 10) / Math.cos((p.coords.latitude * Math.PI) / 180) };
+      cx = x; cy = y;
+      res = Math.min(res, 2);
+      redraw();
+    }, () => gsSay(`<p class="notice">مكانك مش متاح: المتصفح ما ادّاش الإذن أو الـ GPS مقفول.</p>`), { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 });
+  }
+  const png = () => new Promise((ok, bad) => cv.toBlob((b) => (b ? ok(b) : bad(new Error("ما قدرتش أحفظ الملف."))), "image/png"));
+  const isPlane = () => plane;
+  const zoomTo = (bb) => {
+    const pad = Math.max(bb[2] - bb[0], bb[3] - bb[1]) * 0.6 || (plane ? 5 : 60);
+    fitBox([bb[0] - pad, bb[1] - pad, bb[2] + pad, bb[3] + pad]);
+  };
+  try { const b = localStorage.getItem("gs-base"); if (BASES[b]) base = b; } catch { /* storage blocked */ }
+  $("#gs-base").value = base;
+  return { redraw, update, fit, zoomTo, zoomAt: (f) => zoomAt(W / 2, H / 2, f), setBase, setMeasure, isMeasuring: () => measure.on, locate, png, isPlane };
+})();
+
+// The cursor's position on the measuring grid, and in degrees.
+function gsXY(x, y) {
+  const el = $("#gs-xy");
+  if (gsMap.isPlane()) { el.textContent = `X ${x.toFixed(3)}  Y ${y.toFixed(3)}`; return; }
+  const [lon, lat] = gsLonLat(x, y);
+  const l = gsLayers.find((q) => q.id === gsSel && q.geo) ?? gsLayers.find((q) => q.geo);
+  const grid = l ? gsGridOf(l) : E.gisUtmFor(lon, lat);
+  const p = E.gisFromLonLat(grid)?.(lon, lat);
+  const short = grid.startsWith("utm:") ? `UTM ${grid.slice(4).toUpperCase()}${grid.endsWith("s") ? "" : "N"}` : grid.startsWith("etm:") ? `ETM ${grid.slice(4)}` : "";
+  el.textContent = `${p && grid !== "wgs84" ? `E ${p[0].toFixed(2)}  N ${p[1].toFixed(2)}  (${short})   ` : ""}${lat.toFixed(6)}°, ${lon.toFixed(6)}°`;
+}
+
+// ---- the layer list ----
+const gsMini = (act, label, path) => `<button type="button" class="gs-mini" data-act="${act}" title="${esc(label)}" aria-label="${esc(label)}"><svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg></button>`;
+const GS_ICONS = {
+  zoom: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 5.1 5.1M8 10.5h5M10.5 8v5"/>',
+  up: '<path d="m6 14 6-6 6 6"/>',
+  del: '<path d="M5 7h14M10 11v6M14 11v6M7 7l1 12h8l1-12M9.5 7V4.5h5V7"/>',
+};
+function gsList() {
+  $("#gs-layers").innerHTML = [...gsLayers].reverse().map((l) => {
+    const c = gsCounts(l);
+    const meta = [["نقط", c.point], ["خطوط", c.line], ["مضلعات", c.polygon]].filter(([, n]) => n).map(([k, n]) => `<span><span>${k}</span> <bdi>${n}</bdi></span>`).join("");
+    const crs = [...E.GIS_CRS.map(([k]) => k), ...(E.GIS_CRS.some(([k]) => k === l.crs) ? [] : [l.crs])];
+    return `<li class="gs-layer" data-id="${l.id}" aria-current="${l.id === gsSel}">
+      <div class="gs-lhead">
+        <input type="checkbox" data-act="vis" ${l.visible ? "checked" : ""} aria-label="إظهار الطبقة">
+        <span class="gs-sw" style="--c:${l.color}"></span>
+        <button type="button" class="gs-lname" data-act="sel" title="اختار الطبقة"><bdi data-no-i18n>${esc(l.name)}</bdi></button>
+        <span class="gs-lbtns">${gsMini("zoom", "زووم على الطبقة", GS_ICONS.zoom)}${gsMini("up", "لفوق", GS_ICONS.up)}${gsMini("del", "شيل الطبقة", GS_ICONS.del)}</span>
+      </div>
+      <div class="gs-lmeta"><span>${esc(l.format)}</span>${meta}</div>
+      <label class="gs-lcrs"><span>نظام الطبقة${l.crsFrom === "guess" ? ` <em class="gs-guess">متوقع</em>` : ""}</span>
+        <select data-act="crs">${crs.map((k) => `<option value="${esc(k)}"${k === l.crs ? " selected" : ""}>${esc(gsCrsName(k))}</option>`).join("")}</select></label>
+    </li>`;
+  }).join("");
+  $("#gs-work").hidden = !gsLayers.length;
+  const local = gsLayers.some((l) => l.visible && !l.geo) && gsLayers.some((l) => l.visible && l.geo);
+  $("#gs-localnote").hidden = !local;
+}
+$("#gs-layers").addEventListener("click", (e) => {
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  const li = e.target.closest("[data-id]");
+  if (!act || !li || act === "crs" || act === "vis") return;
+  const k = gsLayers.findIndex((l) => l.id === li.dataset.id);
+  const l = gsLayers[k];
+  if (act === "sel") { gsSel = l.id; gsList(); gsDetail(); $("#gs-detail").scrollIntoView({ block: "nearest" }); }
+  else if (act === "zoom") { if (!l.visible) { l.visible = true; gsMap.update(); gsList(); } gsMap.fit([l]); }
+  else if (act === "up" && k < gsLayers.length - 1) { gsLayers.splice(k, 1); gsLayers.splice(k + 1, 0, l); gsList(); gsMap.redraw(); }
+  else if (act === "del") {
+    gsLayers.splice(k, 1);
+    if (gsPick?.l === l) gsPick = null;
+    if (gsSel === l.id) gsSel = gsLayers[gsLayers.length - 1]?.id ?? null;
+    gsRender();
+  }
+});
+$("#gs-layers").addEventListener("change", (e) => {
+  const li = e.target.closest("[data-id]");
+  const l = li && gsLayers.find((q) => q.id === li.dataset.id);
+  if (!l) return;
+  if (e.target.dataset.act === "vis") { l.visible = e.target.checked; gsList(); gsMap.update(); }
+  else if (e.target.dataset.act === "crs") {
+    l.crs = e.target.value;
+    l.crsFrom = "user";
+    gsProject(l);
+    gsSel = l.id;
+    gsRender();
+    gsMap.fit([l]);
+  }
+});
+
+// ---- the selected layer: measures, tools, export, attributes ----
+const gsSel_ = () => gsLayers.find((l) => l.id === gsSel) ?? null;
+function gsDetail() {
+  const l = gsSel_();
+  const el = $("#gs-detail");
+  el.hidden = !l;
+  if (!l) return;
+  const c = gsCounts(l), m = gsMeasures(l);
+  const grid = m.grid;
+  // Words (a format, a system, feddans) in the page's font and direction; numbers in the figures' own.
+  const items = [["الصيغة", l.format, "txt"], ["عدد العناصر", String(l.features.length)]];
+  if (c.point) items.push(["نقط", String(c.point)]);
+  if (c.line) items.push(["خطوط", String(c.line)], ["الطول الكلي (م)", gsNum(m.tot.length)]);
+  if (c.polygon) items.push(["مضلعات", String(c.polygon)], ["المساحة الكلية (م²)", gsNum(m.tot.area, 2)], ["بالفدان", E.gisFeddan(m.tot.area), "txt"], ["المحيط الكلي (م)", gsNum(m.tot.perimeter)]);
+  items.push(["النظام", gsCrsName(l.crs), "txt"]);
+  if (grid !== l.crs) items.push(["مقاسة على", gsCrsName(grid), "txt"]);
+  const notes = [...(l.crsFrom === "guess" ? ["نظام الإحداثيات متوقع من الأرقام؛ اتأكد إن الطبقة نازلة مكانها على الخريطة، ولو لأ غيّر نظامها من قايمة الطبقات."] : []), ...(l.notes ?? [])];
+  const fieldOpts = (sel, none) => `<option value="">${esc(none)}</option>${l.fields.map((f) => `<option value="${esc(f)}"${f === sel ? " selected" : ""} data-no-i18n>${esc(f)}</option>`).join("")}`;
+  const pts = c.point > 0;
+  el.innerHTML = `<h2 data-no-index><span class="callout">LYR</span><bdi data-no-i18n>${esc(l.name)}</bdi></h2>
+    ${readouts(items)}
+    ${notes.length ? `<div class="notice gs-notes">${notes.map((n) => `<p>${esc(n)}</p>`).join("")}</div>` : ""}
+    <div class="gs-tools">
+      <label>الاسم على الخريطة<select id="gs-label">${fieldOpts(l.label, "من غير أسماء")}</select></label>
+      <label>لوّن حسب<select id="gs-style">${fieldOpts(l.style, "لون واحد")}</select></label>
+      <label class="gs-color">لون الطبقة<input id="gs-color" type="color" value="${l.color}"></label>
+    </div>
+    <div class="actions">
+      ${pts ? `<button type="button" class="secondary primary" id="gs-line">وصّل النقط خط</button><button type="button" class="secondary primary" id="gs-poly">اقفل النقط مضلع</button>` : ""}
+      <button type="button" class="secondary primary" id="gs-swap">بدّل E وN</button>
+      <button type="button" class="secondary primary" id="gs-note">حفظ في ملاحظات المشروع</button>
+    </div>
+    <h3>تصدير</h3>
+    <p id="gs-fnote" class="hint"${l.match ? "" : " hidden"}>البحث شغال: التصدير والحفظ هيكونوا للعناصر اللي ظاهرة في البحث بس.</p>
+    <div class="actions gs-exp">
+      <button type="button" class="secondary primary dl" data-x="shp">Shapefile (ZIP)</button>
+      <button type="button" class="secondary primary dl" data-x="kml">KML</button>
+      <button type="button" class="secondary primary dl" data-x="geojson">GeoJSON</button>
+      <button type="button" class="secondary primary dl" data-x="dxf">DXF</button>
+      <button type="button" class="secondary primary dl" data-x="csv">CSV</button>
+      <button type="button" class="secondary primary dl" data-x="gpx">GPX</button>
+      ${pts ? `<button type="button" class="secondary primary dl" data-x="penz">نقط P,E,N,Z,D</button>` : ""}
+      ${gsLayers.length > 1 ? `<button type="button" class="secondary primary dl" data-x="kml-all">كل الطبقات KML</button><button type="button" class="secondary primary dl" data-x="dxf-all">كل الطبقات DXF</button>` : ""}
+    </div>
+    <p class="hint">Shapefile وDXF وCSV وP,E,N,Z بتتكتب على «<span>${esc(gsCrsName(grid))}</span>»، وKML وGPX وGeoJSON بخطوط الطول والعرض (WGS 84).</p>
+    <p id="gs-xerr" class="error" hidden></p>
+    <h3>البيانات</h3>
+    <div class="gs-tbar">
+      <input id="gs-q" type="search" dir="auto" autocomplete="off" placeholder="دوّر في البيانات" aria-label="دوّر في البيانات" value="${esc(l.filter)}">
+      <span id="gs-qn" class="hint" dir="ltr"></span>
+    </div>
+    <div id="gs-table" class="gs-tablebox"></div>
+    <div class="actions"><button type="button" class="secondary primary" id="gs-more" hidden>عرض كمان</button></div>
+    <h3>إحصائيات حقل</h3>
+    <div class="gs-tools"><label><span class="vh">اختار حقل</span><select id="gs-stat">${fieldOpts("", "اختار حقل")}</select></label></div>
+    <div id="gs-statout"></div>`;
+  gsTable();
+}
+
+function gsFilter(l, q) {
+  l.filter = q;
+  const words = gsPlain(q).split(/\s+/).filter(Boolean);
+  if (!words.length) { l.match = null; return; }
+  l.match = new Set();
+  l.features.forEach((f, i) => {
+    const text = gsPlain(Object.values(f.properties ?? {}).join(" "));
+    if (words.every((w) => text.includes(w))) l.match.add(i);
+  });
+}
+
+// The attribute table: the computed E/N, length or area first, then the attributes.
+function gsTable() {
+  const l = gsSel_();
+  if (!l) return;
+  const m = gsMeasures(l);
+  const c = gsCounts(l);
+  const idx = l.match ? [...l.match] : l.features.map((_, i) => i);
+  $("#gs-qn").textContent = l.match ? `${idx.length} / ${l.features.length}` : String(l.features.length);
+  const toGrid = E.gisTransform(l.crs, m.grid) ?? ((q) => q);
+  const extra = [];
+  if (c.point) extra.push(["E (م)", (f) => (f.geometry.type === "Point" ? gsNum(toGrid(f.geometry.coordinates)[0]) : "")], ["N (م)", (f) => (f.geometry.type === "Point" ? gsNum(toGrid(f.geometry.coordinates)[1]) : "")]);
+  if (c.line) extra.push(["الطول (م)", (f, i) => (m.list[i].length ? gsNum(m.list[i].length) : "")]);
+  if (c.polygon) extra.push(["المساحة (م²)", (f, i) => (m.list[i].area ? gsNum(m.list[i].area, 2) : "")]);
+  const fields = l.fields.slice(0, 40);
+  const rows = idx.slice(0, l.shown);
+  const cell = (v) => (v === null || v === undefined ? "" : esc(typeof v === "number" ? String(v) : v));
+  $("#gs-table").innerHTML = `<table><thead><tr><th>#</th>${extra.map(([k]) => `<th>${esc(k)}</th>`).join("")}${fields.map((f) => `<th><bdi data-no-i18n>${esc(f)}</bdi></th>`).join("")}</tr></thead>
+    <tbody data-no-i18n>${rows.map((i) => {
+      const f = l.features[i];
+      return `<tr data-i="${i}" aria-selected="${gsPick?.l === l && gsPick.i === i}"><td class="num">${i + 1}</td>${extra.map(([, fn]) => `<td class="num">${fn(f, i)}</td>`).join("")}${fields.map((k) => `<td>${cell(f.properties?.[k])}</td>`).join("")}</tr>`;
+    }).join("")}</tbody></table>`;
+  $("#gs-more").hidden = idx.length <= l.shown;
+}
+function gsMarkRow() {
+  for (const tr of document.querySelectorAll("#gs-table tr[data-i]")) tr.setAttribute("aria-selected", String(gsPick?.l.id === gsSel && Number(tr.dataset.i) === gsPick.i));
+}
+
+// The picked feature: its attributes, and its place, length or area on the grid.
+function gsInfo() {
+  const el = $("#gs-info");
+  el.hidden = !gsPick;
+  if (!gsPick) return;
+  const { l, i } = gsPick;
+  const f = l.features[i], mm = gsMeasures(l), m = mm.list[i];
+  const rows = [];
+  const g = f.geometry;
+  if (g.type === "Point") {
+    const p = (E.gisTransform(l.crs, mm.grid) ?? ((q) => q))(g.coordinates);
+    rows.push(["E (م)", gsNum(p[0])], ["N (م)", gsNum(p[1])]);
+    if (g.coordinates.length > 2) rows.push(["المنسوب Z", gsNum(g.coordinates[2])]);
+    const ll = E.gisTransform(l.crs, "wgs84")?.(g.coordinates);
+    if (ll) rows.push(["خط العرض", `${ll[1].toFixed(8)}°`], ["خط الطول", `${ll[0].toFixed(8)}°`]);
+  }
+  if (m.length) rows.push(["الطول (م)", gsNum(m.length)]);
+  if (m.area) rows.push(["المساحة (م²)", gsNum(m.area, 2)], ["بالفدان", E.gisFeddan(m.area)], ["المحيط (م)", gsNum(m.perimeter)]);
+  if (l.geo && mm.grid !== l.crs) rows.push(["مقاسة على", gsCrsName(mm.grid)]);
+  const attrs = Object.entries(f.properties ?? {}).filter(([, v]) => v !== null && v !== undefined && v !== "");
+  el.innerHTML = `<div class="gs-ihead"><b><span>العنصر</span> <bdi>${i + 1}</bdi> · <bdi data-no-i18n>${esc(l.name)}</bdi></b>
+      <span class="gs-lbtns"><button type="button" class="secondary primary" data-i="zoom">زووم</button><button type="button" class="secondary primary" data-i="close">قفل</button></span></div>
+    <dl class="gs-kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd dir="ltr">${esc(v)}</dd>`).join("")}</dl>
+    ${attrs.length ? `<dl class="gs-kv gs-attrs" data-no-i18n>${attrs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : ""}`;
+}
+$("#gs-info").addEventListener("click", (e) => {
+  const a = e.target.closest("[data-i]")?.dataset.i;
+  if (a === "close") { gsPick = null; gsInfo(); gsMarkRow(); gsMap.redraw(); }
+  else if (a === "zoom" && gsPick) gsMap.zoomTo(gsPick.l.view[gsPick.i].bb);
+});
+
+function gsStats(l, field) {
+  const vals = l.features.filter((_, i) => !l.match || l.match.has(i)).map((f) => f.properties?.[field]);
+  const filled = vals.filter((v) => v !== null && v !== undefined && v !== "");
+  const nums = filled.map((v) => (typeof v === "number" ? v : Number(String(v).replace(/,/g, "")))).filter(Number.isFinite);
+  const items = [["العدد", `${filled.length} / ${vals.length}`]];
+  if (nums.length && nums.length === filled.length) {
+    const sum = nums.reduce((a, b) => a + b, 0);
+    items.push(["أقل قيمة", gsNum(Math.min(...nums), 3)], ["أكبر قيمة", gsNum(Math.max(...nums), 3)], ["المجموع", gsNum(sum, 3)], ["المتوسط", gsNum(sum / nums.length, 3)]);
+    return readouts(items);
+  }
+  const count = new Map();
+  for (const v of filled) count.set(String(v), (count.get(String(v)) ?? 0) + 1);
+  items.push(["قيم مختلفة", String(count.size)]);
+  const top = [...count].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  return `${readouts(items)}<p class="hint"><span>الأكتر تكرار</span>: <span data-no-i18n>${top.map(([v, n]) => `<bdi>${esc(v)}</bdi> (${n})`).join("، ")}</span></p>`;
+}
+
+// ---- export ----
+async function gsSave(filename, data) {
+  if (!downloads) return;
+  const err = $("#gs-xerr");
+  if (err) err.hidden = true;
+  try { await downloads.save({ filename, data }); }
+  catch (e) {
+    if (e?.code === "declined") return;
+    if (err) { err.textContent = e?.message || "ما قدرتش أحفظ الملف."; err.hidden = false; }
+  }
+}
+function gsExport(kind) {
+  const l = gsSel_();
+  if (!l) return;
+  const out = gsOut(l), grid = gsGridOf(l), base = pjFileName(l.name);
+  const err = $("#gs-xerr");
+  try {
+    switch (kind) {
+      case "shp": return gsSave(`${base}.zip`, E.gisZip(E.gisToShapefiles(out, grid, base)));
+      case "kml": return gsSave(`${base}.kml`, E.gisToKml([out], { colors: [l.color], labels: [l.label] }));
+      case "geojson": return gsSave(`${base}.geojson`, E.gisToGeoJson(out));
+      case "dxf": return gsSave(`${base}.dxf`, E.gisToDxf([out], grid, { labels: [l.label] }));
+      case "csv": return gsSave(`${base}.csv`, E.gisToCsv(out, grid));
+      case "gpx": return gsSave(`${base}.gpx`, E.gisToGpx(out, { label: l.label }));
+      case "penz": return gsSave(`${base}-PENZD.csv`, E.gisToPenz(out, grid, l.label));
+      case "kml-all": {
+        const ls = gsLayers.filter((q) => q.visible && q.geo);
+        return gsSave("GeoX-layers.kml", E.gisToKml(ls.map(gsOut), { colors: ls.map((q) => q.color), labels: ls.map((q) => q.label) }));
+      }
+      case "dxf-all": {
+        const ls = gsLayers.filter((q) => q.visible && q.geo === l.geo);
+        return gsSave("GeoX-layers.dxf", E.gisToDxf(ls.map(gsOut), grid, { labels: ls.map((q) => q.label) }));
+      }
+      default:
+    }
+  } catch (e) {
+    if (err) { err.textContent = e?.message || String(e); err.hidden = false; }
+  }
+  return undefined;
+}
+
+// A layer as a project note, in the language on screen.
+function gsNoteText(l) {
+  const en = I18N.lang === "en";
+  const out = gsOut(l), c = gsCounts(out), grid = gsGridOf(l);
+  const fn = E.gisTransform(l.crs, grid) ?? ((q) => q);
+  const ms = out.features.map((f) => E.gisMeasure(E.gisMapGeom(f.geometry, fn)));
+  const area = ms.reduce((a, m) => a + m.area, 0), length = ms.reduce((a, m) => a + m.length, 0);
+  const ltr = (x) => (en ? x : `⁦${x}⁩`);
+  const sys = en ? I18N.tr(gsCrsName(grid)) ?? gsCrsName(grid) : gsCrsName(grid);
+  const lines = [en ? `GIS layer «${l.name}» (${l.format}): ${out.features.length} features (points ${c.point}, lines ${c.line}, polygons ${c.polygon}), on ${sys}.` : `طبقة GIS «${l.name}» (${l.format}): ${out.features.length} عنصر (نقط ${c.point}، خطوط ${c.line}، مضلعات ${c.polygon})، على ${sys}.`];
+  if (c.polygon) lines.push(en ? `Total area ${gsNum(area, 2)} m² (${I18N.tr(E.gisFeddan(area)) ?? E.gisFeddan(area)}).` : `المساحة الكلية ${ltr(gsNum(area, 2))} م² (${E.gisFeddan(area)}).`);
+  if (c.line) lines.push(en ? `Total length ${gsNum(length)} m.` : `الطول الكلي ${ltr(gsNum(length))} م.`);
+  const lab = l.label;
+  out.features.slice(0, 25).forEach((f, i) => {
+    const name = lab && f.properties?.[lab] !== null && f.properties?.[lab] !== undefined ? f.properties[lab] : i + 1;
+    const g = f.geometry;
+    if (g.type === "Point") { const p = fn(g.coordinates); lines.push(`${name}: E ${ltr(p[0].toFixed(3))}${en ? ", " : "، "}N ${ltr(p[1].toFixed(3))}${g.coordinates.length > 2 ? `${en ? ", " : "، "}Z ${ltr(g.coordinates[2].toFixed(3))}` : ""}`); }
+    else if (ms[i].area) lines.push(`${name}: ${ltr(gsNum(ms[i].area, 2))} ${en ? "m²" : "م²"}`);
+    else if (ms[i].length) lines.push(`${name}: ${ltr(gsNum(ms[i].length))} ${en ? "m" : "م"}`);
+  });
+  if (out.features.length > 25) lines.push(en ? `… and ${out.features.length - 25} more.` : `… و${out.features.length - 25} عنصر كمان.`);
+  return lines.join("\n");
+}
+
+function gsRender() {
+  gsList();
+  gsDetail();
+  gsInfo();
+  gsMap.update();
+}
+
+// ---- wiring ----
+$("#gs-detail").addEventListener("click", (e) => {
+  const l = gsSel_();
+  if (!l) return;
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.x) { gsExport(t.dataset.x); return; }
+  if (t.id === "gs-more") { l.shown += GS_ROWS; gsTable(); return; }
+  if (t.id === "gs-note") { pjCompose(gsNoteText(l)); return; }
+  try {
+    if (t.id === "gs-line" || t.id === "gs-poly") {
+      const made = E.gisConnect(gsOut(l), t.id === "gs-poly");
+      made.name = `${l.name} — ${I18N.lang === "en" ? (t.id === "gs-poly" ? "polygon" : "line") : t.id === "gs-poly" ? "مضلع" : "خط"}`;
+      const n = gsAdd(made, l.source);
+      gsSel = n.id;
+      gsPick = { l: n, i: 0 };
+      gsRender();
+    } else if (t.id === "gs-swap") {
+      const s = E.gisSwapXY(l);
+      Object.assign(l, { features: s.features, crs: s.crs });
+      gsProject(l);
+      gsPick = null;
+      gsRender();
+      gsMap.fit([l]);
+    }
+  } catch (err) {
+    const x = $("#gs-xerr");
+    x.textContent = err.message;
+    x.hidden = false;
+  }
+});
+$("#gs-detail").addEventListener("change", (e) => {
+  const l = gsSel_();
+  if (!l) return;
+  if (e.target.id === "gs-label") { l.label = e.target.value || null; gsMap.redraw(); }
+  else if (e.target.id === "gs-style") { l.style = e.target.value; gsColors(l); gsMap.redraw(); }
+  else if (e.target.id === "gs-color") { l.color = e.target.value; gsList(); gsMap.redraw(); }
+  else if (e.target.id === "gs-stat") $("#gs-statout").innerHTML = e.target.value ? gsStats(l, e.target.value) : "";
+});
+$("#gs-detail").addEventListener("input", (e) => {
+  if (e.target.id !== "gs-q") return;
+  const l = gsSel_();
+  gsFilter(l, e.target.value);
+  l.shown = GS_ROWS;
+  gsTable();
+  gsMap.redraw();
+  $("#gs-fnote").hidden = !l.match;
+});
+$("#gs-detail").addEventListener("click", (e) => {
+  const tr = e.target.closest("#gs-table tr[data-i]");
+  if (!tr) return;
+  const l = gsSel_();
+  gsPick = { l, i: Number(tr.dataset.i) };
+  gsInfo();
+  gsMarkRow();
+  gsMap.zoomTo(l.view[gsPick.i].bb);
+  $("#gs-map").scrollIntoView({ block: "nearest", behavior: "smooth" });
+});
+
+$("#gs-file").addEventListener("change", async (e) => {
+  const list = [...e.target.files];
+  e.target.value = "";
+  if (!list.length) return;
+  const items = [];
+  const problems = [];
+  for (const f of list) {
+    if (f.size > GS_MAX) { problems.push(f.name); continue; }
+    items.push({ name: f.name, bytes: new Uint8Array(await f.arrayBuffer()) });
+  }
+  await gsLoad(items);
+  if (problems.length) $("#gs-status").insertAdjacentHTML("beforeend", `<div class="error"><span>الملف كبير جدًا.</span> <bdi data-no-i18n>${esc(problems.join("، "))}</bdi></div>`);
+});
+{
+  const drop = $("#gs-drop");
+  const tab = $("#tab-gis");
+  let depth = 0;
+  tab.addEventListener("dragenter", (e) => { if (e.dataTransfer?.types?.includes("Files")) { e.preventDefault(); depth++; drop.classList.add("over"); } });
+  tab.addEventListener("dragover", (e) => { if (e.dataTransfer?.types?.includes("Files")) e.preventDefault(); });
+  tab.addEventListener("dragleave", () => { if (--depth <= 0) { depth = 0; drop.classList.remove("over"); } });
+  tab.addEventListener("drop", async (e) => {
+    if (!e.dataTransfer?.files?.length) return;
+    e.preventDefault();
+    depth = 0;
+    drop.classList.remove("over");
+    const items = [];
+    for (const f of e.dataTransfer.files) if (f.size <= GS_MAX) items.push({ name: f.name, bytes: new Uint8Array(await f.arrayBuffer()) });
+    if (items.length) gsLoad(items);
+  });
+}
+$("#gs-paste-btn").onclick = () => {
+  const box = $("#gs-paste");
+  box.hidden = !box.hidden;
+  $("#gs-paste-btn").setAttribute("aria-expanded", String(!box.hidden));
+  if (!box.hidden) $("#gs-text").focus();
+};
+$("#gs-add-text").onclick = () => {
+  const text = $("#gs-text").value;
+  if (!text.trim()) { gsSay(`<p class="notice">الصق بيانات الأول.</p>`); return; }
+  const name = I18N.lang === "en" ? "Pasted data" : "بيانات ملصوقة";
+  gsLoad([{ name: `${name}.txt`, bytes: new TextEncoder().encode(text) }]);
+};
+// A small site in Cairo (UTM 36N): survey points, two parcels and a road centre line.
+$("#gs-sample").onclick = () => {
+  const en = I18N.lang === "en";
+  const pts = `${en ? "Point,Easting,Northing,Level,Description" : "رقم النقطة,شرقي,شمالي,منسوب,الوصف"}
+BM1,329899.643,3325016.736,22.905,${en ? "Benchmark" : "روبير"}
+P1,329880.000,3325000.000,22.410,${en ? "Corner" : "ركن"}
+P2,329920.000,3325000.000,22.385,${en ? "Corner" : "ركن"}
+P3,329955.000,3325000.000,22.360,${en ? "Corner" : "ركن"}
+P4,329955.000,3325030.000,22.520,${en ? "Corner" : "ركن"}
+P5,329920.000,3325030.000,22.575,${en ? "Corner" : "ركن"}
+P6,329880.000,3325030.000,22.610,${en ? "Corner" : "ركن"}
+`;
+  const parcels = `WKT,${en ? "Parcel,Owner" : "رقم القطعة,المالك"}
+"POLYGON ((329880 3325000, 329920 3325000, 329920 3325030, 329880 3325030, 329880 3325000))",12,${en ? "Ahmed" : "أحمد"}
+"POLYGON ((329920 3325000, 329955 3325000, 329955 3325030, 329920 3325030, 329920 3325000))",13,${en ? "Mona" : "منى"}
+"LINESTRING (329860 3324990, 329985 3324990)",${en ? "Road" : "طريق"},
+`;
+  const enc = (s) => new TextEncoder().encode(s);
+  gsLoad([
+    { name: `${en ? "Land parcels" : "قطع الأرض"}.csv`, bytes: enc(parcels) },
+    { name: `${en ? "Survey points" : "نقط الرفع"}.csv`, bytes: enc(pts) },
+  ]);
+};
+
+$("#gs-base").addEventListener("change", (e) => gsMap.setBase(e.target.value));
+$("#gs-grid").addEventListener("change", (e) => { gsGrid = e.target.value; gsDetail(); gsInfo(); });
+$("#gs-fit").onclick = () => gsMap.fit();
+$("#gs-zin").onclick = () => gsMap.zoomAt(0.5);
+$("#gs-zout").onclick = () => gsMap.zoomAt(2);
+$("#gs-measure").onclick = () => gsMap.setMeasure(!gsMap.isMeasuring());
+$("#gs-locate").onclick = () => gsMap.locate();
+$("#gs-png").onclick = async () => {
+  try { await gsSave("GeoX-map.png", await gsMap.png()); }
+  catch (err) { gsSay(`<p class="error">${esc(err.message)}</p>`); }
+};
+{
+  const mapbox = $("#gs-mapbox");
+  const btn = $("#gs-full");
+  const setFull = (on, fromBack = false) => {
+    if (on === mapbox.classList.contains("gs-full")) return;
+    if (on) Back.open("gs-full", () => setFull(false, true));
+    else if (!fromBack) Back.close("gs-full");
+    mapbox.classList.toggle("gs-full", on);
+    document.documentElement.classList.toggle("gs-fullpage", on);
+    btn.setAttribute("aria-pressed", String(on));
+    const label = on ? "خروج من ملء الشاشة" : "ملء الشاشة";
+    if (I18N.lang === "en") { btn.dataset.artitle = label; btn.title = I18N.tr(label) ?? label; }
+    else { delete btn.dataset.artitle; btn.title = label; }
+    btn.querySelector(".vh").textContent = label;
+    gsMap.redraw();
+  };
+  btn.onclick = () => setFull(!mapbox.classList.contains("gs-full"));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && mapbox.classList.contains("gs-full")) setFull(false); });
+}
+{
+  const sel = $("#gs-grid");
+  for (const [k, label] of E.GIS_CRS) if (E.gisGridCrs(k)) sel.insertAdjacentHTML("beforeend", `<option value="${k}">${esc(label)}</option>`);
+}
 
 // ---------- traverse ----------
 // Worked examples from true coordinates, with small field errors so the adjustment shows.
@@ -9638,7 +12801,7 @@ bindCsv($("#rv-csv"), "data-review.csv", () => rvLast);
       if (b.hidden || b.closest("[hidden]") || getComputedStyle(b).display === "none") continue;
       const tab = b.dataset.tab;
       out.push({ kind: "صفحة", code: b.querySelector(".code")?.textContent ?? "", title: textOf(b), go: () => { showTab(tab); scrollTo({ top: 0 }); } });
-      for (const h of document.querySelectorAll(`#tab-${tab} h2`)) out.push({ kind: "جزء من صفحة", code: h.querySelector(".callout")?.textContent ?? "", title: textOf(h), go: () => { showTab(tab); h.scrollIntoView({ block: "start" }); } });
+      for (const h of document.querySelectorAll(`#tab-${tab} h2:not([data-no-index])`)) out.push({ kind: "جزء من صفحة", code: h.querySelector(".callout")?.textContent ?? "", title: textOf(h), go: () => { showTab(tab); h.scrollIntoView({ block: "start" }); } });
     }
     for (const g of GROUPS) out.push({ kind: "قسم في القايمة", code: g.code, title: g.title, en: ENGINEERING_EN[g.title], go: () => openDrawerAt({ type: "home" }, { group: g.id }) });
     for (const c of CALCULATORS) out.push({ kind: "حاسبة", code: c.code, title: c.title, en: ENGINEERING_EN[c.title], go: () => openDrawerAt({ type: "calc", id: c.id }) });
