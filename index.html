@@ -196,6 +196,25 @@ nav button[aria-selected="true"] {
 }
 nav button[aria-selected="true"] .tab-ic { color: var(--accent); filter: drop-shadow(0 0 5px var(--glow)); }
 @media (prefers-reduced-motion: reduce) { nav button { transition: none; } }
+/* With a mouse, the tool tabs keep out of the way: a slim handle under the header, and the tabs drop
+   down over the page while the pointer is on the header, or a tab has the keyboard. They go a moment
+   after the pointer leaves, so a slip of the hand does not close them. Touch screens keep them shown. */
+@media (hover: hover) and (pointer: fine) and (min-width: 761px) {
+  .toolbar { position: relative; height: 12px; }
+  .toolbar::before { content: ""; position: absolute; top: 2px; left: 50%; width: 64px; height: 4px; margin-left: -32px; border-radius: 4px; background: var(--tile-rim); transition: background .15s; }
+  header:hover .toolbar::before { background: var(--accent); }
+  .toolbar nav {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 1; margin-block: 0;
+    box-shadow: var(--tray-shadow), 0 24px 36px -20px rgba(0, 0, 0, .6);
+    /* Not visibility: hidden, so the keyboard can still reach the tabs (and so show them). */
+    opacity: 0; transform: translateY(-6px); pointer-events: none;
+    transition: opacity .18s ease .35s, transform .18s ease .35s;
+  }
+  header:hover .toolbar nav, .toolbar nav:has(:focus-visible) {
+    opacity: 1; transform: none; pointer-events: auto;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+}
 /* Below desktop width: the name keeps the first row beside the menu button, and the second group
    drops to a full row under it, the search bar taking the room the buttons leave. The tabs come down
    a size so that they still go across without scrolling. */
