@@ -764,6 +764,20 @@ footer .note { grid-column: 1 / -1; color: var(--muted); border-top: 1px solid v
 .readout b.cut, #pf-out tr.is-cut td:nth-child(4) { color: var(--cut); }
 .readout b.fill, #pf-out tr.is-fill td:nth-child(5) { color: var(--fill); }
 #pf-out .mono { font-family: var(--f-num); }
+/* Projects: where the notes are kept — this device, or the account too. */
+.pj-cloud { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--sheet-2); font-size: 13px; }
+.pj-cloud-ic { width: 26px; height: 26px; flex: none; fill: none; stroke: var(--muted); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.pj-cloud .ok-mark { display: none; }
+.pj-cloud-msg { flex: 1 1 220px; min-width: 0; }
+.pj-cloud-msg small { color: var(--muted); margin-inline-start: 4px; white-space: nowrap; }
+.pj-cloud button { padding: 6px 14px; font-size: 12.5px; }
+.pj-cloud[data-state="ok"] { border-color: color-mix(in srgb, var(--fill) 45%, var(--line)); background: color-mix(in srgb, var(--fill) 7%, var(--sheet-2)); }
+.pj-cloud[data-state="ok"] .pj-cloud-ic { stroke: var(--fill); }
+.pj-cloud[data-state="ok"] .ok-mark { display: inline; }
+.pj-cloud[data-state="out"] { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.pj-cloud[data-state="out"] .pj-cloud-ic, .pj-cloud[data-state="busy"] .pj-cloud-ic { stroke: var(--accent); }
+.pj-cloud[data-state="error"], .pj-cloud[data-state="offline"] { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+.pj-cloud[data-state="error"] .pj-cloud-ic, .pj-cloud[data-state="offline"] .pj-cloud-ic { stroke: var(--warn); }
 /* Quantities from files: stepping through the sections. */
 .qf-nav { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
 .qf-nav select { width: auto; min-width: 140px; font-family: var(--f-num); }
@@ -1378,6 +1392,11 @@ BM2,,,0.900</textarea>
     <div class="panel">
       <h2><span class="callout">PJ</span>ملاحظات المشاريع</h2>
       <p class="hint">لكل مشروع ملاحظاته لوحده، وكل ملاحظة بتاريخها ووقتها: اللي اتعمل، نقط الروبير والإحداثيات المعتمدة، مشاكل الموقع، والمطلوب بعد كده.</p>
+      <div id="pj-cloud" class="pj-cloud" data-state="wait" aria-live="polite">
+        <svg class="pj-cloud-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.96A5.5 5.5 0 0 0 7.4 9.06 4.75 4.75 0 0 0 7 18.5z"/><path class="ok-mark" d="m9.5 13.8 2 2 3.6-3.8"/></svg>
+        <span class="pj-cloud-msg"><span id="pj-cloud-text">بيجهّز الحفظ على حسابك…</span> <small id="pj-cloud-at" hidden><span>آخر مزامنة</span> <bdi dir="ltr"></bdi></small></span>
+        <button id="pj-cloud-btn" class="secondary primary" type="button" hidden>تسجيل الدخول</button>
+      </div>
       <div class="pj-bar">
         <label for="pj-select" class="pj-pick" data-needs-project>المشروع
           <select id="pj-select" data-no-i18n></select>
@@ -1412,7 +1431,7 @@ BM2,,,0.900</textarea>
         <label class="file-btn secondary" for="pj-restore">استرجاع نسخة احتياطية</label><input type="file" id="pj-restore" accept=".json,application/json" hidden>
       </div>
       <p id="pj-status" class="hint" hidden></p>
-      <p class="hint">الملاحظات بتتحفظ على الجهاز ده بس، والموقع والأبليكيشن كل واحد بيحفظ لوحده. خد نسخة احتياطية عشان تنقلها لجهاز تاني أو تحتفظ بيها.</p>
+      <p class="hint">الملاحظات بتتحفظ على الجهاز، ولو مسجّل دخول بتتحفظ كمان على حسابك وتلاقيها هي هي على الموقع والأبليكيشن وأي جهاز. والنسخة الاحتياطية موجودة لو حبيت تحتفظ بملف.</p>
     </div>
   </section>
 
@@ -1553,6 +1572,16 @@ const I18N = (() => {
     "نسخة احتياطية لكل المشاريع": "Back up all projects",
     "استرجاع نسخة احتياطية": "Restore a backup",
     "الملاحظات بتتحفظ على الجهاز ده بس، والموقع والأبليكيشن كل واحد بيحفظ لوحده. خد نسخة احتياطية عشان تنقلها لجهاز تاني أو تحتفظ بيها.": "Notes are saved on this device only, and the website and the app each keep their own. Take a backup to move them to another device or to keep them.",
+    "الملاحظات بتتحفظ على الجهاز، ولو مسجّل دخول بتتحفظ كمان على حسابك وتلاقيها هي هي على الموقع والأبليكيشن وأي جهاز. والنسخة الاحتياطية موجودة لو حبيت تحتفظ بملف.":
+      "Notes are saved on this device and, when you are signed in, on your account too, so you find the same notes on the website, the app and any device. The backup is still there if you want a file.",
+    "بيجهّز الحفظ على حسابك…": "Getting your account copy ready…",
+    "شغلك محفوظ على الجهاز ده. الحفظ على الحساب محتاج نت يوصل لصفحة تسجيل الدخول.": "Your work is saved on this device. Saving to your account needs a connection that reaches the sign-in page.",
+    "شغلك محفوظ على الجهاز ده بس. سجّل دخول، ويتحفظ كمان على حسابك وتلاقيه على الموبايل والكمبيوتر وتعدّل عليه من أي مكان.": "Your work is saved on this device only. Sign in, and it is saved on your account too, so you find it on your phone and computer and can edit it anywhere.",
+    "بيحفظ على حسابك…": "Saving to your account…",
+    "محفوظ على حسابك، وهتلاقيه على أي جهاز تسجّل دخول منه.": "Saved on your account: you will find it on any device you sign in from.",
+    "مفيش نت: شغلك محفوظ على الجهاز، وهيتحفظ على حسابك أول ما النت يرجع.": "No connection: your work is saved on this device and goes to your account as soon as the connection is back.",
+    "ما قدرتش أوصل لحسابك دلوقتي؛ شغلك محفوظ على الجهاز، وهحاول تاني لوحدي.": "Couldn't reach your account just now; your work is saved on this device and I'll try again by myself.",
+    "آخر مزامنة": "Last synced", "مزامنة دلوقتي": "Sync now", "حاول تاني": "Try again",
     "المتصفح ده مش سامح بالحفظ، فالملاحظات هتضيع لما تقفل الصفحة. خد نسخة احتياطية قبل ما تقفل.": "This browser does not allow saving, so the notes will be lost when the page closes. Take a backup before closing.",
     "مساحة الحفظ على الجهاز خلصت، فآخر تعديل ما اتحفظش. خد نسخة احتياطية وامسح ملاحظات قديمة.": "The device storage is full, so the last change was not saved. Take a backup and delete old notes.",
     "اكتب اسم المشروع.": "Enter the project name.",
@@ -8688,7 +8717,66 @@ function gisZip(files) {
   return out;
 }
 
-return { runTool, TOOLS, formatChainage, parseChainage, toNumber, profileSeries, profileFromSeries, profileSummary, profileDxf, sectionOffset, sectionsFromTable, sectionsFromLandXml, sectionQuantities, sectionsDxf, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
+// ---- src/engine/projects.js
+// Project notes kept in two places — this device and the engineer's account — brought together as one.
+// Nothing either copy has is lost: every project and note from both, the newer edit of each, and what
+// either has deleted stays deleted (deletions are remembered as ids with their time, in `gone`).
+
+const PROJ_KEEP_GONE = 5000; // the newest deletions remembered
+
+const projTime = (v) => (Number.isFinite(v) ? v : 0);
+
+// Notes by id: the newer edit wins; a deleted one goes.
+function projNotes(a, b, gone) {
+  const byId = new Map();
+  for (const n of [...(a ?? []), ...(b ?? [])]) {
+    if (!n || typeof n.id !== "string" || gone[n.id] !== undefined) continue;
+    const m = byId.get(n.id);
+    if (!m || projTime(n.updated) > projTime(m.updated)) byId.set(n.id, { ...n });
+  }
+  return [...byId.values()].sort((x, y) => projTime(x.created) - projTime(y.created));
+}
+
+/**
+ * One copy of the project notes from two ({ projects, gone }, either may be empty). Projects match by
+ * id; two projects of the same name made apart (on two devices, each its own id) become one under the
+ * older id, and the other id is recorded as gone so that its device drops it too.
+ * Returns { projects, gone }.
+ */
+function mergeProjects(a, b, now = Date.now()) {
+  const gone = {};
+  for (const src of [a?.gone, b?.gone]) {
+    for (const [id, t] of Object.entries(src ?? {})) gone[id] = Math.max(gone[id] ?? 0, projTime(t));
+  }
+  const byId = new Map();
+  for (const p of [...(a?.projects ?? []), ...(b?.projects ?? [])]) {
+    if (!p || typeof p.id !== "string" || gone[p.id] !== undefined) continue;
+    const m = byId.get(p.id);
+    if (!m) { byId.set(p.id, { ...p, notes: projNotes(p.notes, [], gone) }); continue; }
+    const newer = projTime(p.updated) > projTime(m.updated) ? p : m;
+    byId.set(p.id, {
+      ...newer,
+      created: Math.min(projTime(p.created), projTime(m.created)) || projTime(newer.created),
+      updated: Math.max(projTime(p.updated), projTime(m.updated)),
+      notes: projNotes(m.notes, p.notes, gone),
+    });
+  }
+  // The same name twice: one project, kept under the id made first.
+  const byName = new Map();
+  for (const p of [...byId.values()].sort((x, y) => projTime(x.created) - projTime(y.created) || (x.id < y.id ? -1 : 1))) {
+    const key = String(p.name ?? "").trim();
+    const keep = byName.get(key);
+    if (!keep) { byName.set(key, p); continue; }
+    keep.notes = projNotes(keep.notes, p.notes, gone);
+    keep.updated = Math.max(projTime(keep.updated), projTime(p.updated));
+    gone[p.id] = now;
+    byId.delete(p.id);
+  }
+  const kept = Object.entries(gone).sort((x, y) => y[1] - x[1]).slice(0, PROJ_KEEP_GONE);
+  return { projects: [...byId.values()], gone: Object.fromEntries(kept) };
+}
+
+return { runTool, TOOLS, formatChainage, parseChainage, toNumber, profileSeries, profileFromSeries, profileSummary, profileDxf, mergeProjects, sectionOffset, sectionsFromTable, sectionsFromLandXml, sectionQuantities, sectionsDxf, tableFromMatrix, parseDelimited, parseGsi, parseLandXml, parseKml, looksTabular, geojsonToTable, modelFromDxf, modelFromDwg, cadData, cadSvg, CALCULATORS, GROUPS, UNITS, runEngineering, ENGINEERING_EN, scEvaluate, scFormat, parseTraverseAngle, traverseDms, traverseRowsFromMatrix, parseGpsText, gpsPointsFromMatrix, convertGps, geoidHeight, GIS_CRS, gisCrsLabel, gisEpsg, gisGeoref, gisGridCrs, gisToLonLat, gisFromLonLat, gisTransform, gisUtmFor, gisCrsFromPrj, gisGuessCrs, gisBbox, gisMapGeom, gisEachPos, gisMeasure, gisFeddan, gisKind, gisInRing, gisLabelField, gisFromText, gisFromMatrix, gisFromTable, gisFromShp, gisDbf, gisFromCad, gisFromKml, gisFromGeoJson, gisFromRows, gisGpkgGeom, gisConnect, gisSwapXY, gisToGeoJson, gisToKml, gisToGpx, gisToCsv, gisToPenz, gisToDxf, gisToShapefiles, gisZip };
 })();
 </script>
 <script>
@@ -10136,6 +10224,9 @@ let openSci = () => {};
 // The page works the same signed out. With no key, or if Clerk can't load (offline, blocked by
 // the host), the sign-in button simply stays hidden.
 const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb3VudHMuZGV2JA";
+// Clerk once it has loaded, or null when it can't (the project notes' account copy waits on it). A
+// change of who is signed in is announced as a "geox-auth" event with the user's id (or null).
+let authReady = async () => null;
 {
   let host = "";
   try { host = CLERK_PUBLISHABLE_KEY ? atob(CLERK_PUBLISHABLE_KEY.split("_")[2]).slice(0, -1) : ""; } catch { /* malformed key */ }
@@ -10157,19 +10248,23 @@ const CLERK_PUBLISHABLE_KEY = "pk_test_bXVzaWNhbC1zY3VscGluLTEyMjQuY2xlcmsuYWNjb
     const C = window.Clerk;
     const slot = $("#user-btn");
     let mounted = false;
+    let who;
     const paint = () => {
       const signedIn = !!C.user;
       $("#sign-in-btn").hidden = signedIn;
       if (signedIn && !mounted) { C.mountUserButton(slot); mounted = true; }
       if (!signedIn && mounted) { C.unmountUserButton(slot); mounted = false; }
+      const id = C.user?.id ?? null;
+      if (id !== who) { who = id; document.dispatchEvent(new CustomEvent("geox-auth", { detail: { user: id } })); }
     };
     C.addListener(paint);
     paint();
     return C;
-  })().catch(() => { $("#auth").hidden = true; return null; }));
+  })().catch(() => { $("#auth").hidden = true; document.dispatchEvent(new CustomEvent("geox-auth", { detail: { user: null, off: true } })); return null; }));
   // The button is in the markup from the first paint; without a key it goes away.
   if (!host) $("#auth").hidden = true;
   else {
+    authReady = boot;
     // Clerk itself loads after the page, so sign-in never delays the tools.
     $("#sign-in-btn").onclick = async (e) => {
       const btn = e.currentTarget;
@@ -11129,7 +11224,9 @@ $("#lv-file").onchange = async (e) => {
 // Each project keeps its own dated notes on this device (localStorage), with a backup file to move
 // or keep them. The notes are the engineer's own words and are never translated.
 const PJ_KEY = "geox-projects";
-let pj = { current: null, projects: [] };
+// gone: ids of deleted projects and notes with the time, so the account's copy loses them too;
+// owner: the account this copy was last kept with (a copy made signed out joins the first account).
+let pj = { current: null, projects: [], gone: {}, owner: null };
 let pjNaming = null; // "new" or "rename" while the name box is open
 const pjId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const pjCurrent = () => pj.projects.find((p) => p.id === pj.current) ?? null;
@@ -11152,23 +11249,26 @@ const pjShow = (sel, text) => { const el = $(sel); el.textContent = text ?? ""; 
 function pjLoad() {
   let raw = null;
   try { raw = localStorage.getItem(PJ_KEY); } catch { pjShow("#pj-warn", PJ_NO_STORAGE); return; }
-  pj = { current: null, projects: [] };
+  pj = { current: null, projects: [], gone: {}, owner: null };
   if (!raw) return;
   try {
     const d = JSON.parse(raw);
-    pj = { current: typeof d?.current === "string" ? d.current : null, projects: (Array.isArray(d?.projects) ? d.projects : []).map(pjClean).filter(Boolean) };
+    const gone = Object.fromEntries(Object.entries(d?.gone && typeof d.gone === "object" ? d.gone : {}).filter(([, t]) => Number.isFinite(t)));
+    pj = { current: typeof d?.current === "string" ? d.current : null, projects: (Array.isArray(d?.projects) ? d.projects : []).map(pjClean).filter(Boolean), gone, owner: typeof d?.owner === "string" ? d.owner : null };
   } catch {
     // Unreadable: keep it aside rather than write over it.
     try { localStorage.setItem(`${PJ_KEY}-unreadable-${Date.now()}`, raw); } catch { /* storage blocked */ }
   }
 }
-function pjSave() {
+// cloud: false when the change came from the account itself.
+function pjSave(cloud = true) {
   try {
     localStorage.setItem(PJ_KEY, JSON.stringify(pj));
     pjShow("#pj-warn", "");
   } catch (err) {
     pjShow("#pj-warn", err?.name === "QuotaExceededError" ? "مساحة الحفظ على الجهاز خلصت، فآخر تعديل ما اتحفظش. خد نسخة احتياطية وامسح ملاحظات قديمة." : PJ_NO_STORAGE);
   }
+  if (cloud) pjCloudSoon();
 }
 function pjRender() {
   const list = [...pj.projects].sort((a, b) => b.updated - a.updated);
@@ -11257,6 +11357,7 @@ $("#pj-name-form").onsubmit = (e) => {
 };
 $("#pj-select").onchange = (e) => { pj.current = e.target.value; $("#pj-q").value = ""; pjSave(); pjRenderNotes(); };
 $("#pj-delete").onclick = (e) => pjArm(e.currentTarget, () => {
+  if (pj.current) pj.gone[pj.current] = Date.now();
   pj.projects = pj.projects.filter((p) => p.id !== pj.current);
   pj.current = null;
   pjSave();
@@ -11270,7 +11371,7 @@ $("#pj-notes").onclick = (e) => {
   const note = p?.notes.find((n) => n.id === li?.dataset.id);
   if (!b || !note) return;
   const act = b.dataset.act;
-  if (act === "del") pjArm(b, () => { p.notes = p.notes.filter((n) => n !== note); p.updated = Date.now(); pjSave(); pjRender(); });
+  if (act === "del") pjArm(b, () => { p.notes = p.notes.filter((n) => n !== note); pj.gone[note.id] = p.updated = Date.now(); pjSave(); pjRender(); });
   else if (act === "edit") {
     li.querySelector(".pj-note-tools").hidden = true;
     li.querySelector(".pj-note-text").outerHTML = `<div class="pj-edit"><textarea class="pj-text" dir="auto" rows="5">${esc(note.text)}</textarea><div class="actions"><button type="button" class="primary" data-act="save">حفظ</button><button type="button" class="secondary primary" data-act="cancel">إلغاء</button></div></div>`;
@@ -11318,10 +11419,106 @@ $("#pj-restore").onchange = async (e) => {
   pjRender();
   pjShow("#pj-status", `اتسترجعت النسخة: مشاريع جديدة ${projects}، ملاحظات جديدة أو أحدث ${notes}.`);
 };
+// ---- the account copy ----
+// Signed in, the notes are kept on the account as well (the server part: cloud/lib/projects-api.js),
+// so every device signed in to it has the same projects. A change here is merged with the account's
+// copy (E.mergeProjects) and sent back; this device's copy stays the one the page works from, offline
+// too. Another account signing in on this device gets its own projects: the last one's are set aside.
+const PJ_CLOUD = "https://geox-survey.pages.dev/api/projects";
+const pjCloud = { state: CLERK_PUBLISHABLE_KEY ? "wait" : "off", at: 0, busy: false, again: false, timer: 0 };
+const pjData = () => ({ projects: pj.projects, gone: pj.gone });
+// The same projects and notes whatever their order, to tell whether the account's copy differs.
+const pjCanon = (d) => {
+  const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  return JSON.stringify({
+    projects: [...(d?.projects ?? [])].map((p) => ({ ...p, notes: [...(p.notes ?? [])].sort(byId) })).sort(byId),
+    gone: Object.fromEntries(Object.entries(d?.gone ?? {}).sort()),
+  });
+};
+function pjCloudShow() {
+  const s = pjCloud.state;
+  const box = $("#pj-cloud");
+  box.dataset.state = s;
+  const text = {
+    wait: "بيجهّز الحفظ على حسابك…",
+    off: "شغلك محفوظ على الجهاز ده. الحفظ على الحساب محتاج نت يوصل لصفحة تسجيل الدخول.",
+    out: "شغلك محفوظ على الجهاز ده بس. سجّل دخول، ويتحفظ كمان على حسابك وتلاقيه على الموبايل والكمبيوتر وتعدّل عليه من أي مكان.",
+    busy: "بيحفظ على حسابك…",
+    ok: "محفوظ على حسابك، وهتلاقيه على أي جهاز تسجّل دخول منه.",
+    offline: "مفيش نت: شغلك محفوظ على الجهاز، وهيتحفظ على حسابك أول ما النت يرجع.",
+    error: "ما قدرتش أوصل لحسابك دلوقتي؛ شغلك محفوظ على الجهاز، وهحاول تاني لوحدي.",
+  }[s];
+  $("#pj-cloud-text").textContent = text;
+  const at = $("#pj-cloud-at");
+  at.hidden = s !== "ok" || !pjCloud.at;
+  if (!at.hidden) at.querySelector("bdi").textContent = pjDate(pjCloud.at).slice(-5);
+  const btn = $("#pj-cloud-btn");
+  btn.hidden = !["out", "ok", "error"].includes(s);
+  btn.textContent = s === "out" ? "تسجيل الدخول" : s === "error" ? "حاول تاني" : "مزامنة دلوقتي";
+}
+function pjCloudSoon(ms = 1500) {
+  clearTimeout(pjCloud.timer);
+  pjCloud.timer = setTimeout(pjCloudSync, ms);
+}
+async function pjCloudSync() {
+  if (pjCloud.busy) { pjCloud.again = true; return; }
+  const C = await authReady();
+  if (!C?.user) { pjCloud.state = C ? "out" : "off"; pjCloudShow(); return; }
+  pjCloud.busy = true;
+  pjCloud.state = "busy";
+  pjCloudShow();
+  try {
+    const me = C.user.id;
+    if (pj.owner && pj.owner !== me) {
+      // Another account's projects: kept aside on this device, and this account's own brought back.
+      try { localStorage.setItem(`${PJ_KEY}-${pj.owner}`, JSON.stringify(pj)); } catch { /* storage blocked */ }
+      let mine = null;
+      try { mine = JSON.parse(localStorage.getItem(`${PJ_KEY}-${me}`) ?? "null"); } catch { /* unreadable */ }
+      pj = { current: null, projects: (mine?.projects ?? []).map(pjClean).filter(Boolean), gone: mine?.gone ?? {}, owner: me };
+      try { localStorage.removeItem(`${PJ_KEY}-${me}`); } catch { /* storage blocked */ }
+      pjRender();
+    }
+    pj.owner = me;
+    for (let tries = 0; tries < 4; tries++) {
+      const auth = { authorization: `Bearer ${await C.session.getToken()}` };
+      const got = await fetch(PJ_CLOUD, { headers: auth, cache: "no-store" });
+      if (!got.ok) throw new Error(`GET ${got.status}`);
+      const remote = await got.json();
+      const merged = E.mergeProjects(pjData(), remote.data ?? {});
+      merged.projects = merged.projects.map(pjClean).filter(Boolean);
+      if (pjCanon(merged) !== pjCanon(pjData())) { pj.projects = merged.projects; pj.gone = merged.gone; pjRender(); }
+      pjSave(false);
+      if (remote.data && pjCanon(remote.data) === pjCanon(pjData())) break;
+      const put = await fetch(PJ_CLOUD, { method: "PUT", headers: { ...auth, "content-type": "application/json" }, body: JSON.stringify({ data: pjData(), version: remote.version }) });
+      if (put.status === 409) continue; // another device saved in between: merge its copy too
+      if (!put.ok) throw new Error(`PUT ${put.status}`);
+      break;
+    }
+    pjCloud.state = "ok";
+    pjCloud.at = Date.now();
+  } catch {
+    pjCloud.state = navigator.onLine === false ? "offline" : "error";
+    pjCloudSoon(60000);
+  } finally {
+    pjCloud.busy = false;
+    pjCloudShow();
+    if (pjCloud.again) { pjCloud.again = false; pjCloudSoon(300); }
+  }
+}
+document.addEventListener("geox-auth", (e) => {
+  if (e.detail.user) pjCloudSoon(0);
+  else { pjCloud.state = e.detail.off ? "off" : "out"; pjCloudShow(); }
+});
+$("#pj-cloud-btn").onclick = () => (pjCloud.state === "out" ? $("#sign-in-btn").click() : pjCloudSoon(0));
+window.addEventListener("online", () => pjCloudSoon(0));
+// Back on the page after a while: the other devices may have saved something.
+document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - pjCloud.at > 30000) pjCloudSoon(0); });
+
 // Another window of the site changed the notes.
 window.addEventListener("storage", (e) => { if (e.key === PJ_KEY) { pjLoad(); pjRender(); } });
 pjLoad();
 pjRender();
+pjCloudShow();
 
 // ---------- GPS ----------
 // A worked example, each line written another way (decimal degrees, degrees minutes seconds with
