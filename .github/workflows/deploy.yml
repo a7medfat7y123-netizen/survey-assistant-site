@@ -1,5 +1,8 @@
 name: Deploy to Cloudflare Pages
 
+# A push publishes the site to Cloudflare Pages when the repository has a CLOUDFLARE_API_TOKEN secret.
+# Without one the job only says so: scripts/deploy-site.sh in survey-assistant publishes to Cloudflare
+# itself before it pushes here, and GitHub Pages and Netlify build from this repository on their own.
 on:
   push:
     branches: [main]
@@ -10,9 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      HAS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     steps:
+      - name: No Cloudflare token
+        if: env.HAS_TOKEN != 'true'
+        run: echo "No CLOUDFLARE_API_TOKEN secret, so nothing to do here; deploy-site.sh already published this version to Cloudflare."
       - uses: actions/checkout@v4
+        if: env.HAS_TOKEN == 'true'
       - name: Deploy
+        if: env.HAS_TOKEN == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
